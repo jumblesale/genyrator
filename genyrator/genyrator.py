@@ -3,18 +3,21 @@ from enum import Enum
 from typing import List, Optional, Dict, Tuple
 import attr
 import re
+
+import inflection
 from jinja2 import Environment, BaseLoader
 
 
 datetime_regex = re.compile('\d{4}-\d{2}-\d{2}T(\d{2}:)*')
 
+
 class TypeOption(Enum):
-    string =     'string'
-    int =        'int'
-    float =      'float'
-    dict =       'dict'
-    list =       'list'
-    datetime =   'datetime'
+    string =   'string'
+    int =      'int'
+    float =    'float'
+    dict =     'dict'
+    list =     'list'
+    datetime = 'datetime'
 
 
 def _string_to_type_option(string_type: str):
@@ -24,7 +27,7 @@ def _string_to_type_option(string_type: str):
         'float':    TypeOption.float,
         'dict':     TypeOption.dict,
         'list':     TypeOption.list,
-        'datetime': TypeOption.datetime
+        'datetime': TypeOption.datetime,
     }[string_type]
 
 
@@ -37,9 +40,9 @@ class SqlAlchemyTypeOption(Enum):
 
 def _type_option_to_sql_alchemy_type(type_option: TypeOption) -> SqlAlchemyTypeOption:
     return {
-        TypeOption.string: SqlAlchemyTypeOption.string,
-        TypeOption.int:    SqlAlchemyTypeOption.int,
-        TypeOption.float:  SqlAlchemyTypeOption.float,
+        TypeOption.string:   SqlAlchemyTypeOption.string,
+        TypeOption.int:      SqlAlchemyTypeOption.int,
+        TypeOption.float:    SqlAlchemyTypeOption.float,
         TypeOption.datetime: SqlAlchemyTypeOption.datetime
     }[type_option]
 
@@ -78,6 +81,7 @@ def _type_option_to_default_value(type_option: TypeOption) -> str:
 @attr.s
 class Column(object):
     name:             str =                  attr.ib()
+    camel_case_name:  str =                  attr.ib()
     sql_alchemy_type: SqlAlchemyTypeOption = attr.ib()
     python_type:      PythonTypeOption =     attr.ib()
     default:          str =                  attr.ib()
@@ -88,7 +92,8 @@ class Column(object):
 
 def create_column(name: str, type_option: TypeOption) -> Column:
     return Column(
-        name=name,
+        name=_camel_case_to_snek_case(name),
+        camel_case_name=_snek_case_to_camel_case(name),
         sql_alchemy_type=_type_option_to_sql_alchemy_type(type_option),
         python_type=_type_option_to_python_type(type_option),
         default=_type_option_to_default_value(type_option),
@@ -156,7 +161,11 @@ class Entity(object):
 
 
 def _camel_case_to_snek_case(x: str) -> str:
-    return x.lower()
+    return inflection.underscore(x)
+
+
+def _snek_case_to_camel_case(x: str) -> str:
+    return inflection.camelize(x, False)
 
 
 def create_entity(class_name: str, columns: List[Column], relationships: List[Relationship]=[]) -> Entity:
@@ -181,6 +190,8 @@ def _entity_from_dict(entity_dict: Dict) -> Entity:
 def _entity_from_exemplar(class_name: str, exemplar: Dict) -> Entity:
     columns = []
     for k, v in exemplar.items():
+        if v is None:
+            v = ''
         type_name = type(v).__name__
         type_option = _string_to_type_option(type_name)
         if type_option == TypeOption.string and _is_string_date_time_ish(v):
@@ -209,7 +220,7 @@ class {{ entity.class_name }}(db.Model):  # type: ignore
         d = {
 {%- for column in entity.columns %}
 {%- set padding = entity.column_length - (column['name']|length) %}
-            "{{ column.name }}": {%for i in range(0, padding)%} {%endfor%}{{ column.python_type.value }}(self.{{ column.name }}),
+            "{{ column.camel_case_name }}": {%for i in range(0, padding)%} {%endfor%}{{ column.python_type.value }}(self.{{ column.name }}),
 {%- endfor %}
         }
 {%- for relationship in entity.relationships %}
