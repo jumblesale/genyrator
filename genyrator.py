@@ -2,30 +2,35 @@ import json
 from enum import Enum
 from typing import List, Optional, Dict
 import attr
+import re
 
+datetime_regex = re.compile('\d{4}-\d{2}-\d{2}T(\d{2}:)*')
 
 class TypeOption(Enum):
-    string = 'string'
-    int =    'int'
-    float =  'float'
-    dict =   'dict'
-    list =   'list'
+    string =     'string'
+    int =        'int'
+    float =      'float'
+    dict =       'dict'
+    list =       'list'
+    datetime =   'datetime'
 
 
 def _string_to_type_option(string_type: str):
     return {
-        'str':   TypeOption.string,
-        'int':   TypeOption.int,
-        'float': TypeOption.float,
-        'dict':  TypeOption.dict,
-        'list':  TypeOption.list,
+        'str':      TypeOption.string,
+        'int':      TypeOption.int,
+        'float':    TypeOption.float,
+        'dict':     TypeOption.dict,
+        'list':     TypeOption.list,
+        'datetime': TypeOption.datetime
     }[string_type]
 
 
 class SqlAlchemyTypeOption(Enum):
-    string = 'String'
-    float =  'Float'
-    int =    'Integer'
+    string =   'String'
+    float =    'Float'
+    int =      'Integer'
+    datetime = 'Datetime'
 
 
 def _type_option_to_sql_alchemy_type(type_option: TypeOption) -> SqlAlchemyTypeOption:
@@ -33,34 +38,38 @@ def _type_option_to_sql_alchemy_type(type_option: TypeOption) -> SqlAlchemyTypeO
         TypeOption.string: SqlAlchemyTypeOption.string,
         TypeOption.int:    SqlAlchemyTypeOption.int,
         TypeOption.float:  SqlAlchemyTypeOption.float,
+        TypeOption.datetime: SqlAlchemyTypeOption.datetime
     }[type_option]
 
 
 class PythonTypeOption(Enum):
-    string = 'str'
-    float =  'float'
-    int =    'int'
-    dict =   'Dict'
-    list =   'List'
+    string =   'str'
+    float =    'float'
+    int =      'int'
+    dict =     'Dict'
+    list =     'List'
+    datetime = 'datetime'
 
 
 def _type_option_to_python_type(type_option: TypeOption) -> PythonTypeOption:
     return {
-        TypeOption.string: PythonTypeOption.string,
-        TypeOption.float:  PythonTypeOption.float,
-        TypeOption.int:    PythonTypeOption.int,
-        TypeOption.dict:   PythonTypeOption.dict,
-        TypeOption.list:   PythonTypeOption.list,
+        TypeOption.string:   PythonTypeOption.string,
+        TypeOption.float:    PythonTypeOption.float,
+        TypeOption.int:      PythonTypeOption.int,
+        TypeOption.dict:     PythonTypeOption.dict,
+        TypeOption.list:     PythonTypeOption.list,
+        TypeOption.datetime: PythonTypeOption.datetime
     }[type_option]
 
 
 def _type_option_to_default_value(type_option: TypeOption) -> str:
     return {
-        TypeOption.string: '""',
-        TypeOption.float:  '0.0',
-        TypeOption.int:    '0',
-        TypeOption.dict:   '{}',
-        TypeOption.list:   '[]',
+        TypeOption.string:   '""',
+        TypeOption.float:    '0.0',
+        TypeOption.int:      '0',
+        TypeOption.dict:     '{}',
+        TypeOption.list:     '[]',
+        TypeOption.datetime: '"1970-01-01T00:00"',
     }[type_option]
 
 
@@ -82,6 +91,10 @@ def create_column(name: str, type_option: TypeOption) -> Column:
         python_type=_type_option_to_python_type(type_option),
         default=_type_option_to_default_value(type_option),
     )
+
+
+def _is_string_date_time_ish(potential_datetime: str) -> bool:
+    return bool(datetime_regex.match(potential_datetime))
 
 
 def _column_from_dict(column_dict: Dict) -> Column:
@@ -166,7 +179,10 @@ def _entity_from_dict(entity_dict: Dict) -> Entity:
 def _entity_from_exemplar(class_name: str, exemplar: Dict) -> Entity:
     columns = []
     for k, v in exemplar.items():
-        type_option = _string_to_type_option(type(v).__name__)
+        type_name = type(v).__name__
+        type_option = _string_to_type_option(type_name)
+        if type_option == TypeOption.string and _is_string_date_time_ish(v):
+            type_option = TypeOption.datetime
         columns.append(create_column(k, type_option))
     return create_entity(
         class_name=class_name,
@@ -260,7 +276,8 @@ example_from_exemplar = """
 {
     "name": "Charles",
     "age": 4,
-    "goodness": 11.6
+    "goodness": 11.6,
+    "dob": "2013-10-17T00:00"
 }
 """
 
