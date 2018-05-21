@@ -1,8 +1,10 @@
 import json
 from enum import Enum
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Tuple
 import attr
 import re
+from jinja2 import Environment, BaseLoader
+
 
 datetime_regex = re.compile('\d{4}-\d{2}-\d{2}T(\d{2}:)*')
 
@@ -265,38 +267,14 @@ to_type_template = """
         )
 """
 
-example_entity = {
-    "class_name": 'Dog',
-    "columns": [
-        {"name": "name", "type": "string"}, {"name": "age", "type": "int"}
-    ]
-}
 
-example_from_exemplar = """
-{
-    "name": "Charles",
-    "age": 4,
-    "goodness": 11.6,
-    "dob": "2013-10-17T00:00"
-}
-"""
-
-# dog_entity = _entity_from_dict(example_entity)
-dog_entity = _entity_from_exemplar('Dog', json.loads(example_from_exemplar))
-dog_entity.relationships = [create_relationship('Owner', True, False, JoinOption.to_one)]
-print(dog_entity)
-
-from jinja2 import Environment, BaseLoader
-
-db_jinja_template = Environment(loader=BaseLoader).from_string(db_model_template)
-db_rendered = db_jinja_template.render({"entity": dog_entity.to_dict()})
-tuple_jinja_template = Environment(loader=BaseLoader).from_string(named_tuple_template)
-tuple_rendered = tuple_jinja_template.render({"entity": dog_entity})
-to_type_jinja_template = Environment(loader=BaseLoader).from_string(to_type_template)
-to_type_rendered = to_type_jinja_template.render({"entity": dog_entity})
-type_constructor_jinja_template = Environment(loader=BaseLoader).from_string(type_constructor_template)
-type_constructor_rendered = type_constructor_jinja_template.render({"entity": dog_entity})
-print(db_rendered)
-print(to_type_rendered)
-print(type_constructor_rendered)
-print(tuple_rendered)
+def render_templates(entity: Entity) -> Tuple[str, str, str, str]:
+    db_jinja_template = Environment(loader=BaseLoader).from_string(db_model_template)
+    db_rendered = db_jinja_template.render({"entity": entity.to_dict()})
+    tuple_jinja_template = Environment(loader=BaseLoader).from_string(named_tuple_template)
+    tuple_rendered = tuple_jinja_template.render({"entity": entity})
+    to_type_jinja_template = Environment(loader=BaseLoader).from_string(to_type_template)
+    to_type_rendered = to_type_jinja_template.render({"entity": entity})
+    type_constructor_jinja_template = Environment(loader=BaseLoader).from_string(type_constructor_template)
+    type_constructor_rendered = type_constructor_jinja_template.render({"entity": entity})
+    return db_rendered, tuple_rendered, to_type_rendered, type_constructor_rendered
