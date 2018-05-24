@@ -27,8 +27,8 @@ if __name__ == '__main__':
         exemplar=json.loads(example_from_exemplar),
         foreign_keys=[('ownerId', 'owner.owner_id')],
         indexes=['name'],
+        relationships=[create_relationship('Owner', True, False, JoinOption.to_one, 'owner_dogs')]
     )
-    dog_entity.relationships = [create_relationship('Owner', True, False, JoinOption.to_one, 'owner_dogs')]
     print(dog_entity)
     print(render_db_model(
         entity=dog_entity,

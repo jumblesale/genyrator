@@ -314,6 +314,12 @@ class {class_name}(db.Model):  # type: ignore
         )
 
 
+def add_relationship_to_entity(relationship: Relationship, entity: Entity):
+    return create_entity(
+        entity.class_name, entity.columns, entity.relationships + [relationship]
+    )
+
+
 def _camel_case_to_snek_case(x: str) -> str:
     return inflection.underscore(x)
 
@@ -322,7 +328,7 @@ def _snek_case_to_camel_case(x: str) -> str:
     return inflection.camelize(x, False)
 
 
-def create_entity(class_name: str, columns: List[Column], relationships: List[Relationship] = []) -> Entity:
+def create_entity(class_name: str, columns: List[Column], relationships: List[Relationship] = list()) -> Entity:
     return Entity(
         class_name=class_name,
         class_name_snek_case=_camel_case_to_snek_case(class_name),
@@ -338,18 +344,12 @@ def create_entity(class_name: str, columns: List[Column], relationships: List[Re
     )
 
 
-def _entity_from_dict(entity_dict: Dict) -> Entity:
-    return create_entity(
-        class_name=entity_dict['class_name'],
-        columns=[_column_from_dict(x) for x in entity_dict['columns']]
-    )
-
-
 def create_entity_from_exemplar(
-        class_name:   str,
-        exemplar:     Dict,
-        foreign_keys: List[Tuple[str, str]]=list(),
-        indexes:      List[str]=list(),
+        class_name:    str,
+        exemplar:      Dict,
+        foreign_keys:  List[Tuple[str, str]]=list(),
+        indexes:       List[str]=list(),
+        relationships: Optional[List[Relationship]] = list(),
 ) -> Entity:
     columns = []
     foreign_keys_dict = dict(foreign_keys)
@@ -366,6 +366,7 @@ def create_entity_from_exemplar(
     return create_entity(
         class_name=class_name,
         columns=columns,
+        relationships=relationships,
     )
 
 
