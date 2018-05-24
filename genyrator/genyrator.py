@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 from typing import List, Optional, Dict, Tuple
 import attr
@@ -269,7 +270,8 @@ def create_{entity_name}(
         template = """
 class {class_name}(db.Model):  # type: ignore
     id ={spacing}db.Column(db.Integer, primary_key=True)
-    {properties}{type_constructor}"""
+    {properties}
+{type_constructor}"""
 
         columns = '\n    '.join(
             [c.to_sqlalchemy_model_string(self.column_length) for c in self.columns]
@@ -308,7 +310,9 @@ class {class_name}(db.Model):  # type: ignore
     def to_type_string(self):
         properties_join = '\n'
         columns = properties_join.join([c.to_named_tuple_string(self.column_length) for c in self.columns])
-        relationships = properties_join.join([r.to_named_tuple_string(self.column_length) for r in self.relationships])
+        relationships = properties_join.join(
+            [r.to_named_tuple_string(self.column_length) for r in self.relationships]
+        ) + '\n'
         return "{class_name} = NamedTuple(\n    '{class_name}', [\n{columns}\n{relationships}    ]\n)".format(
             class_name=self.class_name, columns=columns, relationships=relationships,
         )
@@ -326,6 +330,10 @@ def _camel_case_to_snek_case(x: str) -> str:
 
 def _snek_case_to_camel_case(x: str) -> str:
     return inflection.camelize(x, False)
+
+
+def _entity_name_to_file_namy(entity: Entity):
+    return '{}.py'.format(entity.class_name_snek_case)
 
 
 def create_entity(class_name: str, columns: List[Column], relationships: List[Relationship] = list()) -> Entity:
@@ -385,16 +393,72 @@ def render_db_model(entity: Entity, db_import: str, types_module: str):
     )
 
 
-def render_type_model(entity: Entity):
+def render_type_model(entity: Entity, parent_module: str, types_path: str):
+    relationship_imports = '\n'.join(['from {types_path} import {class_name}, create_{entity_name}'.format(
+        class_name=r.target_entity_name,
+        entity_name=r.target_entity_name_snek_case,
+        types_path='{}.{}'.format(parent_module, _convert_file_path_to_module_name(types_path))
+    ) for r in entity.relationships])
     return """from typing import NamedTuple, Optional
+{date_time_imports}
+{relationship_imports}
 
 {named_tuple}
 
 {tuple_constructor}""".format(
         named_tuple=entity.to_type_string(),
         tuple_constructor=entity.to_type_constructor_string(),
+        relationship_imports=relationship_imports,
+        date_time_imports='from datetime import datetime',
     )
 
 
 def render_type_constructor(entity: Entity):
     return entity.to_type_constructor_string()
+
+
+def _convert_file_path_to_module_name(file_path: str) -> str:
+    return file_path.replace(os.sep, '.')
+
+
+def create_entity_files(
+        out_dir_db_models: str,
+        out_dir_types:     str,
+        db_import:         str,
+        parent_module:     str,
+        entities:          List[Entity],
+    ) -> None:
+    for directory in ['{}/{}'.format(parent_module, target_dir) for target_dir in [out_dir_db_models, out_dir_types]]:
+        try:
+            os.makedirs(directory)
+        except FileExistsError:
+            continue
+    for entity in entities:
+        file_name = _entity_name_to_file_namy(entity)
+        db_model = render_db_model(entity=entity, db_import=db_import, types_module=out_dir_types)
+        type_model = render_type_model(entity, parent_module=parent_module, types_path=out_dir_types)
+        with open('{}/{}/{}'.format(parent_module, out_dir_db_models, file_name), 'w') as f:
+            f.write(db_model)
+        with open('{}/{}/{}'.format(parent_module, out_dir_types, file_name), 'w') as f:
+            f.write(type_model)
+    with open('{}/{}/{}'.format(parent_module, out_dir_db_models, '__init__.py'), 'w') as f:
+        for entity in entities:  # type: Entity
+            import_template = """
+from {parent}.{module_path}.{module_name} import {model_name}\n""".format(
+                parent=parent_module,
+                module_path=_convert_file_path_to_module_name(out_dir_db_models),
+                module_name=entity.class_name_snek_case,
+                model_name=entity.class_name,
+            ).lstrip()
+            f.write(import_template)
+    with open('{}/{}/{}'.format(parent_module, out_dir_types, '__init__.py'), 'w') as f:
+        for entity in entities:  # type: Entity
+            import_template = """
+from {parent}.{module_path}.{module_name} import {model_name}, create_{model_name_lower}\n""".format(
+                parent=parent_module,
+                module_path=_convert_file_path_to_module_name(out_dir_types),
+                module_name=entity.class_name_snek_case,
+                model_name=entity.class_name,
+                model_name_lower=entity.class_name_snek_case,
+            ).lstrip()
+            f.write(import_template)

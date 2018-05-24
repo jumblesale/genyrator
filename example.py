@@ -1,7 +1,4 @@
-from genyrator import (
-    render_db_model, JoinOption, create_relationship, create_entity_from_exemplar,
-    render_type_model,
-    render_type_constructor)
+from genyrator import *
 import json
 
 example_entity = {
@@ -30,11 +27,10 @@ if __name__ == '__main__':
         relationships=[create_relationship('Owner', True, False, JoinOption.to_one, 'owner_dogs')]
     )
     print(dog_entity)
-    print(render_db_model(
-        entity=dog_entity,
-        db_import="from genyrator import db",
-        types_module="doggos"
-    ))
-    print(render_db_model(entity=dog_entity, db_import="from doggos import db", types_module="doggos"))
-    print(render_type_model(entity=dog_entity))
-    print(render_type_constructor(entity=dog_entity))
+    create_entity_files(
+        out_dir_db_models='db',
+        out_dir_types='types',
+        db_import='from genyrator import db',
+        parent_module='doggos',
+        entities=[dog_entity],
+    )

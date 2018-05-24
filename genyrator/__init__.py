@@ -6,6 +6,7 @@ from genyrator.genyrator import (
     render_type_model,
     render_db_model,
     render_type_constructor,
+    create_entity_files,
 
     # classes
     Entity,
