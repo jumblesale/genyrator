@@ -92,7 +92,7 @@ class Column(object):
 
     def to_sqlalchemy_model_string(self, padding: int, foreign_key_relationship: Optional[str] = None) -> str:
         if foreign_key_relationship is not None:
-            foreign_key = ", db.ForeignKey('{relationship}".format(relationship=foreign_key_relationship)
+            foreign_key = ", db.ForeignKey('{relationship}')".format(relationship=foreign_key_relationship)
         else:
             foreign_key = ''
         return '{column_name} ={spacing} db.Column(db.{sql_type}{fk}{index})'.format(
@@ -352,7 +352,11 @@ def create_entity_from_exemplar(
         relationships: Optional[List[Relationship]] = list(),
 ) -> Entity:
     columns = []
-    foreign_keys_dict = dict(foreign_keys)
+    foreign_keys_dict = {}
+    for fk_key, fk_value in foreign_keys:
+        foreign_keys_dict[fk_key] = '{table}.{fk_column}'.format(
+            table=fk_value, fk_column=_camel_case_to_snek_case(fk_key)
+        )
     for k, v in exemplar.items():
         if v is None:
             v = ''

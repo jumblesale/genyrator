@@ -1,4 +1,4 @@
-from genyrator.genyrator import (
+from genyrator import (
     render_db_model, JoinOption, create_relationship, create_entity_from_exemplar,
     render_type_model,
     render_type_constructor)
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     dog_entity = create_entity_from_exemplar(
         class_name='Dog',
         exemplar=json.loads(example_from_exemplar),
-        foreign_keys=[('ownerId', 'owner.owner_id')],
+        foreign_keys=[('ownerId', 'owner')],
         indexes=['name'],
         relationships=[create_relationship('Owner', True, False, JoinOption.to_one, 'owner_dogs')]
     )
