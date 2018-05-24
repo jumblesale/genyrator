@@ -435,7 +435,7 @@ def create_entity_files(
             continue
     for entity in entities:
         file_name = _entity_name_to_file_namy(entity)
-        db_model = render_db_model(entity=entity, db_import=db_import, types_module=out_dir_types)
+        db_model = render_db_model(entity=entity, db_import=db_import, types_module='{}.{}'.format(parent_module, out_dir_types))
         type_model = render_type_model(entity, parent_module=parent_module, types_path=out_dir_types)
         with open('{}/{}/{}'.format(parent_module, out_dir_db_models, file_name), 'w') as f:
             f.write(db_model)
