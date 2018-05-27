@@ -8,6 +8,9 @@ flask = "*"
 attrs = "*"
 inflection = "*"
 twine = "*"
+sqlalchemy = "*"
+flask-sqlalchemy = "*"
+python-dateutil = "*"
 
 [dev-packages]
 
