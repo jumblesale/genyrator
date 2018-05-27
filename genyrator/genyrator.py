@@ -32,7 +32,7 @@ class SqlAlchemyTypeOption(Enum):
     string =   'String'
     float =    'Float'
     int =      'Integer'
-    datetime = 'Datetime'
+    datetime = 'Date'
 
 
 def _type_option_to_sqlalchemy_type(type_option: TypeOption) -> SqlAlchemyTypeOption:
@@ -114,14 +114,25 @@ class Column(object):
         )
 
     def to_sqlalchemy_type_constructor_string(self) -> str:
+        if self.python_type == PythonTypeOption.datetime:
+            type = ''
+        else:
+            type = self.python_type.value
         return '{name}={type}(self.{name}),'.format(
-            name=self.name, type=self.python_type.value,
+            name=self.name, type=type,
         )
 
     def to_named_tuple_string(self, padding: int):
         return "        ('{name}', {spacing}{type}),".format(
             name=self.name, spacing=_create_padding(padding, self.name),
             type=self.python_type.value,
+        )
+
+    def to_create_json_string(self, padding: int, entity_name: str) -> str:
+        return '        "{key}": {spacing}{entity_name}.{key}'.format(
+            spacing=_create_padding(padding, self.name),
+            key=self.name,
+            entity_name=entity_name,
         )
 
 
@@ -179,26 +190,47 @@ class Relationship(object):
         return self.__dict__
 
     def to_type_constructor_argument_string(self, padding: int) -> str:
-        return '{name}: {spacing}Optional[{type}]=None,'.format(
+        if self.join == JoinOption.to_one:
+            type = "Optional['{}']".format(self.target_entity_name)
+        else:
+            type = "List[Optional['{}']]".format(self.target_entity_name)
+        return '{name}: {spacing}{type}=None,'.format(
             name=self.target_entity_name_snek_case, spacing=_create_padding(padding, self.target_entity_name_snek_case),
-            type='Any'
+            type=type
         )
 
     def to_type_constructor_body_string(self) -> str:
-        default = 'None' if self.nullable else 'create_{}()'.format(self.target_entity_name_snek_case)
         return '{name}={name} if {name} else {default},'.format(
             name=self.target_entity_name_snek_case,
-            default=default,
+            default='None',
         )
 
-    def to_sqlalchemy_type_constructor_string(self) -> str:
-        return '            {name}=self.{name}.to_{constructor}(),'.format(
+    def to_sqlalchemy_type_constructor_string(self, entity_name: str) -> str:
+        to_type_method = 'to_{}({}=True)'.format(
+            _camel_case_to_snek_case(self.target_entity_name),
+            entity_name,
+        )
+        constructor = 'self.{name}.{to_type} if self.{name} and not {arg_name} else None'.format(
             name=self.target_entity_name_snek_case,
-            constructor=_camel_case_to_snek_case(self.target_entity_name),
+            to_type=to_type_method,
+            arg_name=_camel_case_to_snek_case(self.target_entity_name),
+        )
+        if self.join == JoinOption.to_one:
+            method = constructor
+        else:
+            method = '[x.{} for x in self.{}] if self.{} is not None and not {} else []'.format(
+                to_type_method,
+                self.target_entity_name_snek_case,
+                self.target_entity_name_snek_case,
+                _camel_case_to_snek_case(self.target_entity_name),
+            )
+        return '            {name}={method},'.format(
+            name=self.target_entity_name_snek_case,
+            method=method,
         )
 
     def to_sqlalchemy_model_string(self, padding: int) -> str:
-        return "    {name} = {spacing}db.relationship('{class_name}', lazy={lazy}, uselist={uselist}{secondary})".format(
+        template = "    {name} = {spacing}db.relationship('{class_name}', lazy={lazy}, uselist={uselist}{secondary})".format(
             name=self.target_entity_name_snek_case,
             class_name=self.target_entity_name,
             uselist=str(self.join == JoinOption.to_many),
@@ -206,12 +238,13 @@ class Relationship(object):
             lazy=str(self.lazy),
             secondary=", secondary='{}'".format(self.join_table),
         )
+        return template
 
     def to_named_tuple_string(self, padding: int):
         return "        ('{name}', {spacing}{type}),".format(
             name=self.target_entity_name_snek_case,
             spacing=_create_padding(padding, self.target_entity_name_snek_case),
-            type=self.target_entity_name
+            type='Any'
         )
 
 
@@ -223,14 +256,14 @@ def create_relationship(
         join_table:               Optional[str]=None,
         property_name:            Optional[str]=None,
 ) -> Relationship:
-    target_entity_name_snek_case = _camel_case_to_snek_case(target_entity_class_name),
+    target_entity_name_snek_case = _camel_case_to_snek_case(target_entity_class_name)
     return Relationship(
         target_entity_name=target_entity_class_name,
         target_entity_name_snek_case=property_name if property_name else target_entity_name_snek_case,
         nullable=nullable,
         lazy=lazy,
         join=join,
-        join_table=join_table,
+        join_table=str(join_table) if join_table else None,
     )
 
 
@@ -242,8 +275,9 @@ class Entity(object):
     import_name:          str =                attr.ib()
     column_length:        int =                attr.ib()
     relationships:        List[Relationship] = attr.ib()
+    table_name:           Optional[str] =      attr.ib()
 
-    def to_dict(self):
+    def to_dict(self) -> Dict:
         d = self.__dict__
         d['columns'] = [c.to_dict() for c in self.columns]
         d['relationships'] = [r.to_dict() for r in self.relationships]
@@ -273,7 +307,7 @@ def create_{entity_name}(
 
     def to_sqlalchemy_model(self) -> str:
         template = """
-class {class_name}(db.Model):  # type: ignore
+class {class_name}(db.Model):  # type: ignore{table_name}
     id ={spacing}db.Column(db.Integer, primary_key=True)
     {properties}
 {type_constructor}"""
@@ -289,12 +323,13 @@ class {class_name}(db.Model):  # type: ignore
             spacing=' ' * (self.column_length - 1),
             properties='\n'.join(columns + relationships),
             type_constructor=self.to_sqlalchemy_type_constructor(),
+            table_name="\n    __tablename__ = '{}'\n".format(self.table_name) if self.table_name else ''
         )
 
     def to_sqlalchemy_type_constructor(self) -> str:
         template =\
             """
-    def to_{class_name}(self) -> {import_name}:
+    def to_{class_name}(self{args}) -> {import_name}:
         return create_{class_name}(
             {properties}
         )
@@ -304,15 +339,19 @@ class {class_name}(db.Model):  # type: ignore
             [c.to_sqlalchemy_type_constructor_string() for c in self.columns]
         ),
         relationships = '\n'.join(
-            [r.to_sqlalchemy_type_constructor_string() for r in self.relationships]
+            [r.to_sqlalchemy_type_constructor_string(_camel_case_to_snek_case(self.class_name)) for r in self.relationships]
         ),
+        args = ', '.join([
+            _camel_case_to_snek_case(r.target_entity_name) + '=False' for r in self.relationships
+        ]) + ', **kwargs'
         return template.format(
             class_name=self.class_name_snek_case,
             import_name=self.import_name,
             properties='\n'.join(columns + relationships).rstrip(),
+            args=', ' + args if args else ''
         )
 
-    def to_type_string(self):
+    def to_type_string(self) -> str:
         properties_join = '\n'
         columns = properties_join.join([c.to_named_tuple_string(self.column_length) for c in self.columns])
         relationships = properties_join.join(
@@ -321,6 +360,15 @@ class {class_name}(db.Model):  # type: ignore
         return "{class_name} = NamedTuple(\n    '{class_name}', [\n{columns}\n{relationships}    ]\n)".format(
             class_name=self.class_name, columns=columns, relationships=relationships,
         )
+
+    def to_create_json_string(self) -> str:
+        signature = 'def {name}_to_json({name}: {type}):\n    return {{'.format(
+            name=self.class_name_snek_case, type=self.class_name
+        )
+        column_body = '\n'.join(
+            [c.to_create_json_string(self.column_length, self.class_name_snek_case) for c in self.columns]
+        )
+        return '\n'.join([signature, column_body, '    }'])
 
 
 def add_relationship_to_entity(relationship: Relationship, entity: Entity):
@@ -341,7 +389,12 @@ def _entity_name_to_file_name(entity: Entity):
     return '{}.py'.format(entity.class_name_snek_case)
 
 
-def create_entity(class_name: str, columns: List[Column], relationships: List[Relationship] = list()) -> Entity:
+def create_entity(
+        class_name:    str,
+        columns:       List[Column],
+        relationships: List[Relationship] = list(),
+        table_name:    Optional[str]=None,
+) -> Entity:
     return Entity(
         class_name=class_name,
         class_name_snek_case=_camel_case_to_snek_case(class_name),
@@ -354,6 +407,7 @@ def create_entity(class_name: str, columns: List[Column], relationships: List[Re
             [r.target_entity_name_snek_case for r in relationships]]
         )),
         relationships=relationships,
+        table_name=table_name if table_name else None,
     )
 
 
@@ -363,6 +417,7 @@ def create_entity_from_exemplar(
         foreign_keys:  List[Tuple[str, str]]=list(),
         indexes:       List[str]=list(),
         relationships: Optional[List[Relationship]] = list(),
+        table_name:    Optional[str]=None,
 ) -> Entity:
     columns = []
     foreign_keys_dict = {}
@@ -384,17 +439,19 @@ def create_entity_from_exemplar(
         class_name=class_name,
         columns=columns,
         relationships=relationships,
+        table_name=table_name,
     )
 
 
 def render_db_model(entity: Entity, db_import: str, types_module: str):
-    return '{types_import}\n{db_import}\n\n{entity}'.format(
+    return '{types_import}\n{db_import}\n{datetime_imports}\n\n{entity}'.format(
         db_import=db_import,
         entity=entity.to_sqlalchemy_model(),
         types_import='from {module} import {entity_type} as {entity_type}Type, {create_entity}'.format(
             module=types_module, entity_type=entity.class_name,
             create_entity='create_{}'.format(entity.class_name_snek_case)
         ),
+        datetime_imports='from datetime import datetime'
     )
 
 
@@ -404,17 +461,12 @@ def render_type_model(entity: Entity, parent_module: str, types_path: str):
         entity_name=r.target_entity_name_snek_case,
         types_path='{}.{}'.format(parent_module, _convert_file_path_to_module_name(types_path))
     ) for r in entity.relationships])
-    return """from typing import NamedTuple, Optional
-{date_time_imports}
-{relationship_imports}
-
-{named_tuple}
+    return """{named_tuple}
 
 {tuple_constructor}""".format(
         named_tuple=entity.to_type_string(),
         tuple_constructor=entity.to_type_constructor_string(),
         relationship_imports=relationship_imports,
-        date_time_imports='from datetime import datetime',
     )
 
 
@@ -438,14 +490,20 @@ def create_entity_files(
             os.makedirs(directory)
         except FileExistsError:
             continue
-    for entity in entities:
-        file_name = _entity_name_to_file_name(entity)
-        db_model = render_db_model(entity=entity, db_import=db_import, types_module='{}.{}'.format(parent_module, out_dir_types))
-        type_model = render_type_model(entity, parent_module=parent_module, types_path=out_dir_types)
-        with open('{}/{}/{}'.format(parent_module, out_dir_db_models, file_name), 'w') as f:
-            f.write(db_model)
-        with open('{}/{}/{}'.format(parent_module, out_dir_types, file_name), 'w') as f:
-            f.write(type_model)
+    datetime_imports = 'from datetime import datetime'
+    with open('{}/{}/{}'.format(parent_module, out_dir_types, '__init__.py'), 'w') as type_init_file:
+        type_init_file.write("""from typing import NamedTuple, Optional, Any, List
+{datetime_imports}
+""".format(datetime_imports=datetime_imports,))
+    with open('{}/{}/{}'.format(parent_module, out_dir_types, '__init__.py'), 'a') as type_init_file:
+        for entity in entities:
+            file_name = _entity_name_to_file_name(entity)
+            db_model = render_db_model(entity=entity, db_import=db_import, types_module='{}.{}'.format(parent_module, out_dir_types))
+            with open('{}/{}/{}'.format(parent_module, out_dir_db_models, file_name), 'w') as db_model_file:
+                db_model_file.write(db_model)
+            type_model = render_type_model(entity, parent_module=parent_module, types_path=out_dir_types)
+            type_init_file.write('\n\n' + type_model)
+
     with open('{}/{}/{}'.format(parent_module, out_dir_db_models, '__init__.py'), 'w') as f:
         for entity in entities:  # type: Entity
             import_template = """
@@ -454,16 +512,5 @@ from {parent}.{module_path}.{module_name} import {model_name}\n""".format(
                 module_path=_convert_file_path_to_module_name(out_dir_db_models),
                 module_name=entity.class_name_snek_case,
                 model_name=entity.class_name,
-            ).lstrip()
-            f.write(import_template)
-    with open('{}/{}/{}'.format(parent_module, out_dir_types, '__init__.py'), 'w') as f:
-        for entity in entities:  # type: Entity
-            import_template = """
-from {parent}.{module_path}.{module_name} import {model_name}, create_{model_name_lower}\n""".format(
-                parent=parent_module,
-                module_path=_convert_file_path_to_module_name(out_dir_types),
-                module_name=entity.class_name_snek_case,
-                model_name=entity.class_name,
-                model_name_lower=entity.class_name_snek_case,
             ).lstrip()
             f.write(import_template)
