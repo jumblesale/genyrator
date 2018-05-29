@@ -7,7 +7,6 @@ from genyrator.genyrator import (
 )
 
 
-
 APIPath = NamedTuple(
     'APIPath',
     [('entity',          Entity),
@@ -27,7 +26,7 @@ def create_api_files(
         model_to_dict_method_import: str,
         db_models_import:            str,
         entities:                    List[Entity],
-        api_paths:                    Optional[List[APIPath]]=list(),
+        api_paths:                   Optional[List[APIPath]]=list(),
 ) -> None:
     try:
         os.makedirs(out_dir_api_endpoints)
@@ -57,7 +56,8 @@ def render_api_paths(namespace: str, api_paths: List[APIPath]):
                 path.route,
                 '-'.join([_camel_case_to_snek_case(x) for x in path.joined_entities]),
                 _snek_case_to_camel_case(''.join(path.joined_entities)),
-                query
+                query,
+                path.joined_entities,
             )
         )
     return '\n'.join(methods)
@@ -97,7 +97,12 @@ import dateutil.parser
     return template
 
 
-def _create_get_by_id_method_body(entity_name: str, class_name: str, query: Optional[str]) -> str:
+def _create_get_by_id_method_body(
+        entity_name: str,
+        class_name:  str,
+        query:       Optional[str]=None,
+        path:        Optional[List[str]]=None
+) -> str:
     query = query if query else '{class_name}.query.filter_by({entity_name}_id=id).first()'.format(
         class_name=class_name, entity_name=entity_name,
     )
@@ -106,12 +111,12 @@ def _create_get_by_id_method_body(entity_name: str, class_name: str, query: Opti
         if result is None:
             abort(404)
         return Response(
-            response=json.dumps(model_to_dict(result)),
+            response=json.dumps(model_to_dict(result{path})),
             status=200,
             mimetype='application/json'
         )
     """.format(
-        class_name=class_name, query=query,
+        class_name=class_name, query=query, path=', ' + str(path) if path else ''
     ).lstrip()
 
 
@@ -121,7 +126,8 @@ def entity_to_api_get_endpoint_string(
         route:         Optional[str]=None,
         endpoint:      Optional[str]=None,
         resource_name: Optional[str]=None,
-        query:         Optional[str]=None
+        query:         Optional[str]=None,
+        path:          Optional[List[str]]=None,
 ) -> str:
     return """@{namespace}.route('/{route}', endpoint='{endpoint_name}')
 class {resource_name}(Resource):  # type: ignore
@@ -138,6 +144,7 @@ class {resource_name}(Resource):  # type: ignore
             entity_name=entity.class_name_snek_case,
             class_name=entity.class_name,
             query=query,
+            path=path,
         ),
     )
 
