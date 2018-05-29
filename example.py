@@ -6,7 +6,7 @@ from flask_restplus import Api
 from sqlalchemy.orm import joinedload, class_mapper
 
 from genyrator import *
-from genyrator.create_api import entity_to_api_get_endpoint_string, render_api_endpoints, create_api_files
+from genyrator.create_api import entity_to_api_get_endpoint_string, render_api_endpoints, create_api_files, APIPath
 from genyrator.genyrator import create_column, TypeOption
 
 
@@ -41,6 +41,7 @@ owner_dogs_entity = create_entity(
     columns=[
         create_column('owner_id', TypeOption.string, 'owner.id'),
         create_column('dog_id', TypeOption.string, 'dog.id'),
+        create_column('current_owner', TypeOption.bool),
     ],
     relationships=[
         create_relationship('Dog', True, False, JoinOption.to_one, None, None,),
@@ -91,11 +92,13 @@ create_api_files(
     'dogs',
     'from doggos import model_to_dict',
     'from doggos.sqlalchemy import db\nfrom doggos.db import *',
-    [dog_entity, owner_entity],
+    [dog_entity, owner_entity, ],
+    [APIPath(dog_entity, ['owner_dogs', 'owner'], 'dog/<id>/owner_dogs/owners')],
 )
 
-import doggos.db
+import doggos.db as doggo_db
 from doggos.sqlalchemy import db
+import dateutil.parser
 
 if __name__ == '__main__':
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
@@ -103,6 +106,26 @@ if __name__ == '__main__':
     with app.app_context():
         db.drop_all()
         db.create_all()
+        charles = doggo_db.Dog(
+            dog_id=1,
+            name='Charles',
+            age=4,
+            goodness=11.3,
+            dob=dateutil.parser.parse("2013-10-17T00:00"),
+            pug=True,
+        )
+        owner = doggo_db.Owner(
+            owner_id=1,
+        )
+        owner_dogs = doggo_db.OwnerDogs(
+            owner_id=1,
+            dog_id=1,
+            current_owner=True,
+            dog=charles,
+            owner=owner
+        )
+        db.session.add(owner_dogs)
+        db.session.commit()
 
     from doggos.restplus import endpoints
 

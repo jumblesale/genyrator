@@ -35,7 +35,7 @@ def _string_to_type_option(string_type: str) -> TypeOption:
 class SqlAlchemyTypeOption(Enum):
     string =   'String'
     float =    'Float'
-    int =      'BigInt'
+    int =      'BigInteger'
     bool =     'Boolean'
     datetime = 'DateTime'
     date =     'Date'
