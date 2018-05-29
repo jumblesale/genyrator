@@ -11,6 +11,7 @@ twine = "*"
 sqlalchemy = "*"
 flask-sqlalchemy = "*"
 python-dateutil = "*"
+flask-restplus = "*"
 
 [dev-packages]
 
