@@ -12,9 +12,11 @@ class TypeOption(Enum):
     string =   'string'
     int =      'int'
     float =    'float'
+    bool =     'bool'
     dict =     'dict'
     list =     'list'
     datetime = 'datetime'
+    date =     'date'
 
 
 def _string_to_type_option(string_type: str) -> TypeOption:
@@ -22,9 +24,11 @@ def _string_to_type_option(string_type: str) -> TypeOption:
         'str':      TypeOption.string,
         'int':      TypeOption.int,
         'float':    TypeOption.float,
+        'bool':     TypeOption.bool,
         'dict':     TypeOption.dict,
         'list':     TypeOption.list,
         'datetime': TypeOption.datetime,
+        'date':     TypeOption.date
     }[string_type]
 
 
@@ -32,7 +36,9 @@ class SqlAlchemyTypeOption(Enum):
     string =   'String'
     float =    'Float'
     int =      'Integer'
-    datetime = 'Date'
+    bool =     'Boolean'
+    datetime = 'DateTime'
+    date =     'Date'
 
 
 def _type_option_to_sqlalchemy_type(type_option: TypeOption) -> SqlAlchemyTypeOption:
@@ -40,7 +46,9 @@ def _type_option_to_sqlalchemy_type(type_option: TypeOption) -> SqlAlchemyTypeOp
         TypeOption.string:   SqlAlchemyTypeOption.string,
         TypeOption.int:      SqlAlchemyTypeOption.int,
         TypeOption.float:    SqlAlchemyTypeOption.float,
+        TypeOption.bool:     SqlAlchemyTypeOption.bool,
         TypeOption.datetime: SqlAlchemyTypeOption.datetime,
+        TypeOption.date:     SqlAlchemyTypeOption.date
     }[type_option]
 
 
@@ -48,9 +56,11 @@ class PythonTypeOption(Enum):
     string =   'str'
     float =    'float'
     int =      'int'
+    bool =     'bool'
     dict =     'Dict'
     list =     'List'
     datetime = 'datetime'
+    date =     'date'
 
 
 def _type_option_to_python_type(type_option: TypeOption) -> PythonTypeOption:
@@ -58,9 +68,11 @@ def _type_option_to_python_type(type_option: TypeOption) -> PythonTypeOption:
         TypeOption.string:   PythonTypeOption.string,
         TypeOption.float:    PythonTypeOption.float,
         TypeOption.int:      PythonTypeOption.int,
+        TypeOption.bool:     PythonTypeOption.bool,
         TypeOption.dict:     PythonTypeOption.dict,
         TypeOption.list:     PythonTypeOption.list,
         TypeOption.datetime: PythonTypeOption.datetime,
+        TypeOption.date:     PythonTypeOption.date,
     }[type_option]
 
 
@@ -69,9 +81,11 @@ def _type_option_to_default_value(type_option: TypeOption) -> str:
         TypeOption.string:   '""',
         TypeOption.float:    '0.0',
         TypeOption.int:      '0',
+        TypeOption.bool:     'None',
         TypeOption.dict:     '{}',
         TypeOption.list:     '[]',
         TypeOption.datetime: '"1970-01-01T00:00"',
+        TypeOption.date:     '"1970-01-01T00:00"',
     }[type_option]
 
 
@@ -144,7 +158,12 @@ class ForeignKey(Column):
         return super().to_sqlalchemy_model_string(padding, self.relationship)
 
 
-def create_column(name: str, type_option: TypeOption, foreign_key_relationship: Optional[str] = None, index=False) -> Column:
+def create_column(
+        name:                     str,
+        type_option:              TypeOption,
+        foreign_key_relationship: Optional[str] = None,
+        index:                    bool=False,
+) -> Column:
     constructor = Column if foreign_key_relationship is None else ForeignKey
     args = {
         "name":            _camel_case_to_snek_case(name),
@@ -276,6 +295,8 @@ class Entity(object):
     column_length:        int =                attr.ib()
     relationships:        List[Relationship] = attr.ib()
     table_name:           Optional[str] =      attr.ib()
+    uniques:              List[List[str]] =    attr.ib()
+    table_args:           Optional[str] =      attr.ib()
 
     def to_dict(self) -> Dict:
         d = self.__dict__
@@ -309,8 +330,7 @@ def create_{entity_name}(
         template = """
 class {class_name}(db.Model):  # type: ignore{table_name}
     id ={spacing}db.Column(db.Integer, primary_key=True)
-    {properties}
-{type_constructor}"""
+    {properties}{table_args}"""
 
         columns = '\n    '.join(
             [c.to_sqlalchemy_model_string(self.column_length) for c in self.columns]
@@ -323,7 +343,10 @@ class {class_name}(db.Model):  # type: ignore{table_name}
             spacing=' ' * (self.column_length - 1),
             properties='\n'.join(columns + relationships),
             type_constructor=self.to_sqlalchemy_type_constructor(),
-            table_name="\n    __tablename__ = '{}'\n".format(self.table_name) if self.table_name else ''
+            table_name="\n    __tablename__ = '{}'\n".format(self.table_name) if self.table_name else '',
+            table_args='\n    __table_args__ = {}{}'.format(
+                _create_padding(self.column_length, '__table_args__'), self.table_args
+            ) if self.table_args else '',
         )
 
     def to_sqlalchemy_type_constructor(self) -> str:
@@ -373,7 +396,8 @@ class {class_name}(db.Model):  # type: ignore{table_name}
 
 def add_relationship_to_entity(relationship: Relationship, entity: Entity):
     return create_entity(
-        entity.class_name, entity.columns, entity.relationships + [relationship]
+        entity.class_name, entity.columns, entity.relationships + [relationship],
+        entity.table_name, entity.uniques,
     )
 
 
@@ -394,6 +418,7 @@ def create_entity(
         columns:       List[Column],
         relationships: List[Relationship] = list(),
         table_name:    Optional[str]=None,
+        uniques:       List[List[str]]=list(),
 ) -> Entity:
     return Entity(
         class_name=class_name,
@@ -408,6 +433,11 @@ def create_entity(
         )),
         relationships=relationships,
         table_name=table_name if table_name else None,
+        uniques=uniques,
+        table_args='({}, )'.format(', '.join(
+            ['UniqueConstraint({})'.format(', '.join(
+                ["'{}'".format(_camel_case_to_snek_case(column)) for column in uc]
+            )) for uc in uniques])) if uniques else None
     )
 
 
@@ -418,6 +448,7 @@ def create_entity_from_exemplar(
         indexes:       List[str]=list(),
         relationships: Optional[List[Relationship]] = list(),
         table_name:    Optional[str]=None,
+        uniques:       Optional[List[List[str]]]=list()
 ) -> Entity:
     columns = []
     foreign_keys_dict = {}
@@ -434,24 +465,24 @@ def create_entity_from_exemplar(
             type_option = TypeOption.datetime
         foreign_key = foreign_keys_dict[k] if k in foreign_keys_dict else None
         index = k in indexes
-        columns.append(create_column(k, type_option, foreign_key, index))
+        columns.append(
+            create_column(k, type_option, foreign_key, index)
+        )
     return create_entity(
         class_name=class_name,
         columns=columns,
         relationships=relationships,
         table_name=table_name,
+        uniques=uniques,
     )
 
 
-def render_db_model(entity: Entity, db_import: str, types_module: str):
-    return '{types_import}\n{db_import}\n{datetime_imports}\n\n{entity}'.format(
+def render_db_model(entity: Entity, db_import: str):
+    return '{db_import}\n{datetime_imports}\n{sqlalchemy_imports}\n\n{entity}'.format(
         db_import=db_import,
         entity=entity.to_sqlalchemy_model(),
-        types_import='from {module} import {entity_type} as {entity_type}Type, {create_entity}'.format(
-            module=types_module, entity_type=entity.class_name,
-            create_entity='create_{}'.format(entity.class_name_snek_case)
-        ),
-        datetime_imports='from datetime import datetime'
+        datetime_imports='from datetime import datetime',
+        sqlalchemy_imports='from sqlalchemy import UniqueConstraint'
     )
 
 
@@ -498,7 +529,7 @@ def create_entity_files(
     with open('{}/{}/{}'.format(parent_module, out_dir_types, '__init__.py'), 'a') as type_init_file:
         for entity in entities:
             file_name = _entity_name_to_file_name(entity)
-            db_model = render_db_model(entity=entity, db_import=db_import, types_module='{}.{}'.format(parent_module, out_dir_types))
+            db_model = render_db_model(entity=entity, db_import=db_import)
             with open('{}/{}/{}'.format(parent_module, out_dir_db_models, file_name), 'w') as db_model_file:
                 db_model_file.write(db_model)
             type_model = render_type_model(entity, parent_module=parent_module, types_path=out_dir_types)
