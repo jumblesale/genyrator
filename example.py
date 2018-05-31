@@ -7,8 +7,7 @@ from sqlalchemy.orm import joinedload, class_mapper
 
 from genyrator import *
 from genyrator.create_api import entity_to_api_get_endpoint_string, render_api_endpoints, create_api_files, APIPath
-from genyrator.genyrator import create_column, TypeOption
-
+from genyrator.genyrator import create_column, TypeOption, create_entity_from_type_dict
 
 example_from_exemplar = """
 {
@@ -20,6 +19,15 @@ example_from_exemplar = """
     "pug": true
 }
 """
+
+example_from_dict = {
+    "dogId": "int",
+    "name": "str",
+    "age": "int",
+    "goodness": "float",
+    "dob": "datetime",
+    "pug": "bool"
+}
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
@@ -61,9 +69,9 @@ fave_treats_entity = create_entity(
     ],
     table_name='favourite_treats',
 )
-dog_entity = create_entity_from_exemplar(
+dog_entity = create_entity_from_type_dict(
     class_name='Dog',
-    exemplar=json.loads(example_from_exemplar),
+    type_dict=example_from_dict,
     foreign_keys=[('ownerId', 'owner')],
     indexes=['name'],
     relationships=[
@@ -90,10 +98,11 @@ create_entity_files(**args)
 create_api_files(
     'doggos/restplus',
     'dogs',
-    'from doggos import model_to_dict',
     'from doggos.sqlalchemy import db\nfrom doggos.db import *',
     [dog_entity, owner_entity, ],
-    [APIPath(dog_entity, ['owner_dogs', 'owner'], 'dog/<id>/owner_dogs/owners')],
+    {'dog': [
+        APIPath(dog_entity, ['owner_dogs', 'owner'], 'dog/<id>/owner_dogs/owners')
+    ]},
 )
 
 import doggos.db as doggo_db
@@ -127,9 +136,11 @@ if __name__ == '__main__':
         db.session.add(owner_dogs)
         db.session.commit()
 
-    from doggos.restplus import endpoints
+    import doggos.restplus.dog
+    import doggos.restplus.owner
+    from doggos.restplus import dogs
 
     api = Api(app)
-    api.add_namespace(endpoints.dogs)
+    api.add_namespace(dogs)
 
     app.run(debug=True)

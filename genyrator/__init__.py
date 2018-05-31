@@ -2,6 +2,7 @@ from genyrator.genyrator import (
     # methods
     create_entity,
     create_entity_from_exemplar,
+    create_entity_from_type_dict,
     create_relationship,
     render_type_model,
     render_db_model,

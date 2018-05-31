@@ -41,6 +41,15 @@ class SqlAlchemyTypeOption(Enum):
     date =     'Date'
 
 
+class RestplusTypeOption(Enum):
+    string =   'String'
+    float =    'Float'
+    int =      'Integer'
+    bool =     'Boolean'
+    datetime = 'DateTime'
+    date =     'Date'
+
+
 def _type_option_to_sqlalchemy_type(type_option: TypeOption) -> SqlAlchemyTypeOption:
     return {
         TypeOption.string:   SqlAlchemyTypeOption.string,
@@ -48,7 +57,18 @@ def _type_option_to_sqlalchemy_type(type_option: TypeOption) -> SqlAlchemyTypeOp
         TypeOption.float:    SqlAlchemyTypeOption.float,
         TypeOption.bool:     SqlAlchemyTypeOption.bool,
         TypeOption.datetime: SqlAlchemyTypeOption.datetime,
-        TypeOption.date:     SqlAlchemyTypeOption.date
+        TypeOption.date:     SqlAlchemyTypeOption.date,
+    }[type_option]
+
+
+def _type_option_to_restplus_type(type_option: TypeOption) -> RestplusTypeOption:
+    return {
+        TypeOption.string:   RestplusTypeOption.string,
+        TypeOption.int:      RestplusTypeOption.int,
+        TypeOption.float:    RestplusTypeOption.float,
+        TypeOption.bool:     RestplusTypeOption.bool,
+        TypeOption.datetime: RestplusTypeOption.datetime,
+        TypeOption.date:     RestplusTypeOption.date,
     }[type_option]
 
 
@@ -101,6 +121,8 @@ class Column(object):
     python_type:     PythonTypeOption =     attr.ib()
     default:         str =                  attr.ib()
     index:           bool =                 attr.ib()
+    type_option:     TypeOption =           attr.ib()
+    nullable:        bool =                 attr.ib()
 
     def to_dict(self) -> Dict:
         return self.__dict__
@@ -110,10 +132,11 @@ class Column(object):
             foreign_key = ", db.ForeignKey('{relationship}')".format(relationship=foreign_key_relationship)
         else:
             foreign_key = ''
-        return '{column_name} ={spacing} db.Column(db.{sql_type}{fk}{index})'.format(
+        return '{column_name} ={spacing} db.Column(db.{sql_type}{fk}{index}{nullable})'.format(
             column_name=self.name, sql_type=self.sqlalchemy_type.value,
             spacing=_create_padding(padding, self.name), fk=foreign_key,
             index=', index=True' if self.index else '',
+            nullable=', nullable=True' if self.nullable is True else '',
         )
 
     def to_type_constructor_argument_string(self, padding: int) -> str:
@@ -161,17 +184,20 @@ class ForeignKey(Column):
 def create_column(
         name:                     str,
         type_option:              TypeOption,
-        foreign_key_relationship: Optional[str] = None,
+        foreign_key_relationship: Optional[str]=None,
         index:                    bool=False,
+        nullable:                 bool=True,
 ) -> Column:
     constructor = Column if foreign_key_relationship is None else ForeignKey
     args = {
         "name":            _camel_case_to_snek_case(name),
         "camel_case_name": _snek_case_to_camel_case(name),
+        "type_option":     type_option,
         "sqlalchemy_type": _type_option_to_sqlalchemy_type(type_option),
         "python_type":     _type_option_to_python_type(type_option),
         "default":         _type_option_to_default_value(type_option),
         "index":           index,
+        "nullable":        nullable,
     }
     if foreign_key_relationship is not None:
         args["relationship"] = foreign_key_relationship
@@ -477,6 +503,37 @@ def create_entity_from_exemplar(
     )
 
 
+def create_entity_from_type_dict(
+        class_name:    str,
+        type_dict:     Dict,
+        foreign_keys:  List[Tuple[str, str]]=list(),
+        indexes:       List[str]=list(),
+        relationships: Optional[List[Relationship]] = list(),
+        table_name:    Optional[str]=None,
+        uniques:       Optional[List[List[str]]]=list()
+) -> Entity:
+    columns = []
+    foreign_keys_dict = {}
+    for fk_key, fk_value in foreign_keys:
+        foreign_keys_dict[fk_key] = '{table}.{fk_column}'.format(
+            table=fk_value, fk_column=_camel_case_to_snek_case(fk_key)
+        )
+    for k, v in type_dict.items():
+        type_option = _string_to_type_option(v)
+        foreign_key = foreign_keys_dict[k] if k in foreign_keys_dict else None
+        index = k in indexes
+        columns.append(
+            create_column(k, type_option, foreign_key, index)
+        )
+    return create_entity(
+        class_name=class_name,
+        columns=columns,
+        relationships=relationships,
+        table_name=table_name,
+        uniques=uniques,
+    )
+
+
 def render_db_model(entity: Entity, db_import: str):
     return '{db_import}\n{datetime_imports}\n{sqlalchemy_imports}\n\n{entity}'.format(
         db_import=db_import,
@@ -490,7 +547,7 @@ def render_type_model(entity: Entity, parent_module: str, types_path: str):
     relationship_imports = '\n'.join(['from {types_path}.{entity_name} import {class_name}, create_{entity_name}'.format(
         class_name=r.target_entity_name,
         entity_name=r.target_entity_name_snek_case,
-        types_path='{}.{}'.format(parent_module, _convert_file_path_to_module_name(types_path))
+        types_path='{}.{}'.format(parent_module, convert_file_path_to_module_name(types_path))
     ) for r in entity.relationships])
     return """{named_tuple}
 
@@ -505,7 +562,7 @@ def render_type_constructor(entity: Entity):
     return entity.to_type_constructor_string()
 
 
-def _convert_file_path_to_module_name(file_path: str) -> str:
+def convert_file_path_to_module_name(file_path: str) -> str:
     return file_path.replace(os.sep, '.')
 
 
@@ -540,7 +597,7 @@ def create_entity_files(
             import_template = """
 from {parent}.{module_path}.{module_name} import {model_name}\n""".format(
                 parent=parent_module,
-                module_path=_convert_file_path_to_module_name(out_dir_db_models),
+                module_path=convert_file_path_to_module_name(out_dir_db_models),
                 module_name=entity.class_name_snek_case,
                 model_name=entity.class_name,
             ).lstrip()
