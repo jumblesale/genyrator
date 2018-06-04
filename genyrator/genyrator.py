@@ -316,7 +316,7 @@ def create_relationship(
 class Entity(object):
     class_name:           str =                attr.ib()
     columns:              List[Column] =       attr.ib()
-    class_name_snek_case: str =                attr.ib()
+    python_name:          str =                attr.ib()
     import_name:          str =                attr.ib()
     column_length:        int =                attr.ib()
     relationships:        List[Relationship] = attr.ib()

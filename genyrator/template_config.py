@@ -18,5 +18,9 @@ def create_template_config(
         *[create_template(
             Template.SQLAlchemyModel, 'sqlalchemy/sqlalchemy_model',
             db_import_path=db_import_path, entity=e, out_path=Template.OutPath(('sqlalchemy/', e.class_name))
-        ) for e in entities]
+        ) for e in entities],
+        create_template(
+            Template.SQLAlchemyInit, 'sqlalchemy/__init__', db_import_path=db_import_path,
+            imports=[Template.Import(e.python_name, e.class_name) for e in entities]
+        ),
     ]

@@ -1,4 +1,4 @@
-from typing import List, Optional, NewType, Tuple
+from typing import List, Optional, NewType, Tuple, NamedTuple
 import attr
 from jinja2 import Template as JinjaTemplate
 
@@ -6,6 +6,9 @@ from genyrator.entities.Entity import Entity
 
 
 OutPath = NewType('OutPath', Tuple[str, str])
+Import = NamedTuple('Import',
+    [('module_name', str),
+     ('imports',     List[str])])
 
 
 @attr.s
@@ -52,3 +55,9 @@ class RootSchema(Template):
 class SQLAlchemyModel(Template):
     db_import_path: str = attr.ib()
     entity: Entity =      attr.ib()
+
+
+@attr.s
+class SQLAlchemyInit(Template):
+    db_import_path: str =          attr.ib()
+    imports:        List[Import] = attr.ib()
