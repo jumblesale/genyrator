@@ -573,25 +573,17 @@ def create_entity_files(
         parent_module:     str,
         entities:          List[Entity],
     ) -> None:
-    for directory in ['{}/{}'.format(parent_module, target_dir) for target_dir in [out_dir_db_models, out_dir_types]]:
+    for directory in ['{}/{}'.format(parent_module, target_dir) for target_dir in [out_dir_db_models]]:
         try:
             os.makedirs(directory)
         except FileExistsError:
             continue
     datetime_imports = 'from datetime import datetime'
-    with open('{}/{}/{}'.format(parent_module, out_dir_types, '__init__.py'), 'w') as type_init_file:
-        type_init_file.write("""from typing import NamedTuple, Optional, Any, List
-{datetime_imports}
-""".format(datetime_imports=datetime_imports,))
-    with open('{}/{}/{}'.format(parent_module, out_dir_types, '__init__.py'), 'a') as type_init_file:
-        for entity in entities:
-            file_name = _entity_name_to_file_name(entity)
-            db_model = render_db_model(entity=entity, db_import=db_import)
-            with open('{}/{}/{}'.format(parent_module, out_dir_db_models, file_name), 'w') as db_model_file:
-                db_model_file.write(db_model)
-            type_model = render_type_model(entity, parent_module=parent_module, types_path=out_dir_types)
-            type_init_file.write('\n\n' + type_model)
-
+    for entity in entities:
+        file_name = _entity_name_to_file_name(entity)
+        db_model = render_db_model(entity=entity, db_import=db_import)
+        with open('{}/{}/{}'.format(parent_module, out_dir_db_models, file_name), 'w') as db_model_file:
+            db_model_file.write(db_model)
     with open('{}/{}/{}'.format(parent_module, out_dir_db_models, '__init__.py'), 'w') as f:
         for entity in entities:  # type: Entity
             import_template = """

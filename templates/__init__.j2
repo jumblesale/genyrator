@@ -1,0 +1,9 @@
+from flask_marshmallow import Marshmallow
+from {{ template.module_name }}.resources import api
+from {{ template.module_name }}.config import config
+from {{ template.module_name }}.sqlalchemy import db
+
+app = config()
+db.init_app(app)
+ma = Marshmallow(app)
+api.init_app(app)

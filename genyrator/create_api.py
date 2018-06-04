@@ -168,7 +168,7 @@ def _create_post_by_id_method_body(entity: Entity) -> str:
     for c in entity.columns:
         dict_value = "data['{}']".format(c.camel_case_name)
         if c.python_type == PythonTypeOption.datetime:
-            dict_value = 'dateutil.parser.parse({})'.format(dict_value)
+            dict_value = 'dateutil.parser.parse({}) if {} else None'.format(dict_value, dict_value)
         if c.python_type == PythonTypeOption.date:
             dict_value = '{}.date'.format(dict_value)
         columns.append('{}{}={},'.format(

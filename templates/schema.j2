@@ -1,0 +1,9 @@
+from marshmallow_sqlalchemy import ModelSchema
+from {{ template.db_import_path }} import *
+
+{% for entity in template.entities %}
+class {{ entity.class_name }}Schema(ModelSchema):
+    class Meta:
+        model = {{ entity.class_name }}
+
+{% endfor %}

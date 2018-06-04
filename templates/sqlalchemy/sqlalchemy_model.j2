@@ -1,0 +1,23 @@
+from {{ template.db_import_path }} import db
+from datetime import datetime
+from sqlalchemy import UniqueConstraint
+
+
+class {{ template.entity.class_name }}(db.Model):  # type: ignore
+    id = db.Column(db.Integer, primary_key=True)
+{%- for column in template.entity.columns %}
+    {{ column.python_name }} = db.Column(db.{{ column.sqlalchemy_type.value }}
+    {%- if column.index %}, index=True{% endif %}
+    {%- if column.nullable %}, nullable=True{% endif %})
+{%- endfor %}
+{%- for relationship in template.entity.relationships %}
+    {{ relationship.python_name }} = db.relationship('{{ relationship.target_entity_python_name }}', {# -#}
+    lazy={{ relationship.lazy | string }}, uselist={{ relationship.join.value == 'to_many' | string }}{# -#}
+    {%- if relationship.join_table %}, secondary='{{ relationship.join_table }}'{% endif -%}{# -#}
+)
+{%- endfor %}
+{#{% if template.entity.uniques %}#}
+{#    __table_args__ = ({# -#}
+{#    {%- for unique in relationship.uniques %}UniqueConstraint(#}
+{#        {%- for column in unique %}{% endfor %}), UniqueConstraint('name', 'age'), )#}
+{#{% endif %}#}
