@@ -31,7 +31,7 @@ def create_template(
         template_file_name: str,
         out_path: Optional[OutPath]=None,
         **kwargs,
-):
+) -> Template:
     return constructor(
         template_file_name=template_file_name,
         template_file_path='templates/{}.j2'.format(template_file_name),
@@ -61,3 +61,14 @@ class SQLAlchemyModel(Template):
 class SQLAlchemyInit(Template):
     db_import_path: str =          attr.ib()
     imports:        List[Import] = attr.ib()
+
+
+@attr.s
+class RestplusModel(Template):
+    entity: Entity = attr.ib()
+
+
+@attr.s
+class Resource(Template):
+    entity:            Entity = attr.ib()
+    restplus_template: str =    attr.ib()

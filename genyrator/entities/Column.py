@@ -3,8 +3,8 @@ import attr
 from genyrator.inflector import pythonize, to_class_name, to_json_case
 from genyrator.types import (
     SqlAlchemyTypeOption, PythonTypeOption, TypeOption, type_option_to_sqlalchemy_type,
-    type_option_to_python_type, type_option_to_default_value,
-)
+    type_option_to_python_type, type_option_to_default_value, RestplusTypeOption,
+    type_option_to_restplus_type)
 
 
 @attr.s
@@ -15,6 +15,7 @@ class Column(object):
     type_option:        TypeOption =           attr.ib()
     sqlalchemy_type:    SqlAlchemyTypeOption = attr.ib()
     python_type:        PythonTypeOption =     attr.ib()
+    restplus_type:      RestplusTypeOption =   attr.ib()
     default:            str =                  attr.ib()
     index:              bool =                 attr.ib()
     nullable:           bool =                 attr.ib()
@@ -40,6 +41,7 @@ def create_column(
         "type_option":        type_option,
         "sqlalchemy_type":    type_option_to_sqlalchemy_type(type_option),
         "python_type":        type_option_to_python_type(type_option),
+        "restplus_type":      type_option_to_restplus_type(type_option),
         "default":            type_option_to_default_value(type_option),
         "index":              index,
         "nullable":           nullable,

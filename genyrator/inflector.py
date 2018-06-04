@@ -15,3 +15,11 @@ def to_json_case(x: str) -> str:
 
 def to_class_name(x: str) -> str:
     return camelize(x, True)
+
+
+def pluralize(x: str) -> str:
+    return inflection.pluralize(x)
+
+
+def dasherize(x: str) -> str:
+    return inflection.dasherize(x)

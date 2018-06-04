@@ -1,0 +1,5 @@
+{{ template.entity.python_name }}_model = api.model('{{ template.entity.class_name }}', {
+{%- for column in template.entity.columns %}
+    '{{ column.json_property_name }}': fields.{{ column.restplus_type.value }}(),
+{%- endfor %}
+})

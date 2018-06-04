@@ -1,0 +1,61 @@
+from flask import request, abort, json
+from flask_restplus import Resource, fields, Namespace
+from sqlalchemy.orm import joinedload
+from typing import Optional
+{#from doggos_example.core.convert_dict import python_dict_to_json_dict, json_dict_to_python_dict#}
+{#from doggos_example.sqlalchemy import db#}
+{#from doggos_example.db import *#}
+{#from doggos_example.schema import DogSchema, OwnerDogsSchema#}
+{#from doggos_example.sqlalchemy.model_to_dict import model_to_dict#}
+
+api = Namespace('{{ template.entity.resource_namespace }}', path='{{ template.entity.resource_path }}')
+
+{{ template.marshmallow_template }}
+
+{#dog_schema = DogSchema()#}
+{#dogs_schema = DogSchema(many=True)#}
+{#owner_dogs_schema = OwnerDogsSchema(many=True)#}
+{#owner_schema = OwnerDogsSchema()#}
+
+
+@api.route('/{{ template.entity.dashed_name }}/<id>', endpoint='{{ template.entity.python_name }}')
+class Get{{ template.entity.class_name }}Resource(Resource):  # type: ignore
+    @api.marshal_with({{ template.entity.python_name }}_model)
+    @api.doc(id='get-{{ template.entity.python_name }}-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
+    def get(self, id):  # type: ignore
+        result: Optional[{{ template.entity.class_name }}] = {{ template.entity.class_name }}.query.filter_by({{ template.entity.python_name }}_id=id).first()
+        if result is None:
+            abort(404)
+        return python_dict_to_json_dict({{ template.entity.python_name }}_schema.dump(result).data)
+
+    @api.doc(id='delete-{{ template.entity.python_name }}-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
+    def delete(self, id):  # type: ignore
+        result: Optional[{{ template.entity.class_name }}] = {{ template.entity.class_name }}.query.filter_by({{ template.entity.python_name }}_id=id).delete()
+        if result != 1:
+            abort(404)
+        db.session.commit()
+        return '', 204
+
+
+@api.route('/{{ template.entity.resource_namespace }}', endpoint='{{ template.entity.resource_namespace }}')
+class Post{{ template.entity.class_name }}Resource(Resource):  # type: ignore
+    @api.marshal_with({{ template.entity.python_name }}_model)
+    @api.expect({{ template.entity.python_name }}_model, validate=True)
+    def post(self):  # type: ignore
+        data = json.loads(request.data)
+        result = {{ template.entity.python_name }}_schema.load(json_dict_to_python_dict(data), session=db.session)
+        return python_dict_to_json_dict({{ template.entity.python_name }}_schema.dump(result.data).data), 201
+
+
+@api.route('/dog/<id>/owner_dogs/owners', endpoint='owner_dogs-owner')
+class DogOwnerDogsOwner(Resource):  # type: ignore
+    @api.doc(id='owner_dogs-owner', responses={401: 'Unauthorised', 404: 'Not Found'})
+    def get(self, id):  # type: ignore
+        result: Optional[Dog] = Dog \
+            .query \
+            .options(joinedload('owner_dogs').joinedload('owner')) \
+            .filter_by(dog_id=id) \
+            .first()
+        if result is None:
+            abort(404)
+        return python_dict_to_json_dict(model_to_dict(result, ['owner_dogs', 'owner']))

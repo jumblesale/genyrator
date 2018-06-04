@@ -3,7 +3,7 @@ from typing import List, Optional, NewType, Union, Tuple, Dict
 
 from genyrator.entities.Relationship import Relationship
 from genyrator.entities.Column import Column, create_column
-from genyrator.inflector import pythonize
+from genyrator.inflector import pythonize, pluralize, dasherize
 from genyrator.types import string_to_type_option
 
 Property = NewType('Property', Union[Column, Relationship])
@@ -19,25 +19,37 @@ class Entity(object):
     uniques:              List[List[str]] =    attr.ib()
     properties:           List[Property] =     attr.ib()
     max_property_length:  int =                attr.ib()
+    plural:               str =                attr.ib()
+    dashed_name:          str =                attr.ib()
+    resource_namespace:   str =                attr.ib()
+    resource_path:        str =                attr.ib()
 
 
 def create_entity(
-        class_name:    str,
-        columns:       List[Column],
-        relationships: List[Relationship] = list(),
-        table_name:    Optional[str]=None,
-        uniques:       List[List[str]]=list(),
+        class_name:         str,
+        columns:            List[Column],
+        relationships:      List[Relationship] = list(),
+        table_name:         Optional[str]=None,
+        uniques:            List[List[str]]=list(),
+        plural:             Optional[str]=None,
+        resource_namespace: Optional[str]=None,
+        resource_path:      Optional[str]=None,
 ) -> Entity:
     properties: List[Property] = columns + relationships
+    python_name = pythonize(class_name)
     return Entity(
         class_name=class_name,
-        python_name=pythonize(class_name),
+        python_name=python_name,
         columns=columns,
         max_property_length=(max(*[len(x.python_name) for x in properties])),
         relationships=relationships,
         table_name=table_name if table_name else None,
         uniques=uniques,
-        properties=properties
+        properties=properties,
+        plural=plural if plural else pluralize(python_name),
+        resource_namespace=resource_namespace if resource_namespace else pluralize(python_name),
+        resource_path=resource_path if resource_path else '/',
+        dashed_name=dasherize(class_name),
     )
 
 

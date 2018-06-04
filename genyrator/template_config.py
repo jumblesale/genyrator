@@ -23,4 +23,11 @@ def create_template_config(
             Template.SQLAlchemyInit, 'sqlalchemy/__init__', db_import_path=db_import_path,
             imports=[Template.Import(e.python_name, e.class_name) for e in entities]
         ),
+        *[create_template(
+            Template.Resource, 'resources/resource',
+            entity=e, out_path=Template.OutPath(('resources/', e.class_name)),
+            restplus_template=create_template(
+                Template.RestplusModel, 'resources/restplus_model', entity=e
+            ).render()
+        ) for e in entities],
     ]
