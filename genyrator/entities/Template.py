@@ -91,5 +91,7 @@ class Resource(Template):
 
 @attr.s
 class ResourcesInit(Template):
-    entities:    List[Entity] = attr.ib()
-    module_name: str =          attr.ib()
+    entities:        List[Entity] = attr.ib()
+    module_name:     str =          attr.ib()
+    api_name:        str =          attr.ib()
+    api_description: str =          attr.ib()

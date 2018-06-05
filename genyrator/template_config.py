@@ -11,9 +11,11 @@ TemplateConfig = NamedTuple('TemplateConfig', [
 
 
 def create_template_config(
-        module_name:    str,
-        db_import_path: str,
-        entities:       List[Entity],
+        module_name:     str,
+        db_import_path:  str,
+        entities:        List[Entity],
+        api_name:        str,
+        api_description: str,
 ) -> TemplateConfig:
     root_files = [
         create_template(Template.RootInit, ['__init__'], module_name=module_name),
@@ -49,7 +51,7 @@ def create_template_config(
         ) for e in entities],
         create_template(
             Template.ResourcesInit, ['resources', '__init__'], entities=entities,
-            module_name=module_name,
+            module_name=module_name, api_name=api_name, api_description=api_description,
         ),
     ]
     return TemplateConfig(

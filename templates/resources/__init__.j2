@@ -5,9 +5,9 @@ from {{ template.module_name }}.resources.{{ entity.class_name }} {# -#}
 {% endfor %}
 
 api = Api(
-    title='My Title',
+    title='{{ template.api_name }}',
     version='1.0',
-    description='A description',
+    description='{{ template.api_description }}',
 )
 
 {% for entity in template.entities -%}

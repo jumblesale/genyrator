@@ -26,7 +26,7 @@ class Entity(object):
     columns:              List[Column] =       attr.ib()
     relationships:        List[Relationship] = attr.ib()
     table_name:           Optional[str] =      attr.ib()
-    uniques:              Set[List[str]] =    attr.ib()
+    uniques:              Set[List[str]] =     attr.ib()
     properties:           List[Property] =     attr.ib()
     max_property_length:  int =                attr.ib()
     plural:               str =                attr.ib()
@@ -131,3 +131,13 @@ def _convert_uniques_to_table_args_string(uniques: List[List[str]]) -> str:
             ', '.join(["'{}'".format(uc) for uc in unique_columns])
         ))
     return '({}, )'.format(', '.join(unique_constraints))
+
+
+def add_relationship_to_entity(
+        entity:       Entity,
+        relationship: Relationship
+) -> Entity:
+    args = entity.__dict__
+    args['relationships'].append(relationship)
+    # haha!
+    return Entity(**args)
