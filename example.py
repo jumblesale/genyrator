@@ -1,45 +1,15 @@
-import json
-import datetime
-import dateutil.parser
-from flask import Flask
-from flask_restplus import Api
-from sqlalchemy.orm import joinedload, class_mapper
+import dateutil
 
-from genyrator import *
-from genyrator.create_api import entity_to_api_get_endpoint_string, render_api_endpoints, create_api_files, APIPath
-from genyrator.genyrator import create_column, TypeOption, create_entity_from_type_dict
+from genyrator.entities.Column import create_column, create_identifier_column
+from genyrator.entities.Entity import create_entity, create_entity_from_type_dict, APIPath, APIPaths, create_api_path
+from genyrator.entities.Relationship import create_relationship, JoinOption
+from genyrator.entities.Schema import Schema, create_schema
+from genyrator.types import TypeOption
 
-example_from_exemplar = """
-{
-    "dogId": 1,
-    "name": "Charles",
-    "age": 4,
-    "goodness": 11.6,
-    "dob": "2013-10-17T00:00",
-    "pug": true
-}
-"""
-
-example_from_dict = {
-    "dogId": "int",
-    "name": "str",
-    "age": "int",
-    "goodness": "float",
-    "dob": "datetime",
-    "pug": "bool"
-}
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-
-
-treat_entity = create_entity_from_exemplar(
+treat_entity = create_entity(
     class_name='Treat',
-    exemplar={
-        "name": "snicky snax",
-    },
-    foreign_keys=[],
-    indexes=['name'],
+    columns=[],
+    identifier_column=create_column('name', TypeOption.string),
     relationships=[
         create_relationship('Dog', True, True, JoinOption.to_many, 'favourite_treats', 'dogs')
     ],
@@ -51,6 +21,7 @@ owner_dogs_entity = create_entity(
         create_column('dog_id', TypeOption.string, 'dog.id'),
         create_column('current_owner', TypeOption.bool),
     ],
+    identifier_column=create_identifier_column('ownerDogId', TypeOption.int),
     relationships=[
         create_relationship('Dog', True, False, JoinOption.to_one, None, None,),
         create_relationship('Owner', True, False, JoinOption.to_one, None, None,),
@@ -63,59 +34,61 @@ fave_treats_entity = create_entity(
         create_column('dog_id', TypeOption.string, 'dog.id'),
         create_column('treat_id', TypeOption.string, 'treat.id'),
     ],
+    identifier_column=create_identifier_column('treatId', TypeOption.int),
     relationships=[
         create_relationship('Dog', True, False, JoinOption.to_one,),
         create_relationship('Treat', True, False, JoinOption.to_one,),
     ],
     table_name='favourite_treats',
 )
+
+example_from_dict = {
+    "dogId": "int",
+    "name": "str",
+    "age": "int",
+    "goodness": "float",
+    "dob": "datetime",
+    "pug": "bool"
+}
+
 dog_entity = create_entity_from_type_dict(
     class_name='Dog',
     type_dict=example_from_dict,
-    foreign_keys=[('ownerId', 'owner')],
-    indexes=['name'],
+    identifier_column_name='dogId',
+    foreign_keys={('ownerId', 'owner')},
+    indexes={'name'},
     relationships=[
         create_relationship('Owner', False, False, JoinOption.to_many, 'owner_dogs', 'owners'),
         create_relationship('OwnerDogs', False, False, JoinOption.to_many, None, 'owner_dogs'),
         create_relationship('Treat', True, False, JoinOption.to_one, 'favourite_treats', 'favourite_treat'),
     ],
-    uniques=[['name', 'goodness'], ['name', 'age']]
+    uniques=[['name', 'goodness'], ['name', 'age']],
+    api_paths=APIPaths([
+        create_api_path(['owner_dogs', 'owner'], 'owner_dogs/owners', 'dog-owners')
+    ]),
 )
 owner_entity = create_entity(
     'Owner',
-    [create_column('owner_id', TypeOption.string)],
+    create_identifier_column('owner_id', TypeOption.string),
+    [],
     [create_relationship('Dog', False, True, JoinOption.to_many, 'owner_dogs', 'dogs')]
 )
+entities = [dog_entity, owner_entity, fave_treats_entity, owner_dogs_entity, treat_entity]
 
-args = {"out_dir_db_models": 'db',
-        "out_dir_types":     'types',
-        "db_import":         'from doggos.sqlalchemy import db',
-        "parent_module":     'doggos',
-        "entities":          [fave_treats_entity, owner_dogs_entity, dog_entity, owner_entity, treat_entity],
-        }
-
-create_entity_files(**args)
-create_api_files(
-    'doggos/restplus',
-    'dogs',
-    'from doggos.sqlalchemy import db\nfrom doggos.db import *',
-    [dog_entity, owner_entity, ],
-    {'dog': [
-        APIPath(dog_entity, ['owner_dogs', 'owner'], 'dog/<id>/owner_dogs/owners')
-    ]},
+schema = create_schema(
+    module_name='doggos',
+    entities=entities,
 )
+schema.write_files()
 
-import doggos.db as doggo_db
-from doggos.sqlalchemy import db
-import dateutil.parser
+from doggos import app, db
+from doggos.sqlalchemy.model import *
 
 if __name__ == '__main__':
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
-    db.init_app(app)
     with app.app_context():
         db.drop_all()
         db.create_all()
-        charles = doggo_db.Dog(
+        charles = Dog(
             dog_id=1,
             name='Charles',
             age=4,
@@ -123,10 +96,10 @@ if __name__ == '__main__':
             dob=dateutil.parser.parse("2013-10-17T00:00"),
             pug=True,
         )
-        owner = doggo_db.Owner(
+        owner = Owner(
             owner_id=1,
         )
-        owner_dogs = doggo_db.OwnerDogs(
+        owner_dogs = OwnerDogs(
             owner_id=1,
             dog_id=1,
             current_owner=True,
@@ -135,12 +108,5 @@ if __name__ == '__main__':
         )
         db.session.add(owner_dogs)
         db.session.commit()
-
-    import doggos.restplus.dog
-    import doggos.restplus.owner
-    from doggos.restplus import dogs
-
-    api = Api(app)
-    api.add_namespace(dogs)
 
     app.run(debug=True)
