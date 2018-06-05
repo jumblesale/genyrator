@@ -1,0 +1,16 @@
+from flask_restplus import Api
+{% for entity in template.entities -%}
+from {{ template.module_name }}.resources.{{ entity.class_name }} {# -#}
+    import api as {{ entity.plural }}_api
+{% endfor %}
+
+api = Api(
+    title='My Title',
+    version='1.0',
+    description='A description',
+)
+
+{% for entity in template.entities -%}
+api.add_namespace({{ entity.plural }}_api)
+{% endfor %}
+
