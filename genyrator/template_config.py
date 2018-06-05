@@ -18,13 +18,15 @@ def create_template_config(
         create_template(Template.Template,    ['core', 'convert_case']),
         create_template(Template.ConvertDict, ['core', 'convert_dict'], module_name=module_name),
         *[create_template(
-            Template.SQLAlchemyModel, ['sqlalchemy', 'sqlalchemy_model'],
-            db_import_path=db_import_path, entity=e, out_path=Template.OutPath((['sqlalchemy'], e.class_name))
+            Template.SQLAlchemyModel, ['sqlalchemy', 'model', 'sqlalchemy_model'],
+            db_import_path=db_import_path, entity=e, out_path=Template.OutPath((['sqlalchemy', 'model'], e.class_name))
         ) for e in entities],
         create_template(
-            Template.SQLAlchemyInit, ['sqlalchemy', '__init__'], db_import_path=db_import_path,
+            Template.SQLAlchemyModelInit, ['sqlalchemy', 'model', '__init__'], db_import_path=db_import_path,
             imports=[Template.Import(e.class_name, [e.class_name]) for e in entities],
         ),
+        create_template(Template.Template, ['sqlalchemy', 'model_to_dict']),
+        create_template(Template.Template, ['sqlalchemy', '__init__']),
         *[create_template(
             Template.Resource, ['resources', 'resource'],
             entity=e, out_path=Template.OutPath((['resources'], e.class_name)),

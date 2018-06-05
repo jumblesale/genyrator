@@ -19,3 +19,4 @@ class {{ template.entity.class_name }}(db.Model):  # type: ignore
 {%- if template.entity.uniques %}
     __table_args__ = {{ template.entity.table_args }}
 {% endif %}
+

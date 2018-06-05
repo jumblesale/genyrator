@@ -71,7 +71,7 @@ class SQLAlchemyModel(Template):
 
 
 @attr.s
-class SQLAlchemyInit(Template):
+class SQLAlchemyModelInit(Template):
     db_import_path: str =          attr.ib()
     imports:        List[Import] = attr.ib()
 
