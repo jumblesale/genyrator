@@ -26,14 +26,35 @@ class ForeignKey(Column):
     relationship: str = attr.ib()
 
 
+@attr.s
+class IdentifierColumn(Column):
+    ...
+
+
+def create_identifier_column(
+        name:                     str,
+        type_option:              TypeOption,
+) -> IdentifierColumn:
+    column: IdentifierColumn = create_column(
+        name, type_option, index=True, nullable=False, identifier=True,
+    )
+    return column
+
+
 def create_column(
         name:                     str,
         type_option:              TypeOption,
         foreign_key_relationship: Optional[str]=None,
         index:                    bool=False,
         nullable:                 bool=True,
+        identifier:               bool=False,
 ) -> Column:
-    constructor = Column if foreign_key_relationship is None else ForeignKey
+    if identifier is True:
+        constructor = IdentifierColumn
+    elif foreign_key_relationship is not None:
+        constructor = ForeignKey
+    else:
+        constructor = Column
     args = {
         "python_name":        pythonize(name),
         "class_name":         to_class_name(name),

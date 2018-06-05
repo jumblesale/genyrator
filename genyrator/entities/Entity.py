@@ -1,11 +1,10 @@
 import attr
-from typing import List, Optional, NewType, Union, Tuple, Dict, NamedTuple
+from typing import List, Optional, NewType, Union, Tuple, Dict, NamedTuple, Set
 
 from genyrator.entities.Relationship import Relationship
-from genyrator.entities.Column import Column, create_column
+from genyrator.entities.Column import Column, create_column, IdentifierColumn, create_identifier_column
 from genyrator.inflector import pythonize, pluralize, dasherize, to_class_name
 from genyrator.types import string_to_type_option
-
 
 APIPath = NamedTuple(
     'APIPath',
@@ -15,17 +14,19 @@ APIPath = NamedTuple(
      ('class_name',      str),
      ('python_name',     str), ]
 )
-Property = NewType('Property', Union[Column, Relationship])
+Property = NewType('Property', Union[Column, Relationship, IdentifierColumn])
 APIPaths = NewType('APIPaths', List[APIPath])
+
 
 @attr.s
 class Entity(object):
     python_name:          str =                attr.ib()
     class_name:           str =                attr.ib()
+    identifier_column:    IdentifierColumn =   attr.ib()
     columns:              List[Column] =       attr.ib()
     relationships:        List[Relationship] = attr.ib()
     table_name:           Optional[str] =      attr.ib()
-    uniques:              List[List[str]] =    attr.ib()
+    uniques:              Set[List[str]] =    attr.ib()
     properties:           List[Property] =     attr.ib()
     max_property_length:  int =                attr.ib()
     plural:               str =                attr.ib()
@@ -38,20 +39,24 @@ class Entity(object):
 
 def create_entity(
         class_name:         str,
+        identifier_column:  Column,
         columns:            List[Column],
-        relationships:      List[Relationship] = list(),
-        table_name:         Optional[str]=None,
+        relationships:      List[Relationship]=list(),
         uniques:            List[List[str]]=list(),
+        table_name:         Optional[str]=None,
         plural:             Optional[str]=None,
         resource_namespace: Optional[str]=None,
         resource_path:      Optional[str]=None,
         api_paths:          Optional[APIPaths]=None,
 ) -> Entity:
-    properties: List[Property] = columns + relationships
+    properties: List[Property] = columns + relationships + [identifier_column]
     python_name = pythonize(class_name)
+    columns = [identifier_column] + columns
+    uniques = [[identifier_column.python_name]] + uniques
     return Entity(
         class_name=class_name,
         python_name=python_name,
+        identifier_column=identifier_column,
         columns=columns,
         max_property_length=(max(*[len(x.python_name) for x in properties])),
         relationships=relationships,
@@ -68,14 +73,15 @@ def create_entity(
 
 
 def create_entity_from_type_dict(
-        class_name:    str,
-        type_dict:     Dict,
-        foreign_keys:  List[Tuple[str, str]]=list(),
-        indexes:       List[str]=list(),
-        relationships: Optional[List[Relationship]] = list(),
-        table_name:    Optional[str]=None,
-        uniques:       Optional[List[List[str]]]=None,
-        api_paths:     Optional[APIPaths]=None,
+        class_name:             str,
+        identifier_column_name: str,
+        type_dict:              Dict,
+        foreign_keys:           Set[Tuple[str, str]]=set(),
+        indexes:                Set[str]=set(),
+        relationships:          Optional[List[Relationship]]=None,
+        table_name:             Optional[str]=None,
+        uniques:                Optional[List[List[str]]]=None,
+        api_paths:              Optional[APIPaths]=None,
 ) -> Entity:
     columns = []
     foreign_keys_dict = {}
@@ -83,15 +89,20 @@ def create_entity_from_type_dict(
         foreign_keys_dict[fk_key] = '{table}.{fk_column}'.format(
             table=fk_value, fk_column=pythonize(fk_key)
         )
+    identifier_column = None
     for k, v in type_dict.items():
         type_option = string_to_type_option(v)
         foreign_key = foreign_keys_dict[k] if k in foreign_keys_dict else None
         index = k in indexes
+        if k == identifier_column_name:
+            identifier_column = create_identifier_column(k, type_option)
+            continue
         columns.append(
             create_column(k, type_option, foreign_key, index)
         )
     return create_entity(
         class_name=class_name,
+        identifier_column=identifier_column,
         columns=columns,
         relationships=relationships,
         table_name=table_name,

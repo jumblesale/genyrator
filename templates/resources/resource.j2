@@ -15,20 +15,29 @@ api = Namespace('{{ template.entity.resource_namespace }}', path='{{ template.en
 {{ template.entity.python_name }}_schema = {{ template.entity.class_name }}Schema()
 {{ template.entity.plural }}_many_schema = {{ template.entity.class_name }}Schema(many=True)
 
+{%- macro find_element_by_id() -%}
+    result: Optional[{{ template.entity.class_name }}] = {{ template.entity.class_name }}.query.filter_by({# -#}
+{{ template.entity.identifier_column.python_name }}={# -#}
+{{ template.entity.identifier_column.json_property_name }}){# -#}
+{%- endmacro %}
 
-@api.route('/{{ template.entity.dashed_name }}/<id>', endpoint='{{ template.entity.python_name }}_by_id')
+
+@api.route('/{{ template.entity.dashed_name }}/<{{ template.entity.identifier_column.json_property_name }}>', endpoint='{{ template.entity.python_name }}_by_id')
 class Get{{ template.entity.class_name }}Resource(Resource):  # type: ignore
     @api.marshal_with({{ template.entity.python_name }}_model)
     @api.doc(id='get-{{ template.entity.python_name }}-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
-    def get(self, id):  # type: ignore
-        result: Optional[{{ template.entity.class_name }}] = {{ template.entity.class_name }}.query.filter_by({{ template.entity.python_name }}_id=id).first()
+    def get(self, {{ template.entity.identifier_column.json_property_name }}):  # type: ignore
+        {{ find_element_by_id() }}.first()
         if result is None:
             abort(404)
         return python_dict_to_json_dict(model_to_dict(result))
 
     @api.doc(id='delete-{{ template.entity.python_name }}-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
     def delete(self, id):  # type: ignore
-        result: Optional[{{ template.entity.class_name }}] = {{ template.entity.class_name }}.query.filter_by({{ template.entity.python_name }}_id=id).delete()
+        result: Optional[{{ template.entity.class_name }}] = {{ template.entity.class_name }}.query.filter_by({# -#}
+{{ template.entity.identifier_column.python_name }}={# -#}
+{{ template.entity.identifier_column.json_property_name }}){# -#}
+.delete()
         if result != 1:
             abort(404)
         db.session.commit()
@@ -41,7 +50,16 @@ class Post{{ template.entity.class_name }}Resource(Resource):  # type: ignore
     @api.expect({{ template.entity.python_name }}_model, validate=True)
     def post(self):  # type: ignore
         data = json.loads(request.data)
+        {{ template.entity.identifier_column.json_property_name }} = data['{{ template.entity.identifier_column.json_property_name }}']
+        {{ find_element_by_id() }}.first()
+        if result is not None:
+            abort(400, "A {} with {} {} already exists".format(
+                '{{ template.entity.class_name }}', '{{ template.entity.identifier_column.json_property_name }}', {# -#}
+                {{ template.entity.identifier_column.json_property_name }}
+            ))
         result = {{ template.entity.python_name }}_schema.load(json_dict_to_python_dict(data), session=db.session)
+        db.session.add(result.data)
+        db.session.commit()
         return python_dict_to_json_dict(model_to_dict(result.data)), 201
 
 {%- if template.entity.api_paths %}
@@ -49,11 +67,11 @@ class Post{{ template.entity.class_name }}Resource(Resource):  # type: ignore
     joinedload('{{ relationship }}')
 {%- endmacro %}
 {% for api_path in template.entity.api_paths %}
-@api.route('/dog/<id>/owner_dogs/owners', endpoint='{{ api_path.endpoint }}')
-class DogOwnerDogsOwner(Resource):  # type: ignore
-    @api.doc(id='owner_dogs-owner', responses={401: 'Unauthorised', 404: 'Not Found'})
-    def get(self, id):  # type: ignore
-        result: Optional[Dog] = Dog \
+@api.route('/{{ template.entity.python_name }}/<{{ template.entity.identifier_column.json_property_name }}>/{{ api_path.route }}', endpoint='{{ api_path.endpoint }}')
+class {{ api_path.class_name }}(Resource):  # type: ignore
+    @api.doc(id='{{ api_path.python_name }}', responses={401: 'Unauthorised', 404: 'Not Found'})
+    def get(self, {{ template.entity.identifier_column.json_property_name }}):  # type: ignore
+        result: Optional[{{ template.entity.class_name }}] = {{ template.entity.class_name }} \
             .query \
             .options({#  -#}
     {%- set sep = joiner('.') -%}
@@ -61,7 +79,10 @@ class DogOwnerDogsOwner(Resource):  # type: ignore
         {{ sep() }}{{ joinedload(entity) }}
     {%- endfor -%}
             ) \
-            .filter_by(dog_id=id) \
+            .filter_by({# -#}
+                {{ template.entity.identifier_column.python_name }}={# -#}
+                {{ template.entity.identifier_column.json_property_name }}{# -#}
+            ) \
             .first()
         if result is None:
             abort(404)
