@@ -1,6 +1,7 @@
 from genyrator.entities.Column import (
     Column,
     create_column,
+    create_identifier_column,
 )
 from genyrator.types import TypeOption, string_to_type_option
 from genyrator.entities.Relationship import (

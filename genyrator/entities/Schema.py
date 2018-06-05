@@ -42,7 +42,7 @@ def create_schema(
         file_path:       Optional[List[str]]=None,
 ) -> Schema:
     db_import_path = db_import_path if db_import_path else '{}.sqlalchemy'.format(module_name)
-    file_path = file_path if file_path else [module_name]
+    file_path =  file_path if file_path else [module_name]
     api_name = api_name if api_name else module_name
     api_description = api_description if api_description else ''
     template_config = create_template_config(
