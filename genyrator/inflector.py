@@ -22,4 +22,4 @@ def pluralize(x: str) -> str:
 
 
 def dasherize(x: str) -> str:
-    return inflection.dasherize(x)
+    return inflection.dasherize(x).lower()

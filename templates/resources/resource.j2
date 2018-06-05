@@ -10,14 +10,13 @@ from typing import Optional
 
 api = Namespace('{{ template.entity.resource_namespace }}', path='{{ template.entity.resource_path }}')
 
-{{ template.marshmallow_template }}
-
-{#dog_schema = DogSchema()#}
-{#dogs_schema = DogSchema(many=True)#}
-{#owner_dogs_schema = OwnerDogsSchema(many=True)#}
-{#owner_schema = OwnerDogsSchema()#}
+{{ template.restplus_template }}
 
 
+{#dog_schema = DogSchema()-#}
+{#dogs_schema = DogSchema(many=True)-#}
+{#owner_dogs_schema = OwnerDogsSchema(many=True)-#}
+{#owner_schema = OwnerDogsSchema()-#}
 @api.route('/{{ template.entity.dashed_name }}/<id>', endpoint='{{ template.entity.python_name }}')
 class Get{{ template.entity.class_name }}Resource(Resource):  # type: ignore
     @api.marshal_with({{ template.entity.python_name }}_model)
@@ -26,7 +25,7 @@ class Get{{ template.entity.class_name }}Resource(Resource):  # type: ignore
         result: Optional[{{ template.entity.class_name }}] = {{ template.entity.class_name }}.query.filter_by({{ template.entity.python_name }}_id=id).first()
         if result is None:
             abort(404)
-        return python_dict_to_json_dict({{ template.entity.python_name }}_schema.dump(result).data)
+        return python_dict_to_json_dict(model_to_dict(result))
 
     @api.doc(id='delete-{{ template.entity.python_name }}-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
     def delete(self, id):  # type: ignore
@@ -44,18 +43,34 @@ class Post{{ template.entity.class_name }}Resource(Resource):  # type: ignore
     def post(self):  # type: ignore
         data = json.loads(request.data)
         result = {{ template.entity.python_name }}_schema.load(json_dict_to_python_dict(data), session=db.session)
-        return python_dict_to_json_dict({{ template.entity.python_name }}_schema.dump(result.data).data), 201
+        return python_dict_to_json_dict(model_to_dict(result.data)), 201
 
-
-@api.route('/dog/<id>/owner_dogs/owners', endpoint='owner_dogs-owner')
+{%- if template.entity.api_paths %}
+{% macro joinedload(relationship) -%}
+    joinedload('{{ relationship }}')
+{%- endmacro %}
+{% for api_path in template.entity.api_paths %}
+@api.route('/dog/<id>/owner_dogs/owners', endpoint='{{ api_path.endpoint }}')
 class DogOwnerDogsOwner(Resource):  # type: ignore
     @api.doc(id='owner_dogs-owner', responses={401: 'Unauthorised', 404: 'Not Found'})
     def get(self, id):  # type: ignore
         result: Optional[Dog] = Dog \
             .query \
-            .options(joinedload('owner_dogs').joinedload('owner')) \
+            .options({#  -#}
+    {%- set sep = joiner('.') -%}
+    {%- for entity in api_path.joined_entities -%}
+        {{ sep() }}{{ joinedload(entity) }}
+    {%- endfor -%}
+            ) \
             .filter_by(dog_id=id) \
             .first()
         if result is None:
             abort(404)
-        return python_dict_to_json_dict(model_to_dict(result, ['owner_dogs', 'owner']))
+        return python_dict_to_json_dict(model_to_dict(result, ['{#  -#}
+    {%- set sep = joiner("', '") -%}
+    {%- for entity in api_path.joined_entities -%}
+        {{ sep() }}{{ entity }}
+    {%- endfor %}']))
+{%- endfor -%}
+{%- endif %}
+

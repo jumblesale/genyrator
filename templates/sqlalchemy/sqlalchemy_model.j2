@@ -16,8 +16,6 @@ class {{ template.entity.class_name }}(db.Model):  # type: ignore
     {%- if relationship.join_table %}, secondary='{{ relationship.join_table }}'{% endif -%}{# -#}
 )
 {%- endfor %}
-{#{% if template.entity.uniques %}#}
-{#    __table_args__ = ({# -#}
-{#    {%- for unique in relationship.uniques %}UniqueConstraint(#}
-{#        {%- for column in unique %}{% endfor %}), UniqueConstraint('name', 'age'), )#}
-{#{% endif %}#}
+{%- if template.entity.uniques %}
+    __table_args__ = {{ template.entity.table_args }}
+{% endif %}
