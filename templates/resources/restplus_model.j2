@@ -2,4 +2,7 @@
 {%- for column in template.entity.columns %}
     '{{ column.json_property_name }}': fields.{{ column.restplus_type.value }}(),
 {%- endfor %}
+{%- for api_path in template.entity.api_paths %}
+    '{{ api_path.python_name }}': fields.Url('{{ api_path.endpoint }}')
+{% endfor %}
 })

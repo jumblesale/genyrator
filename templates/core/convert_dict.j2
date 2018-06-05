@@ -1,6 +1,6 @@
 import datetime
 from typing import Dict, Callable, Any
-from {{ module_name }}.core.convert_case import to_json_name, to_python_name
+from {{ template.module_name }}.core.convert_case import to_json_name, to_python_name
 
 
 def convert_dict_naming(in_dict: Dict, fn: Callable[[str], str]) -> Dict:

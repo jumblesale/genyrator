@@ -12,7 +12,8 @@ APIPath = NamedTuple(
     [('joined_entities', List[str]),
      ('route',           str),
      ('endpoint',        str),
-     ('class_name',      str), ]
+     ('class_name',      str),
+     ('python_name',     str), ]
 )
 Property = NewType('Property', Union[Column, Relationship])
 APIPaths = NewType('APIPaths', List[APIPath])
@@ -62,7 +63,7 @@ def create_entity(
         resource_path=resource_path if resource_path else '/',
         dashed_name=dasherize(class_name),
         table_args=_convert_uniques_to_table_args_string(uniques),
-        api_paths=api_paths,
+        api_paths=api_paths if api_paths else [],
     )
 
 
@@ -105,15 +106,17 @@ def create_api_path(
         endpoint:        Optional[str]=None,
         class_name:      Optional[str]=None,
 ) -> APIPath:
+    python_name = '_'.join(joined_entities)
     return APIPath(joined_entities, route,
                    endpoint if endpoint else '-'.join(joined_entities),
-                   class_name=class_name if class_name else to_class_name('_'.join(joined_entities)))
+                   class_name=class_name if class_name else to_class_name(python_name),
+                   python_name=python_name, )
 
 
 def _convert_uniques_to_table_args_string(uniques: List[List[str]]) -> str:
     unique_constraints = []
     for unique_columns in uniques:
         unique_constraints.append('UniqueConstraint({}, )'.format(
-            ', '.join(['"{}"'.format(uc) for uc in unique_columns])
+            ', '.join(["'{}'".format(uc) for uc in unique_columns])
         ))
     return '({}, )'.format(', '.join(unique_constraints))

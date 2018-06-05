@@ -35,4 +35,8 @@ def create_template_config(
                 Template.RestplusModel, ['resources', 'restplus_model'], entity=e
             ).render()
         ) for e in entities],
+        create_template(
+            Template.ResourcesInit, ['resources', '__init__'], entities=entities,
+            module_name=module_name,
+        ),
     ]

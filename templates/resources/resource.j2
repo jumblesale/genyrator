@@ -13,10 +13,10 @@ api = Namespace('{{ template.entity.resource_namespace }}', path='{{ template.en
 {{ template.restplus_template }}
 
 {{ template.entity.python_name }}_schema = {{ template.entity.class_name }}Schema()
-{{ template.entity.plural }}_schema = {{ template.entity.class_name }}Schema(many=True)
+{{ template.entity.plural }}_many_schema = {{ template.entity.class_name }}Schema(many=True)
 
 
-@api.route('/{{ template.entity.dashed_name }}/<id>', endpoint='{{ template.entity.python_name }}')
+@api.route('/{{ template.entity.dashed_name }}/<id>', endpoint='{{ template.entity.python_name }}_by_id')
 class Get{{ template.entity.class_name }}Resource(Resource):  # type: ignore
     @api.marshal_with({{ template.entity.python_name }}_model)
     @api.doc(id='get-{{ template.entity.python_name }}-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})

@@ -87,3 +87,9 @@ class Resource(Template):
     db_import_path:    str =    attr.ib()
     entity:            Entity = attr.ib()
     restplus_template: str =    attr.ib()
+
+
+@attr.s
+class ResourcesInit(Template):
+    entities:    List[Entity] = attr.ib()
+    module_name: str =          attr.ib()

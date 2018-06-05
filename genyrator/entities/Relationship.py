@@ -14,6 +14,7 @@ class Relationship(object):
     python_name:               str =        attr.ib()
     target_entity_class_name:  str =        attr.ib()
     target_entity_python_name: str =        attr.ib()
+    property_name:             str =        attr.ib()
     nullable:                  bool =       attr.ib()
     lazy:                      bool =       attr.ib()
     join:                      JoinOption = attr.ib()
@@ -32,7 +33,8 @@ def create_relationship(
     return Relationship(
         python_name=target_entity_python_name,
         target_entity_class_name=target_entity_class_name,
-        target_entity_python_name=property_name if property_name else target_entity_python_name,
+        target_entity_python_name=target_entity_python_name,
+        property_name=property_name if property_name else target_entity_python_name,
         nullable=nullable,
         lazy=lazy,
         join=join,
