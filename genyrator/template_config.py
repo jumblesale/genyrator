@@ -10,24 +10,27 @@ def create_template_config(
         entities:       List[Entity],
 ) -> List[Template.Template]:
     return [
-        create_template(Template.RootInit, '__init__', module_name=module_name),
-        create_template(Template.Template, 'config'),
+        create_template(Template.RootInit, ['__init__'], module_name=module_name),
+        create_template(Template.Template, ['config']),
         create_template(
-            Template.RootSchema, 'schema', db_import_path=db_import_path, entities=entities
+            Template.RootSchema, ['schema'], db_import_path=db_import_path, entities=entities
         ),
+        create_template(Template.Template,    ['core', 'convert_case']),
+        create_template(Template.ConvertDict, ['core', 'convert_dict'], module_name=module_name),
         *[create_template(
-            Template.SQLAlchemyModel, 'sqlalchemy/sqlalchemy_model',
-            db_import_path=db_import_path, entity=e, out_path=Template.OutPath(('sqlalchemy/', e.class_name))
+            Template.SQLAlchemyModel, ['sqlalchemy', 'sqlalchemy_model'],
+            db_import_path=db_import_path, entity=e, out_path=Template.OutPath((['sqlalchemy'], e.class_name))
         ) for e in entities],
         create_template(
-            Template.SQLAlchemyInit, 'sqlalchemy/__init__', db_import_path=db_import_path,
-            imports=[Template.Import(e.python_name, e.class_name) for e in entities]
+            Template.SQLAlchemyInit, ['sqlalchemy', '__init__'], db_import_path=db_import_path,
+            imports=[Template.Import(e.class_name, [e.class_name]) for e in entities],
         ),
         *[create_template(
-            Template.Resource, 'resources/resource',
-            entity=e, out_path=Template.OutPath(('resources/', e.class_name)),
+            Template.Resource, ['resources', 'resource'],
+            entity=e, out_path=Template.OutPath((['resources'], e.class_name)),
+            db_import_path=db_import_path, module_name=module_name,
             restplus_template=create_template(
-                Template.RestplusModel, 'resources/restplus_model', entity=e
+                Template.RestplusModel, ['resources', 'restplus_model'], entity=e
             ).render()
         ) for e in entities],
     ]

@@ -1,4 +1,6 @@
 import os
+from typing import List
+
 import attr
 
 from genyrator.entities import Template
@@ -6,28 +8,30 @@ from genyrator.entities import Template
 
 @attr.s
 class File(object):
-    file_name: str = attr.ib()
-    file_path: str = attr.ib()
-    contents:  str = attr.ib()
+    file_name: str =       attr.ib()
+    file_path: List[str] = attr.ib()
+    contents:  str =       attr.ib()
 
     def write(self):
+        file_path = os.path.join(*self.file_path)
         try:
-            os.makedirs(self.file_path)
+            os.makedirs(file_path)
         except FileExistsError:
             ...
-        with open('{}/{}'.format(self.file_path, self.file_name), 'w') as f:
+        file = os.path.join(file_path, self.file_name)
+        with open(file, 'w') as f:
             f.write(self.contents)
 
 
-def create_file_from_template(file_path: str, template: Template):
-    if template.out_path is not None:
-        file_name = template.out_path[1]
-        file_path = '{}/{}'.format(file_path, template.out_path[0])
+def create_file_from_template(file_path: List[str], template: Template) -> File:
+    if template.out_path:
+        file_path = file_path + template.out_path[0]
+        file_name = '{}.py'.format(template.out_path[1])
     else:
-        file_name = template.template_file_name
-        file_path = file_path
+        file_path = file_path + template.relative_path
+        file_name = '{}.py'.format(template.template_name)
     return File(
-        file_name='{}.py'.format(file_name),
+        file_name=file_name,
         file_path=file_path,
         contents=template.render(),
     )
