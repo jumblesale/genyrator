@@ -2,26 +2,31 @@ from {{ template.db_import_path }} import db
 from datetime import datetime
 from sqlalchemy import UniqueConstraint
 
+{%- macro pad(name) -%}
+{{ ' ' * (template.entity.max_property_length - (name | length)) }}
+{%- endmacro  %}
+
 
 class {{ template.entity.class_name }}(db.Model):  # type: ignore
 {%- if template.entity.table_name %}
     __table_name__ = '{{ template.entity.table_name }}'
 
 {% endif %}
-    id = db.Column(db.Integer, primary_key=True)
+    id ={{ pad('id') }} db.Column(db.Integer, primary_key=True)
 {%- for column in template.entity.columns %}
-    {{ column.python_name }} = db.Column(db.{{ column.sqlalchemy_type.value }}
+    {{ column.python_name }} ={{ pad(column.python_name) }} db.Column(db.{{ column.sqlalchemy_type.value }}
     {%- if column.relationship %}, db.ForeignKey('{{ column.relationship }}'){% endif %}
     {%- if column.index %}, index=True{% endif %}
     {%- if column.nullable %}, nullable=True{% endif %})
 {%- endfor %}
 {%- for relationship in template.entity.relationships %}
-    {{ relationship.property_name }} = db.relationship('{{ relationship.target_entity_class_name }}', {# -#}
+    {{ relationship.property_name }} ={{ pad(relationship.property_name) }} db.relationship('{{ relationship.target_entity_class_name }}', {# -#}
     lazy={{ relationship.lazy | string }}, uselist={{ relationship.join.value == 'to_many' | string }}{# -#}
     {%- if relationship.join_table %}, secondary='{{ relationship.join_table }}'{% endif -%}{# -#}
 )
 {%- endfor %}
 {%- if template.entity.uniques %}
+
     __table_args__ = {{ template.entity.table_args }}
 {% endif %}
 
