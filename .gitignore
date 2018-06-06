@@ -2,3 +2,4 @@
 doggos/
 output/
 *.pyc
+__pycache__/

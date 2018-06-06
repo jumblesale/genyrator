@@ -6,6 +6,7 @@ from genyrator.entities.Template import create_template
 TemplateConfig = NamedTuple('TemplateConfig', [
     ('root_files', List[Template.Template]),
     ('core',       List[Template.Template]),
+    ('db_init'  ,  List[Template.Template]),
     ('db_models',  List[Template.Template]),
     ('resources',  List[Template.Template]), ])
 
@@ -18,12 +19,15 @@ def create_template_config(
         api_description: str,
 ) -> TemplateConfig:
     root_files = [
-        create_template(Template.RootInit, ['__init__'], module_name=module_name),
+        create_template(Template.RootInit, ['__init__'], module_name=module_name, db_import_path=db_import_path),
         create_template(Template.Template, ['config']),
     ]
     core_files = [
         create_template(Template.Template, ['core', 'convert_case']),
         create_template(Template.ConvertDict, ['core', 'convert_dict'], module_name=module_name),
+    ]
+    db_init = [
+        create_template(Template.Template, ['sqlalchemy', '__init__']),
     ]
     db_models = [
         *[create_template(
@@ -35,7 +39,6 @@ def create_template_config(
             imports=[Template.Import(e.class_name, [e.class_name]) for e in entities], module_name=module_name,
         ),
         create_template(Template.Template, ['sqlalchemy', 'model_to_dict']),
-        create_template(Template.Template, ['sqlalchemy', '__init__']),
     ]
     resources = [
         create_template(
@@ -57,6 +60,7 @@ def create_template_config(
     return TemplateConfig(
         root_files=root_files,
         core=core_files,
+        db_init=db_init,
         db_models=db_models,
         resources=resources,
     )

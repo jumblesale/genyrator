@@ -53,7 +53,8 @@ def create_template(
 
 @attr.s
 class RootInit(Template):
-    module_name: str = attr.ib()
+    db_import_path: str = attr.ib()
+    module_name: str =    attr.ib()
 
 
 @attr.s

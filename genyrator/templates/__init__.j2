@@ -1,7 +1,7 @@
 from flask_marshmallow import Marshmallow
 from {{ template.module_name }}.resources import api
 from {{ template.module_name }}.config import config
-from {{ template.module_name }}.sqlalchemy import db
+from {{ template.db_import_path }} import db
 
 app = config()
 db.init_app(app)

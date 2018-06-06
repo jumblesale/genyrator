@@ -3,7 +3,7 @@ from flask_restplus import Resource, fields, Namespace
 from sqlalchemy.orm import joinedload
 from typing import Optional
 from {{ template.module_name }}.core.convert_dict import python_dict_to_json_dict, json_dict_to_python_dict
-from {{ template.module_name }}.sqlalchemy import db
+from {{ template.db_import_path }} import db
 from {{ template.module_name }}.sqlalchemy.model import *
 from {{ template.module_name }}.schema import *
 from {{ template.module_name }}.sqlalchemy.model_to_dict import model_to_dict

@@ -24,6 +24,10 @@ class Schema(object):
         for resource in self.files.resources:
             resource.write()
 
+    def write_db_init(self):
+        for model in self.files.db_models:
+            model.write()
+
     def write_db_models(self):
         for model in self.files.db_models:
             model.write()
