@@ -20,9 +20,6 @@ def create_template_config(
     root_files = [
         create_template(Template.RootInit, ['__init__'], module_name=module_name),
         create_template(Template.Template, ['config']),
-        create_template(
-            Template.RootSchema, ['schema'], db_import_path=db_import_path, entities=entities
-        ),
     ]
     core_files = [
         create_template(Template.Template, ['core', 'convert_case']),
@@ -35,12 +32,15 @@ def create_template_config(
         ) for e in entities],
         create_template(
             Template.SQLAlchemyModelInit, ['sqlalchemy', 'model', '__init__'], db_import_path=db_import_path,
-            imports=[Template.Import(e.class_name, [e.class_name]) for e in entities],
+            imports=[Template.Import(e.class_name, [e.class_name]) for e in entities], module_name=module_name,
         ),
         create_template(Template.Template, ['sqlalchemy', 'model_to_dict']),
         create_template(Template.Template, ['sqlalchemy', '__init__']),
     ]
     resources = [
+        create_template(
+            Template.RootSchema, ['schema'], module_name=module_name, entities=entities
+        ),
         *[create_template(
             Template.Resource, ['resources', 'resource'],
             entity=e, out_path=Template.OutPath((['resources'], e.class_name)),

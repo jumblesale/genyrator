@@ -49,10 +49,10 @@ def create_entity(
         resource_path:      Optional[str]=None,
         api_paths:          Optional[APIPaths]=None,
 ) -> Entity:
-    properties: List[Property] = columns + relationships + [identifier_column]
+    properties: List[Property] = [identifier_column, *columns, *relationships]
     python_name = pythonize(class_name)
-    columns = [identifier_column] + columns
-    uniques = [[identifier_column.python_name]] + uniques
+    columns = [identifier_column, *columns]
+    uniques = [[identifier_column.python_name], *uniques]
     return Entity(
         class_name=class_name,
         python_name=python_name,
@@ -96,17 +96,16 @@ def create_entity_from_type_dict(
         index = k in indexes
         if k == identifier_column_name:
             identifier_column = create_identifier_column(k, type_option)
-            continue
-        columns.append(
-            create_column(k, type_option, foreign_key, index)
-        )
+        else:
+            column = create_column(k, type_option, foreign_key, index)
+            columns.append(column)
     return create_entity(
         class_name=class_name,
         identifier_column=identifier_column,
         columns=columns,
-        relationships=relationships,
+        relationships=relationships if relationships else [],
         table_name=table_name,
-        uniques=uniques,
+        uniques=uniques if uniques else [],
         api_paths=api_paths,
     )
 

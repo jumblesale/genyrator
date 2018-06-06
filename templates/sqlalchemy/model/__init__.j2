@@ -1,3 +1,0 @@
-{% for import in template.imports -%}
-from {{ template.db_import_path }}.model.{{ import.module_name }} import {% for import in import.imports %}{{ import }}{% endfor %}
-{% endfor %}

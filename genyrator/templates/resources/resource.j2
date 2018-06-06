@@ -4,9 +4,9 @@ from sqlalchemy.orm import joinedload
 from typing import Optional
 from {{ template.module_name }}.core.convert_dict import python_dict_to_json_dict, json_dict_to_python_dict
 from {{ template.module_name }}.sqlalchemy import db
-from {{ template.db_import_path }}.model import *
+from {{ template.module_name }}.sqlalchemy.model import *
 from {{ template.module_name }}.schema import *
-from {{ template.db_import_path }}.model_to_dict import model_to_dict
+from {{ template.module_name }}.sqlalchemy.model_to_dict import model_to_dict
 
 api = Namespace('{{ template.entity.resource_namespace }}', path='{{ template.entity.resource_path }}')
 

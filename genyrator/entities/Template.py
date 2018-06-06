@@ -4,12 +4,12 @@ import attr
 from jinja2 import Template as JinjaTemplate
 
 from genyrator.entities.Entity import Entity
-
+from genyrator.path import get_root_path_list, create_relative_path
 
 OutPath = NewType('OutPath', Tuple[List[str], str])
 Import = NamedTuple('Import',
     [('module_name', str),
-     ('imports',     List[str])])
+     ('imports',     List[str]), ])
 
 
 @attr.s
@@ -21,7 +21,10 @@ class Template(object):
     out_path:           Optional[OutPath] = attr.ib()
 
     def create_template(self):
-        with open(os.path.join(*self.template_file_path, self.template_file_name)) as f:
+        path = create_relative_path(
+            [*self.template_file_path, self.template_file_name]
+        )
+        with open(path) as f:
             template = JinjaTemplate(f.read())
         return template
 
@@ -36,7 +39,7 @@ def create_template(
         **kwargs,
 ) -> Template:
     relative_path = template_path[0:-1]
-    path = ['templates'] + relative_path
+    path = ['genyrator', 'templates'] + relative_path
     template_name = template_path[-1]
     return constructor(
         template_name=template_name,
@@ -55,8 +58,8 @@ class RootInit(Template):
 
 @attr.s
 class RootSchema(Template):
-    db_import_path: str =          attr.ib()
-    entities:       List[Entity] = attr.ib()
+    module_name: str =          attr.ib()
+    entities:    List[Entity] = attr.ib()
 
 
 @attr.s
@@ -72,6 +75,7 @@ class SQLAlchemyModel(Template):
 
 @attr.s
 class SQLAlchemyModelInit(Template):
+    module_name:    str =          attr.ib()
     db_import_path: str =          attr.ib()
     imports:        List[Import] = attr.ib()
 
