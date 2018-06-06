@@ -69,7 +69,7 @@ class Post{{ template.entity.class_name }}Resource(Resource):  # type: ignore
 {% for api_path in template.entity.api_paths %}
 @api.route('/{{ template.entity.python_name }}/<{{ template.entity.identifier_column.json_property_name }}>/{{ api_path.route }}', endpoint='{{ api_path.endpoint }}')
 class {{ api_path.class_name }}(Resource):  # type: ignore
-    @api.doc(id='{{ api_path.python_name }}', responses={401: 'Unauthorised', 404: 'Not Found'})
+    @api.doc(id='{{ api_path.endpoint }}', responses={401: 'Unauthorised', 404: 'Not Found'})
     def get(self, {{ template.entity.identifier_column.json_property_name }}):  # type: ignore
         result: Optional[{{ template.entity.class_name }}] = {{ template.entity.class_name }} \
             .query \

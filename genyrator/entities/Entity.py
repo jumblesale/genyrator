@@ -3,7 +3,7 @@ from typing import List, Optional, NewType, Union, Tuple, Dict, NamedTuple, Set
 
 from genyrator.entities.Relationship import Relationship
 from genyrator.entities.Column import Column, create_column, IdentifierColumn, create_identifier_column
-from genyrator.inflector import pythonize, pluralize, dasherize, to_class_name
+from genyrator.inflector import pythonize, pluralize, dasherize, to_class_name, to_json_case
 from genyrator.types import string_to_type_option
 
 APIPath = NamedTuple(
@@ -12,7 +12,8 @@ APIPath = NamedTuple(
      ('route',           str),
      ('endpoint',        str),
      ('class_name',      str),
-     ('python_name',     str), ]
+     ('python_name',     str),
+     ('property_name',   str), ]
 )
 Property = NewType('Property', Union[Column, Relationship, IdentifierColumn])
 APIPaths = NewType('APIPaths', List[APIPath])
@@ -115,12 +116,14 @@ def create_api_path(
         route:           str,
         endpoint:        Optional[str]=None,
         class_name:      Optional[str]=None,
+        property_name:   Optional[str]=None,
 ) -> APIPath:
-    python_name = '_'.join(joined_entities)
+    python_name = pythonize(joined_entities[-1])
+    property_name = property_name if property_name else to_json_case(python_name)
     return APIPath(joined_entities, route,
                    endpoint if endpoint else '-'.join(joined_entities),
                    class_name=class_name if class_name else to_class_name(python_name),
-                   python_name=python_name, )
+                   python_name=python_name, property_name=property_name)
 
 
 def _convert_uniques_to_table_args_string(uniques: List[List[str]]) -> str:
