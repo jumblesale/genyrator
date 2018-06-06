@@ -27,7 +27,6 @@ class Entity(object):
     relationships:        List[Relationship] = attr.ib()
     table_name:           Optional[str] =      attr.ib()
     uniques:              Set[List[str]] =     attr.ib()
-    properties:           List[Property] =     attr.ib()
     max_property_length:  int =                attr.ib()
     plural:               str =                attr.ib()
     dashed_name:          str =                attr.ib()
@@ -39,7 +38,7 @@ class Entity(object):
 
 def create_entity(
         class_name:         str,
-        identifier_column:  Column,
+        identifier_column:  IdentifierColumn,
         columns:            List[Column],
         relationships:      List[Relationship]=list(),
         uniques:            List[List[str]]=list(),
@@ -49,20 +48,21 @@ def create_entity(
         resource_path:      Optional[str]=None,
         api_paths:          Optional[APIPaths]=None,
 ) -> Entity:
-    properties: List[Property] = [identifier_column, *columns, *relationships]
     python_name = pythonize(class_name)
     columns = [identifier_column, *columns]
     uniques = [[identifier_column.python_name], *uniques]
+    max_property_length = _calculate_max_property_length(
+        identifier_column, columns, relationships
+    )
     return Entity(
         class_name=class_name,
         python_name=python_name,
         identifier_column=identifier_column,
         columns=columns,
-        max_property_length=(max(*[len(x.python_name) for x in properties])),
+        max_property_length=max_property_length,
         relationships=relationships,
         table_name=table_name if table_name else None,
         uniques=uniques,
-        properties=properties,
         plural=plural if plural else pluralize(python_name),
         resource_namespace=resource_namespace if resource_namespace else pluralize(python_name),
         resource_path=resource_path if resource_path else '/',
@@ -132,11 +132,36 @@ def _convert_uniques_to_table_args_string(uniques: List[List[str]]) -> str:
     return '({}, )'.format(', '.join(unique_constraints))
 
 
+def _calculate_max_property_length(
+        identifier_column: IdentifierColumn,
+        columns:           List[Column],
+        relationships:     List[Relationship],
+) -> int:
+    return max(
+        len(identifier_column.python_name),
+        *[len(x.python_name) for x in columns],
+        *[len(x.property_name) for x in relationships],
+    )
+
+
+def add_api_paths_to_entity(
+        entity:    Entity,
+        api_paths: APIPaths,
+) -> Entity:
+    args = entity.__dict__
+    args['api_paths'] = api_paths
+    return Entity(**args)
+
+
 def add_relationship_to_entity(
         entity:       Entity,
-        relationship: Relationship
+        relationship: Relationship,
 ) -> Entity:
     args = entity.__dict__
     args['relationships'].append(relationship)
-    # haha!
+    args['max_property_length'] = _calculate_max_property_length(
+        entity.identifier_column,
+        entity.columns,
+        args['relationships'],
+    )
     return Entity(**args)
