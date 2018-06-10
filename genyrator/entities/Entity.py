@@ -92,13 +92,15 @@ def create_entity_from_type_dict(
         )
     identifier_column = None
     for k, v in type_dict.items():
+        nullable = v.endswith('?')
+        v = v.replace('?', '')
         type_option = string_to_type_option(v)
         foreign_key = foreign_keys_dict[k] if k in foreign_keys_dict else None
         index = k in indexes
         if k == identifier_column_name:
             identifier_column = create_identifier_column(k, type_option)
         else:
-            column = create_column(k, type_option, foreign_key, index)
+            column = create_column(k, type_option, foreign_key, index, nullable, False)
             columns.append(column)
     return create_entity(
         class_name=class_name,
