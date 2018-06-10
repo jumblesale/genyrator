@@ -1,4 +1,4 @@
-Feature: Generating a schema
+Feature: generating a schema
 
   Background:
     Given I have an entity with properties
