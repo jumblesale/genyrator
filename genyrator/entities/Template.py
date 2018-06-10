@@ -1,7 +1,7 @@
 import os
 from typing import List, Optional, NewType, Tuple, NamedTuple
 import attr
-from jinja2 import Template as JinjaTemplate
+from jinja2 import Template as JinjaTemplate, StrictUndefined
 
 from genyrator.entities.Entity import Entity
 from genyrator.path import get_root_path_list, create_relative_path
@@ -25,7 +25,7 @@ class Template(object):
             [*self.template_file_path, self.template_file_name]
         )
         with open(path) as f:
-            template = JinjaTemplate(f.read())
+            template = JinjaTemplate(f.read(), undefined=StrictUndefined)
         return template
 
     def render(self):
