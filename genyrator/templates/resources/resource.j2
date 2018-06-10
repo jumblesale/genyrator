@@ -1,4 +1,5 @@
-from flask import request, abort, json
+import json
+from flask import request, abort, json as flask_json
 from flask_restplus import Resource, fields, Namespace
 from sqlalchemy.orm import joinedload
 from typing import Optional
@@ -23,7 +24,7 @@ api = Namespace('{{ template.entity.resource_namespace }}', path='{{ template.en
 
 
 @api.route('/{{ template.entity.dashed_name }}/<{{ template.entity.identifier_column.json_property_name }}>', endpoint='{{ template.entity.python_name }}_by_id')
-class Get{{ template.entity.class_name }}Resource(Resource):  # type: ignore
+class {{ template.entity.class_name }}Resource(Resource):  # type: ignore
     @api.marshal_with({{ template.entity.python_name }}_model)
     @api.doc(id='get-{{ template.entity.python_name }}-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
     def get(self, {{ template.entity.identifier_column.json_property_name }}):  # type: ignore
@@ -43,29 +44,51 @@ class Get{{ template.entity.class_name }}Resource(Resource):  # type: ignore
         db.session.commit()
         return '', 204
 
-
-@api.route('/{{ template.entity.resource_namespace }}', endpoint='{{ template.entity.resource_namespace }}')
-class Post{{ template.entity.class_name }}Resource(Resource):  # type: ignore
-    @api.marshal_with({{ template.entity.python_name }}_model)
-    @api.expect({{ template.entity.python_name }}_model, validate=True)
-    def post(self):  # type: ignore
+    def post(self, {{ template.entity.identifier_column.json_property_name }}):  # type: ignore
         data = json.loads(request.data)
-        {{ template.entity.identifier_column.json_property_name }} = data['{{ template.entity.identifier_column.json_property_name }}']
+        if type(data) is not dict:
+            return abort(400)
+
         {{ find_element_by_id() }}.first()
         if result is not None:
-            abort(400, "A {} with {} {} already exists".format(
-                '{{ template.entity.class_name }}', '{{ template.entity.identifier_column.json_property_name }}', {# -#}
-                {{ template.entity.identifier_column.json_property_name }}
-            ))
-        result = {{ template.entity.python_name }}_schema.load(json_dict_to_python_dict(data), session=db.session)
-        db.session.add(result.data)
-        db.session.commit()
-        return python_dict_to_json_dict(model_to_dict(result.data)), 201
+            abort(400, {"{{ template.entity.identifier_column.json_property_name }}": {# -#}
+                "A {{ template.entity.class_name }} with {{ template.entity.identifier_column.json_property_name }} {# -#}
+                {} already exists".format({{ template.entity.identifier_column.json_property_name }})})
 
-{%- if template.entity.api_paths %}
+        marshmallow_result = {{ template.entity.python_name }}_schema.load(json_dict_to_python_dict(data), session=db.session)
+        if marshmallow_result.errors:
+            abort(400, marshmallow_result.errors)
+
+        db.session.add(marshmallow_result.data)
+        db.session.commit()
+        return '', 201
+
+    def put(self, {{ template.entity.identifier_column.json_property_name }}):  # type: ignore
+        data = json.loads(request.data)
+        if type(data) is not dict:
+            return abort(400)
+
+        {{ find_element_by_id() }}.first()
+        marshmallow_result = {{ template.entity.python_name }}_schema.load(
+            json_dict_to_python_dict(data),
+            session=db.session,
+            instance=result,
+        )
+        if marshmallow_result.errors:
+            abort(400, marshmallow_result.errors)
+
+        db.session.commit()
+        return '', 201
+
+
+@api.route('/{{ template.entity.resource_namespace }}', endpoint='{{ template.entity.resource_namespace }}')
+class Many{{ template.entity.class_name }}Resource(Resource):  # type: ignore
+    ...
+
+{%- if template.entity.api_paths -%}
 {% macro joinedload(relationship) -%}
     joinedload('{{ relationship }}')
-{%- endmacro %}
+{%- endmacro -%}
 {% for api_path in template.entity.api_paths %}
 @api.route('/{{ template.entity.python_name }}/<{{ template.entity.identifier_column.json_property_name }}>/{{ api_path.route }}', endpoint='{{ api_path.endpoint }}')
 class {{ api_path.class_name }}(Resource):  # type: ignore

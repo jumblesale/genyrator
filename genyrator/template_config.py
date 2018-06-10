@@ -19,7 +19,9 @@ def create_template_config(
         api_description: str,
 ) -> TemplateConfig:
     root_files = [
-        create_template(Template.RootInit, ['__init__'], module_name=module_name, db_import_path=db_import_path),
+        create_template(
+            Template.RootInit, ['__init__'], module_name=module_name, db_import_path=db_import_path,
+        ),
         create_template(Template.Template, ['config']),
     ]
     core_files = [

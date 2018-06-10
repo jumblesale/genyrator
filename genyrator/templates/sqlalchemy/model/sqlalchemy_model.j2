@@ -10,14 +10,13 @@ from sqlalchemy import UniqueConstraint
 class {{ template.entity.class_name }}(db.Model):  # type: ignore
 {%- if template.entity.table_name %}
     __table_name__ = '{{ template.entity.table_name }}'
-
 {% endif %}
     id ={{ pad('id') }} db.Column(db.Integer, primary_key=True)
 {%- for column in template.entity.columns %}
     {{ column.python_name }} ={{ pad(column.python_name) }} db.Column(db.{{ column.sqlalchemy_type.value }}
-    {%- if column.relationship %}, db.ForeignKey('{{ column.relationship }}'){% endif %}
-    {%- if column.index %}, index=True{% endif %}
-    {%- if column.nullable %}, nullable=True{% endif %})
+    {%- if column.relationship is defined %}, db.ForeignKey('{{ column.relationship }}'){% endif %}
+    {%- if column.index %}, index=True{% endif %}{# -#}
+    , nullable={{ column.nullable | string }})
 {%- endfor %}
 {%- for relationship in template.entity.relationships %}
     {{ relationship.property_name }} ={{ pad(relationship.property_name) }} db.relationship('{{ relationship.target_entity_class_name }}', {# -#}
