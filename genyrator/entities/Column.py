@@ -1,16 +1,18 @@
 from typing import Optional
 import attr
-from genyrator.inflector import pythonize, to_class_name, to_json_case
+from genyrator.inflector import pythonize, to_class_name, to_json_case, humanize
 from genyrator.types import (
     SqlAlchemyTypeOption, PythonTypeOption, TypeOption, type_option_to_sqlalchemy_type,
     type_option_to_python_type, type_option_to_default_value, RestplusTypeOption,
-    type_option_to_restplus_type)
+    type_option_to_restplus_type
+)
 
 
 @attr.s
 class Column(object):
     python_name:        str =                  attr.ib()
     class_name:         str =                  attr.ib()
+    display_name:       str =                  attr.ib()
     json_property_name: str =                  attr.ib()
     type_option:        TypeOption =           attr.ib()
     sqlalchemy_type:    SqlAlchemyTypeOption = attr.ib()
@@ -45,6 +47,7 @@ def create_column(
         name:                     str,
         type_option:              TypeOption,
         foreign_key_relationship: Optional[str]=None,
+        display_name:             Optional[str]=None,
         index:                    bool=False,
         nullable:                 bool=True,
         identifier:               bool=False,
@@ -59,6 +62,7 @@ def create_column(
         "python_name":        pythonize(name),
         "class_name":         to_class_name(name),
         "json_property_name": to_json_case(name),
+        "display_name":       display_name if display_name is not None else humanize(name),
         "type_option":        type_option,
         "sqlalchemy_type":    type_option_to_sqlalchemy_type(type_option),
         "python_type":        type_option_to_python_type(type_option),

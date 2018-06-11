@@ -1,9 +1,11 @@
+from enum import Enum
+
 import attr
 from typing import List, Optional, NewType, Union, Tuple, Dict, NamedTuple, Set
 
 from genyrator.entities.Relationship import Relationship
 from genyrator.entities.Column import Column, create_column, IdentifierColumn, create_identifier_column
-from genyrator.inflector import pythonize, pluralize, dasherize, to_class_name, to_json_case
+from genyrator.inflector import pythonize, pluralize, dasherize, humanize, to_class_name, to_json_case
 from genyrator.types import string_to_type_option
 
 APIPath = NamedTuple(
@@ -19,30 +21,47 @@ Property = NewType('Property', Union[Column, Relationship, IdentifierColumn])
 APIPaths = NewType('APIPaths', List[APIPath])
 
 
+class OperationsOption(Enum):
+    create_with_id =    'create_with_id'
+    create_without_id = 'create_without_id'
+    update =            'update'
+    get_one =           'get'
+    get_all =           'get_all'
+    delete =            'delete'
+    delete_all =        'delete_all'
+
+
+all_operations: Set[OperationsOption] = set([o for o in OperationsOption])
+
+
 @attr.s
 class Entity(object):
-    python_name:          str =                attr.ib()
-    class_name:           str =                attr.ib()
-    identifier_column:    IdentifierColumn =   attr.ib()
-    columns:              List[Column] =       attr.ib()
-    relationships:        List[Relationship] = attr.ib()
-    table_name:           Optional[str] =      attr.ib()
-    uniques:              Set[List[str]] =     attr.ib()
-    max_property_length:  int =                attr.ib()
-    plural:               str =                attr.ib()
-    dashed_name:          str =                attr.ib()
-    resource_namespace:   str =                attr.ib()
-    resource_path:        str =                attr.ib()
-    table_args:           str =                attr.ib()
-    api_paths:            Optional[APIPaths] = attr.ib()
+    python_name:          str =                   attr.ib()
+    class_name:           str =                   attr.ib()
+    display_name:         str =                   attr.ib()
+    identifier_column:    IdentifierColumn =      attr.ib()
+    columns:              List[Column] =          attr.ib()
+    relationships:        List[Relationship] =    attr.ib()
+    table_name:           Optional[str] =         attr.ib()
+    uniques:              Set[List[str]] =        attr.ib()
+    max_property_length:  int =                   attr.ib()
+    plural:               str =                   attr.ib()
+    dashed_name:          str =                   attr.ib()
+    resource_namespace:   str =                   attr.ib()
+    resource_path:        str =                   attr.ib()
+    table_args:           str =                   attr.ib()
+    operations:           Set[OperationsOption] = attr.ib()
+    api_paths:            Optional[APIPaths] =    attr.ib()
 
 
 def create_entity(
         class_name:         str,
         identifier_column:  IdentifierColumn,
         columns:            List[Column],
+        operations:         Set[OperationsOption],
         relationships:      List[Relationship]=list(),
         uniques:            List[List[str]]=list(),
+        display_name:       Optional[str]=None,
         table_name:         Optional[str]=None,
         plural:             Optional[str]=None,
         resource_namespace: Optional[str]=None,
@@ -62,14 +81,16 @@ def create_entity(
         columns=columns,
         max_property_length=max_property_length,
         relationships=relationships,
-        table_name=table_name if table_name else None,
+        display_name=display_name if display_name is not None else humanize(class_name),
+        table_name=table_name if table_name is not None else None,
         uniques=uniques,
-        plural=plural if plural else pluralize(python_name),
-        resource_namespace=resource_namespace if resource_namespace else pluralize(python_name),
-        resource_path=resource_path if resource_path else '/',
+        plural=plural if plural is not None else pluralize(python_name),
+        resource_namespace=resource_namespace if resource_namespace is not None else pluralize(python_name),
+        resource_path=resource_path if resource_path is not None else '/',
         dashed_name=dasherize(class_name),
         table_args=_convert_uniques_to_table_args_string(uniques),
-        api_paths=api_paths if api_paths else [],
+        operations=operations,
+        api_paths=api_paths if api_paths is not None else [],
     )
 
 
@@ -106,6 +127,7 @@ def create_entity_from_type_dict(
         class_name=class_name,
         identifier_column=identifier_column,
         columns=columns,
+        operations=all_operations,
         relationships=relationships if relationships else [],
         table_name=table_name,
         uniques=uniques if uniques else [],

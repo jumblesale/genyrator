@@ -54,7 +54,7 @@ def create_template(
 @attr.s
 class RootInit(Template):
     db_import_path: str = attr.ib()
-    module_name: str =    attr.ib()
+    module_name:    str = attr.ib()
 
 
 @attr.s

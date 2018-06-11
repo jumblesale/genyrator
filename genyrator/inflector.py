@@ -9,6 +9,10 @@ def camelize(x: str, skip_first_word=False) -> str:
     return inflection.camelize(x, skip_first_word)
 
 
+def humanize(x: str) -> str:
+    return inflection.humanize(x)
+
+
 def to_json_case(x: str) -> str:
     return camelize(x, False)
 
