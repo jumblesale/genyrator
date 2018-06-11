@@ -46,6 +46,7 @@ class Entity(object):
     uniques:              Set[List[str]] =        attr.ib()
     max_property_length:  int =                   attr.ib()
     plural:               str =                   attr.ib()
+    dashed_plural:        str =                   attr.ib()
     dashed_name:          str =                   attr.ib()
     resource_namespace:   str =                   attr.ib()
     resource_path:        str =                   attr.ib()
@@ -58,12 +59,13 @@ def create_entity(
         class_name:         str,
         identifier_column:  IdentifierColumn,
         columns:            List[Column],
-        operations:         Set[OperationsOption],
         relationships:      List[Relationship]=list(),
         uniques:            List[List[str]]=list(),
+        operations:         Optional[Set[OperationsOption]]=None,
         display_name:       Optional[str]=None,
         table_name:         Optional[str]=None,
         plural:             Optional[str]=None,
+        dashed_plural:      Optional[str]=None,
         resource_namespace: Optional[str]=None,
         resource_path:      Optional[str]=None,
         api_paths:          Optional[APIPaths]=None,
@@ -85,11 +87,12 @@ def create_entity(
         table_name=table_name if table_name is not None else None,
         uniques=uniques,
         plural=plural if plural is not None else pluralize(python_name),
+        dashed_plural=dashed_plural if dashed_plural is not None else dasherize(pluralize(python_name)),
         resource_namespace=resource_namespace if resource_namespace is not None else pluralize(python_name),
         resource_path=resource_path if resource_path is not None else '/',
         dashed_name=dasherize(python_name),
         table_args=_convert_uniques_to_table_args_string(uniques),
-        operations=operations,
+        operations=operations if operations is not None else all_operations,
         api_paths=api_paths if api_paths is not None else [],
     )
 

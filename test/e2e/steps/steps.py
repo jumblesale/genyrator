@@ -14,6 +14,7 @@ from genyrator import (
     Entity, create_entity, Column, create_column, create_identifier_column,
     string_to_type_option,
 )
+from genyrator.entities.Entity import all_operations as all_entity_operations
 from genyrator.entities.Column import IdentifierColumn
 from genyrator.entities.Schema import create_schema, Schema
 
@@ -44,7 +45,7 @@ def _create_schema(context: Any, module_name: Optional[str]=None):
     entity = create_entity(
         class_name=_random_string(36) if not context.entity_name else context.entity_name,
         identifier_column=context.identifier_column,
-        columns=context.columns,
+        columns=context.columns, operations=all_entity_operations,
     )
     module_name = _random_string(14) if module_name is None else module_name
     schema = create_schema(

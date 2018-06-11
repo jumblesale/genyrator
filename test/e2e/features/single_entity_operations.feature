@@ -1,7 +1,7 @@
 Feature: performing operations on a simple schema
 
   Background:
-    Given I have an entity "Book" with properties
+    Given I have an entity "BookStore" with properties
     | name         | type     | nullable |
     | book_name    | str      | False    |
     | publish_date | date     | False    |
@@ -22,25 +22,20 @@ Feature: performing operations on a simple schema
     """
 
   Scenario: requesting a non-existing entity
-     When I make a "GET" request to "/book" with parameters "id=1"
+     When I make a "GET" request to "/book-store" with parameters "id=1"
      Then I get http status "404"
 
   Scenario: creating a new entity with correct data
-     When I make a "POST" request to "/book/3" with that json data
+     When I make a "PUT" request to "/book-store/3" with that json data
      Then I get http status "201"
-      And I can get entity "/book/3"
-    
-  Scenario: duplicating an existing entity
-    Given I make a "POST" request to "/book/3" with that json data
-      And I make a "POST" request to "/book/3" with that json data
-     Then I get http status "400"
+      And I can get entity "/book-store/3"
 
   Scenario: creating an entity with non-dict data
     Given I have text data
     """{
       "snake"="🐍
     """
-    When I make a "POST" request to "/book/3" with that json data
+    When I make a "PUT" request to "/book-store/3" with that json data
     Then I get http status "400"
 
   Scenario: creating an entity with incorrect data
@@ -54,7 +49,7 @@ Feature: performing operations on a simple schema
       "rating": "5"
     }
     """
-    When I make a "POST" request to "/book/3" with that json data
+    When I make a "PUT" request to "/book-store/3" with that json data
     Then I get http status "400"
 
   Scenario: creating a new entity with null values
@@ -68,13 +63,13 @@ Feature: performing operations on a simple schema
       "rating": null
     }
     """
-    When I make a "POST" request to "/book/3" with that json data
+    When I make a "PUT" request to "/book-store/3" with that json data
     Then I get http status "201"
-     And I can get entity "/book/3"
+     And I can get entity "/book-store/3"
      And that response matches the original data
 
   Scenario: updating an existing entity
-    Given I make a "POST" request to "/book/3" with that json data
+    Given I make a "PUT" request to "/book-store/3" with that json data
       And I have json data
       """
       {
@@ -85,13 +80,13 @@ Feature: performing operations on a simple schema
         "rating": 12.4
       }
       """
-     When I make a "PUT" request to "/book/3" with that json data
+     When I make a "PUT" request to "/book-store/3" with that json data
      Then I get http status "201"
-      And I can get entity "/book/3"
+      And I can get entity "/book-store/3"
       And that response matches the original data
 
   Scenario: deleting an entity
-    Given I make a "POST" request to "/book/3" with that json data
-     When I make a "DELETE" request to "/book/3"
+    Given I make a "PUT" request to "/book-store/3" with that json data
+     When I make a "DELETE" request to "/book-store/3"
      Then I get http status "204"
-      And I cannot get entity "/book/3"
+      And I cannot get entity "/book-store/3"
