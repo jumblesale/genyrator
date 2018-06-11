@@ -87,7 +87,7 @@ def create_entity(
         plural=plural if plural is not None else pluralize(python_name),
         resource_namespace=resource_namespace if resource_namespace is not None else pluralize(python_name),
         resource_path=resource_path if resource_path is not None else '/',
-        dashed_name=dasherize(class_name),
+        dashed_name=dasherize(python_name),
         table_args=_convert_uniques_to_table_args_string(uniques),
         operations=operations,
         api_paths=api_paths if api_paths is not None else [],
