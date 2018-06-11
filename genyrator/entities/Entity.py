@@ -121,7 +121,14 @@ def create_entity_from_type_dict(
         if k == identifier_column_name:
             identifier_column = create_identifier_column(k, type_option)
         else:
-            column = create_column(k, type_option, foreign_key, index, nullable, False)
+            column = create_column(
+                name=k,
+                type_option=type_option,
+                foreign_key_relationship=foreign_key,
+                index=index,
+                nullable=nullable,
+                identifier=False
+            )
             columns.append(column)
     return create_entity(
         class_name=class_name,
