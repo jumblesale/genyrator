@@ -25,6 +25,19 @@ def string_to_type_option(string_type: str) -> TypeOption:
     }[string_type]
 
 
+def type_option_to_type_constructor(type_option: TypeOption):
+    return {
+        TypeOption.string:   str,
+        TypeOption.int:      int,
+        TypeOption.float:    float,
+        TypeOption.bool:     bool,
+        TypeOption.dict:     dict,
+        TypeOption.list:     list,
+        TypeOption.datetime: str,
+        TypeOption.date:     str,
+    }[type_option]
+
+
 class SqlAlchemyTypeOption(Enum):
     string =   'String'
     float =    'Float'
