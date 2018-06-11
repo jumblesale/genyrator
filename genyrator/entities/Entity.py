@@ -21,7 +21,7 @@ Property = NewType('Property', Union[Column, Relationship, IdentifierColumn])
 APIPaths = NewType('APIPaths', List[APIPath])
 
 
-class OperationsOption(Enum):
+class OperationOption(Enum):
     create_with_id =    'create_with_id'
     create_without_id = 'create_without_id'
     update =            'update'
@@ -31,7 +31,7 @@ class OperationsOption(Enum):
     delete_all =        'delete_all'
 
 
-all_operations: Set[OperationsOption] = set([o for o in OperationsOption])
+all_operations: Set[OperationOption] = set([o for o in OperationOption])
 
 
 @attr.s
@@ -51,7 +51,7 @@ class Entity(object):
     resource_namespace:   str =                   attr.ib()
     resource_path:        str =                   attr.ib()
     table_args:           str =                   attr.ib()
-    operations:           Set[OperationsOption] = attr.ib()
+    operations:           Set[OperationOption] = attr.ib()
     api_paths:            Optional[APIPaths] =    attr.ib()
 
 
@@ -61,7 +61,7 @@ def create_entity(
         columns:            List[Column],
         relationships:      List[Relationship]=list(),
         uniques:            List[List[str]]=list(),
-        operations:         Optional[Set[OperationsOption]]=None,
+        operations:         Optional[Set[OperationOption]]=None,
         display_name:       Optional[str]=None,
         table_name:         Optional[str]=None,
         plural:             Optional[str]=None,
@@ -101,7 +101,7 @@ def create_entity_from_type_dict(
         class_name:             str,
         identifier_column_name: str,
         type_dict:              Dict,
-        operations:             Set[OperationsOption]=set(),
+        operations:             Set[OperationOption]=set(),
         foreign_keys:           Set[Tuple[str, str]]=set(),
         indexes:                Set[str]=set(),
         relationships:          Optional[List[Relationship]]=None,
