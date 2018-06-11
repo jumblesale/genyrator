@@ -38,7 +38,7 @@ def create_identifier_column(
         type_option:              TypeOption,
 ) -> IdentifierColumn:
     column: IdentifierColumn = create_column(
-        name, type_option, index=True, nullable=False, identifier=True,
+        name=name, type_option=type_option, index=True, nullable=False, identifier=True,
     )
     return column
 
@@ -46,11 +46,11 @@ def create_identifier_column(
 def create_column(
         name:                     str,
         type_option:              TypeOption,
-        foreign_key_relationship: Optional[str]=None,
-        display_name:             Optional[str]=None,
         index:                    bool=False,
         nullable:                 bool=True,
         identifier:               bool=False,
+        foreign_key_relationship: Optional[str]=None,
+        display_name:             Optional[str]=None,
 ) -> Column:
     if identifier is True:
         constructor = IdentifierColumn
@@ -62,7 +62,7 @@ def create_column(
         "python_name":        pythonize(name),
         "class_name":         to_class_name(name),
         "json_property_name": to_json_case(name),
-        "display_name":       display_name if display_name is not None else humanize(name),
+        "display_name":       display_name if display_name else humanize(name),
         "type_option":        type_option,
         "sqlalchemy_type":    type_option_to_sqlalchemy_type(type_option),
         "python_type":        type_option_to_python_type(type_option),
