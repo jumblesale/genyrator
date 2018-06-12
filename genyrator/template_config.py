@@ -40,7 +40,7 @@ def create_template_config(
             Template.SQLAlchemyModelInit, ['sqlalchemy', 'model', '__init__'], db_import_path=db_import_path,
             imports=[Template.Import(e.class_name, [e.class_name]) for e in entities], module_name=module_name,
         ),
-        create_template(Template.Template, ['sqlalchemy', 'model_to_dict']),
+        create_template(Template.ModelToDict, ['sqlalchemy', 'model_to_dict'], module_name=module_name),
     ]
     resources = [
         create_template(

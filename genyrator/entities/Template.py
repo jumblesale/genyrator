@@ -75,6 +75,11 @@ class SQLAlchemyModel(Template):
 
 
 @attr.s
+class ModelToDict(Template):
+    module_name: str = attr.ib()
+
+
+@attr.s
 class SQLAlchemyModelInit(Template):
     module_name:    str =          attr.ib()
     db_import_path: str =          attr.ib()

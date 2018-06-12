@@ -1,5 +1,6 @@
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.orm.collections import InstrumentedList
+from {{ template.module_name }}.core.convert_dict import python_dict_to_json_dict
 
 
 def model_to_dict(model: DeclarativeMeta, paths=list()):
@@ -20,7 +21,10 @@ def model_to_dict(model: DeclarativeMeta, paths=list()):
     next_relationship = getattr(model, next_path)
     next_key = next_path
     if type(next_relationship) is InstrumentedList:
-        serialized_data[next_key] = [model_to_dict(nr, paths[1:]) for nr in next_relationship]
+        serialized_data[next_key] = [
+            python_dict_to_json_dict(model_to_dict(nr, paths[1:])) for nr in next_relationship
+        ]
     else:
-        serialized_data[next_key] = model_to_dict(next_relationship, paths[1:])
+        serialized_data[next_key] = python_dict_to_json_dict(model_to_dict(next_relationship, paths[1:]))
     return serialized_data
+

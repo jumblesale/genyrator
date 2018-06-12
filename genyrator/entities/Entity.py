@@ -88,6 +88,7 @@ def create_entity(
         resource_path:      Optional[str]=None,
         api_paths:          Optional[APIPaths]=None,
 ) -> Entity:
+    operations = operations if operations is not None else all_operations
     python_name = pythonize(class_name)
     columns = [identifier_column, *columns]
     uniques = [[identifier_column.python_name], *uniques]

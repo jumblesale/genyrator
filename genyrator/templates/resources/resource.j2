@@ -53,9 +53,9 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
         db.session.commit()
         return '', 204
 
-
-    {% endif -%}{# delete_one method #}
-    {%- if entity.supports_put -%}
+{# -#}
+    {%- endif -%}{# delete_one method #}
+    {%- if entity.supports_put %}
     @api.expect({{ entity.python_name }}_model, validate=False)
     def put(self, {{ entity.identifier_column.json_property_name }}):  # type: ignore
         data = json.loads(request.data)
@@ -79,8 +79,7 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
         db.session.add(marshmallow_result.data)
         db.session.commit()
         return '', 201
-
-
+{#  -#}
     {%- endif -%}{# put method #}
 {%- endif %}{# single class #}
 {%- if entity.supports_get_all or entity.supports_delete_all or entity.supports_post %}
