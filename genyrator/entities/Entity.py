@@ -25,10 +25,22 @@ class OperationOption(Enum):
     create_with_id =    'create_with_id'
     create_without_id = 'create_without_id'
     update =            'update'
-    get_one =           'get'
+    get_one =           'get_one'
     get_all =           'get_all'
-    delete =            'delete'
+    delete_one =        'delete_one'
     delete_all =        'delete_all'
+
+
+def string_to_operation_option(option: str) -> OperationOption:
+    return {
+        "create_with_id":    OperationOption.create_with_id,
+        "create_without_id": OperationOption.create_without_id,
+        "update":            OperationOption.update,
+        "get_one":           OperationOption.get_one,
+        "get_all":           OperationOption.get_all,
+        "delete_one":        OperationOption.delete_one,
+        "delete_all":        OperationOption.delete_all,
+    }[option]
 
 
 all_operations: Set[OperationOption] = set([o for o in OperationOption])
@@ -51,8 +63,14 @@ class Entity(object):
     resource_namespace:   str =                   attr.ib()
     resource_path:        str =                   attr.ib()
     table_args:           str =                   attr.ib()
-    operations:           Set[OperationOption] = attr.ib()
+    operations:           Set[OperationOption] =  attr.ib()
     api_paths:            Optional[APIPaths] =    attr.ib()
+    supports_put:         bool =                  attr.ib()
+    supports_get_one:     bool =                  attr.ib()
+    supports_get_all:     bool =                  attr.ib()
+    supports_post:        bool =                  attr.ib()
+    supports_delete_one:  bool =                  attr.ib()
+    supports_delete_all:  bool =                  attr.ib()
 
 
 def create_entity(
@@ -94,6 +112,12 @@ def create_entity(
         table_args=_convert_uniques_to_table_args_string(uniques),
         operations=operations if operations is not None else all_operations,
         api_paths=api_paths if api_paths is not None else [],
+        supports_put=OperationOption.create_with_id in operations,
+        supports_get_one=OperationOption.get_one in operations,
+        supports_get_all=OperationOption.get_all in operations,
+        supports_post=OperationOption.create_without_id in operations,
+        supports_delete_one=OperationOption.delete_one in operations,
+        supports_delete_all=OperationOption.delete_all in operations,
     )
 
 

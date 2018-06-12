@@ -14,7 +14,8 @@ from genyrator import (
     Entity, create_entity, Column, create_column, create_identifier_column,
     string_to_type_option,
 )
-from genyrator.entities.Entity import all_operations as all_entity_operations
+from genyrator.entities.Entity import all_operations as all_entity_operations, OperationOption, \
+    string_to_operation_option, all_operations
 from genyrator.entities.Column import IdentifierColumn
 from genyrator.entities.Schema import create_schema, Schema
 
@@ -42,10 +43,13 @@ def _make_request(client: FlaskClient, endpoint: str, method: str, parameters: O
 
 
 def _create_schema(context: Any, module_name: Optional[str]=None):
+    entity_name = context.entity_name if hasattr(context, 'entity_name') else None
+    operations = context.operations if hasattr(context, 'operations') else all_operations
     entity = create_entity(
-        class_name=_random_string(36) if not context.entity_name else context.entity_name,
+        class_name=_random_string(36) if entity_name is None else entity_name,
         identifier_column=context.identifier_column,
-        columns=context.columns, operations=all_entity_operations,
+        columns=context.columns,
+        operations=operations,
     )
     module_name = _random_string(14) if module_name is None else module_name
     schema = create_schema(
@@ -62,6 +66,11 @@ def _create_schema(context: Any, module_name: Optional[str]=None):
 def step_impl(context: Any, name: str):
     context.entity_name = name
     entity_with_properties(context)
+
+
+@given('I have operation options "{operation}"')
+def step_impl(context, operation: str):
+    context.operations = {string_to_operation_option(operation)}
 
 
 @given("I have an entity with properties")
@@ -101,6 +110,7 @@ def write_schema(context: Any):
     schema.write_files()
 
 
+@step("I import the generated app")
 @then("I can import the generated app")
 def import_app(context):
     context.generated_module = generated_module = importlib.import_module(context.module_name)
@@ -177,3 +187,46 @@ def step_impl(context, path: str):
 @step("that response matches the original data")
 def step_impl(context):
     assert_that(json.loads(context.response.data), equal_to(context.data))
+
+
+@step('I load data for "{entity_name}"')
+def step_impl(context, entity_name):
+    db = context.generated_module.db
+    model_module = importlib.import_module(
+        '.'.join([context.module_name, 'sqlalchemy', 'model', entity_name])
+    )
+    constructor = getattr(model_module, entity_name)
+    args = {}
+    for row in context.table:
+        args[row['name']] = row['value']
+    model = constructor(**args)
+    with context.app.app_context():
+        db.session.add(model)
+        db.session.commit()
+
+
+@step('making "{operations_list}" requests to "{endpoint}" gives http status "{status}"')
+def step_impl(context, operations_list: str, endpoint: str, status: int):
+    for operation in operations_list.split(','):
+        response = _make_request(
+            client=context.client,
+            endpoint=endpoint,
+            method=operation,
+        )
+        assert_that(response.status_code, equal_to(int(status)), f'{operation}')
+
+
+@step("I create an example app")
+def step_impl(context):
+        context.execute_steps("""
+        Given I have an entity "ExampleEntity" with properties
+          | name      | type |
+          | test_name | str  |
+          And identifier column "test_id" with type "int"
+          And I create a schema from those entities
+          And the app is running
+          And I load data for "ExampleEntity"
+          | name      | value |
+          | test_name | test  |
+          | test_id   | 3     |
+    """)
