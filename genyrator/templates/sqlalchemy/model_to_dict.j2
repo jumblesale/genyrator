@@ -12,11 +12,13 @@ def model_to_dict(model: DeclarativeMeta, paths=list()):
     """
     serialized_data = {}
     for c in model.__table__.columns:
+        if c.primary_key:
+            continue
         key = c.key
         value = getattr(model, c.key)
         serialized_data[key] = value
     if not paths:
-        return serialized_data
+        return python_dict_to_json_dict(serialized_data)
     next_path = paths[0]
     next_relationship = getattr(model, next_path)
     next_key = next_path

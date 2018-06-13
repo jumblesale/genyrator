@@ -145,5 +145,7 @@ class {{ api_path.class_name }}(Resource):  # type: ignore
     {%- for entity in api_path.joined_entities -%}
         {{ sep() }}{{ entity }}
     {%- endfor %}']))
-{%- endfor -%}
+
+
+{% endfor -%}
 {%- endif %}
