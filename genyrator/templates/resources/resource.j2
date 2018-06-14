@@ -74,7 +74,7 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
             instance=result,
         )
         if marshmallow_result.errors:
-            abort(400, marshmallow_result.errors)
+            abort(400, python_dict_to_json_dict(marshmallow_result.errors))
 
         db.session.add(marshmallow_result.data)
         db.session.commit()

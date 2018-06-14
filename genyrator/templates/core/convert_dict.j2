@@ -1,5 +1,5 @@
 import datetime
-from typing import Dict, Callable, Any
+from typing import Dict, Callable, Any, Iterable, List
 from {{ template.module_name }}.core.convert_case import to_json_name, to_python_name
 
 
@@ -9,11 +9,24 @@ def convert_dict_naming(in_dict: Dict, fn: Callable[[str], str]) -> Dict:
         if type(v) is dict:
             value = convert_dict_naming(v, fn)
         elif type(v) is list or type(v) is set:
-            value = [convert_dict_naming(v_, fn) for v_ in v]
+            value = convert_iterable_naming(v, fn)
         else:
             value = v
         out_dict[fn(k)] = dict_value_to_json_value(value)
     return out_dict
+
+
+def convert_iterable_naming(in_list: Iterable, fn: Callable[[str], str]) -> List:
+    out_list = []
+    for v in in_list:
+        if type(v) is dict:
+            value = convert_dict_naming(v, fn)
+        elif type(v) is list or type(v) is set:
+            value = convert_iterable_naming(v, fn)
+        else:
+            value = v
+        out_list.append(dict_value_to_json_value(value))
+    return out_list
 
 
 def python_dict_to_json_dict(python_dict: Dict) -> Dict:
