@@ -20,6 +20,12 @@ APIPath = NamedTuple(
 Property = NewType('Property', Union[Column, Relationship, IdentifierColumn])
 APIPaths = NewType('APIPaths', List[APIPath])
 
+ImportAlias = NamedTuple(
+    'ImportAlias',
+    [('class_name',    str),
+     ('module_import', str), ]
+)
+
 
 class OperationOption(Enum):
     create_with_id =    'create_with_id'
@@ -71,6 +77,7 @@ class Entity(object):
     supports_post:        bool =                  attr.ib()
     supports_delete_one:  bool =                  attr.ib()
     supports_delete_all:  bool =                  attr.ib()
+    model_alias:          Optional[ImportAlias] = attr.ib()
 
 
 def create_entity(
@@ -87,6 +94,7 @@ def create_entity(
         resource_namespace: Optional[str]=None,
         resource_path:      Optional[str]=None,
         api_paths:          Optional[APIPaths]=None,
+        model_alias:        Optional[ImportAlias]=None,
 ) -> Entity:
     operations = operations if operations is not None else all_operations
     python_name = pythonize(class_name)
@@ -119,6 +127,7 @@ def create_entity(
         supports_post=OperationOption.create_without_id in operations,
         supports_delete_one=OperationOption.delete_one in operations,
         supports_delete_all=OperationOption.delete_all in operations,
+        model_alias=model_alias,
     )
 
 
@@ -126,13 +135,14 @@ def create_entity_from_type_dict(
         class_name:             str,
         identifier_column_name: str,
         type_dict:              Dict,
-        operations:             Set[OperationOption]=set(),
         foreign_keys:           Set[Tuple[str, str]]=set(),
         indexes:                Set[str]=set(),
+        operations:             Optional[Set[OperationOption]]=None,
         relationships:          Optional[List[Relationship]]=None,
         table_name:             Optional[str]=None,
         uniques:                Optional[List[List[str]]]=None,
         api_paths:              Optional[APIPaths]=None,
+        model_alias:            Optional[ImportAlias]=None,
 ) -> Entity:
     columns = []
     foreign_keys_dict = {}
@@ -168,6 +178,7 @@ def create_entity_from_type_dict(
         table_name=table_name,
         uniques=uniques if uniques else [],
         api_paths=api_paths,
+        model_alias=model_alias,
     )
 
 
