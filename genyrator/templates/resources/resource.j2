@@ -2,13 +2,14 @@
 {%- set identifier_column = entity.identifier_column -%}
 {%- set schema_name = entity.python_name + '_schema' -%}
 {%- set schema_name_many = entity.plural + '_many_schema' -%}
+{%- set get_one_endpoint = entity.python_name + '_by_id' -%}
 {%- if entity.model_alias is not none -%}
     {%- set model_import = 'from ' + entity.model_alias.module_import + ' import ' + entity.model_alias.class_name -%}
 {%- else -%}
     {%- set model_import = 'from ' + template.module_name + '.sqlalchemy.model import ' + entity.class_name -%}
 {%- endif -%}
 import json
-from flask import request, abort, json as flask_json
+from flask import request, abort, json as flask_json, url_for
 from flask_restplus import Resource, fields, Namespace
 from sqlalchemy.orm import joinedload
 from typing import Optional
@@ -95,9 +96,14 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
 @api.route('/{{ entity.dashed_plural }}', endpoint='{{ entity.resource_namespace }}')
 class Many{{ entity.class_name }}Resource(Resource):  # type: ignore
     {%- if entity.supports_get_all %}
-    @api.marshal_with({{ entity.python_name }}_model)
     def get(self):
-        return {{ schema_name_many }}.dumps({{ entity.class_name }}.query.all())
+        {%- if entity.supports_get_one %}
+        result = {{ entity.class_name }}.query.all()
+        urls = [url_for('{{ get_one_endpoint }}', {{ identifier_column.json_property_name }}=x.{{ identifier_column.python_name }}) for x in result]
+        return {"links": urls}
+        {%- else %}
+        ...
+        {%- endif %}
 
     {% endif -%}{# get_all method #}
     {% if entity.supports_post %}
