@@ -22,7 +22,7 @@ def create_template_config(
         create_template(
             Template.RootInit, ['__init__'], module_name=module_name, db_import_path=db_import_path,
         ),
-        create_template(Template.Template, ['config']),
+        create_template(Template.Config, ['config'], module_name=module_name),
     ]
     core_files = [
         create_template(Template.Template, ['core', 'convert_case']),
