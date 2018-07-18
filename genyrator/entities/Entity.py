@@ -31,6 +31,7 @@ class OperationOption(Enum):
     create_with_id =    'create_with_id'
     create_without_id = 'create_without_id'
     update =            'update'
+    patch =             'patch'
     get_one =           'get_one'
     get_all =           'get_all'
     delete_one =        'delete_one'
@@ -42,6 +43,7 @@ def string_to_operation_option(option: str) -> OperationOption:
         "create_with_id":    OperationOption.create_with_id,
         "create_without_id": OperationOption.create_without_id,
         "update":            OperationOption.update,
+        "patch":             OperationOption.patch,
         "get_one":           OperationOption.get_one,
         "get_all":           OperationOption.get_all,
         "delete_one":        OperationOption.delete_one,
@@ -75,6 +77,7 @@ class Entity(object):
     supports_get_one:     bool =                  attr.ib()
     supports_get_all:     bool =                  attr.ib()
     supports_post:        bool =                  attr.ib()
+    supports_patch:       bool =                  attr.ib()
     supports_delete_one:  bool =                  attr.ib()
     supports_delete_all:  bool =                  attr.ib()
     model_alias:          Optional[ImportAlias] = attr.ib()
@@ -125,6 +128,7 @@ def create_entity(
         supports_get_one=OperationOption.get_one in operations,
         supports_get_all=OperationOption.get_all in operations,
         supports_post=OperationOption.create_without_id in operations,
+        supports_patch=OperationOption.patch in operations,
         supports_delete_one=OperationOption.delete_one in operations,
         supports_delete_all=OperationOption.delete_all in operations,
         model_alias=model_alias,

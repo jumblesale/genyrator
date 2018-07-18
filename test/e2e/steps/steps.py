@@ -8,7 +8,7 @@ from behave import *
 from typing import List, Any, Dict, Optional
 
 from flask.testing import FlaskClient
-from hamcrest import assert_that, equal_to
+from hamcrest import assert_that, equal_to, has_entry
 
 from genyrator import (
     Entity, create_entity, Column, create_column, create_identifier_column,
@@ -70,7 +70,7 @@ def step_impl(context: Any, name: str):
 
 @given('I have operation options "{operation}"')
 def step_impl(context, operation: str):
-    context.operations = {string_to_operation_option(operation)}
+    context.operations = set([string_to_operation_option(o) for o in operation.split(', ')])
 
 
 @given("I have an entity with properties")
@@ -187,6 +187,11 @@ def step_impl(context, path: str):
 @step("that response matches the original data")
 def step_impl(context):
     assert_that(json.loads(context.response.data), equal_to(context.data))
+
+
+@step('the response has "{field}" with value "{value}"')
+def response_has_field_value(context, field: str, value: Any):
+    assert_that(json.loads(context.response.data), has_entry(field, value))
 
 
 @step('I load data for "{entity_name}"')
