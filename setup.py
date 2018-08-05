@@ -9,4 +9,8 @@ setup(
     author='jumblesale',
     author_email='',
     description='',
+    install_requires=[
+        'attrs>=18.1',
+        'inflection>=0.3',
+    ],
 )
