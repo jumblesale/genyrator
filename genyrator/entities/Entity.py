@@ -26,6 +26,12 @@ ImportAlias = NamedTuple(
      ('module_import', str), ]
 )
 
+AdditionalProperty = NamedTuple(
+    'AdditionalProperty',
+    [('python_name', str),
+     ('value',       str), ]
+)
+
 
 class OperationOption(Enum):
     create_with_id =    'create_with_id'
@@ -56,48 +62,50 @@ all_operations: Set[OperationOption] = set([o for o in OperationOption])
 
 @attr.s
 class Entity(object):
-    python_name:          str =                   attr.ib()
-    class_name:           str =                   attr.ib()
-    display_name:         str =                   attr.ib()
-    identifier_column:    IdentifierColumn =      attr.ib()
-    columns:              List[Column] =          attr.ib()
-    relationships:        List[Relationship] =    attr.ib()
-    table_name:           Optional[str] =         attr.ib()
-    uniques:              Set[List[str]] =        attr.ib()
-    max_property_length:  int =                   attr.ib()
-    plural:               str =                   attr.ib()
-    dashed_plural:        str =                   attr.ib()
-    dashed_name:          str =                   attr.ib()
-    resource_namespace:   str =                   attr.ib()
-    resource_path:        str =                   attr.ib()
-    table_args:           str =                   attr.ib()
-    operations:           Set[OperationOption] =  attr.ib()
-    api_paths:            Optional[APIPaths] =    attr.ib()
-    supports_put:         bool =                  attr.ib()
-    supports_get_one:     bool =                  attr.ib()
-    supports_get_all:     bool =                  attr.ib()
-    supports_post:        bool =                  attr.ib()
-    supports_patch:       bool =                  attr.ib()
-    supports_delete_one:  bool =                  attr.ib()
-    supports_delete_all:  bool =                  attr.ib()
-    model_alias:          Optional[ImportAlias] = attr.ib()
+    python_name:           str =                      attr.ib()
+    class_name:            str =                      attr.ib()
+    display_name:          str =                      attr.ib()
+    identifier_column:     IdentifierColumn =         attr.ib()
+    columns:               List[Column] =             attr.ib()
+    relationships:         List[Relationship] =       attr.ib()
+    table_name:            Optional[str] =            attr.ib()
+    uniques:               Set[List[str]] =           attr.ib()
+    max_property_length:   int =                      attr.ib()
+    plural:                str =                      attr.ib()
+    dashed_plural:         str =                      attr.ib()
+    dashed_name:           str =                      attr.ib()
+    resource_namespace:    str =                      attr.ib()
+    resource_path:         str =                      attr.ib()
+    table_args:            str =                      attr.ib()
+    operations:            Set[OperationOption] =     attr.ib()
+    api_paths:             Optional[APIPaths] =       attr.ib()
+    supports_put:          bool =                     attr.ib()
+    supports_get_one:      bool =                     attr.ib()
+    supports_get_all:      bool =                     attr.ib()
+    supports_post:         bool =                     attr.ib()
+    supports_patch:        bool =                     attr.ib()
+    supports_delete_one:   bool =                     attr.ib()
+    supports_delete_all:   bool =                     attr.ib()
+    model_alias:           Optional[ImportAlias] =    attr.ib()
+    additional_properties: List[AdditionalProperty] = attr.ib()
 
 
 def create_entity(
-        class_name:         str,
-        identifier_column:  IdentifierColumn,
-        columns:            List[Column],
-        relationships:      List[Relationship]=list(),
-        uniques:            List[List[str]]=list(),
-        operations:         Optional[Set[OperationOption]]=None,
-        display_name:       Optional[str]=None,
-        table_name:         Optional[str]=None,
-        plural:             Optional[str]=None,
-        dashed_plural:      Optional[str]=None,
-        resource_namespace: Optional[str]=None,
-        resource_path:      Optional[str]=None,
-        api_paths:          Optional[APIPaths]=None,
-        model_alias:        Optional[ImportAlias]=None,
+        class_name:            str,
+        identifier_column:     IdentifierColumn,
+        columns:               List[Column],
+        relationships:         List[Relationship]=list(),
+        uniques:               List[List[str]]=list(),
+        operations:            Optional[Set[OperationOption]]=None,
+        display_name:          Optional[str]=None,
+        table_name:            Optional[str]=None,
+        plural:                Optional[str]=None,
+        dashed_plural:         Optional[str]=None,
+        resource_namespace:    Optional[str]=None,
+        resource_path:         Optional[str]=None,
+        api_paths:             Optional[APIPaths]=None,
+        model_alias:           Optional[ImportAlias]=None,
+        additional_properties: Optional[List[AdditionalProperty]]=None
 ) -> Entity:
     operations = operations if operations is not None else all_operations
     python_name = pythonize(class_name)
@@ -132,6 +140,7 @@ def create_entity(
         supports_delete_one=OperationOption.delete_one in operations,
         supports_delete_all=OperationOption.delete_all in operations,
         model_alias=model_alias,
+        additional_properties=additional_properties if additional_properties is not None else [],
     )
 
 
@@ -243,3 +252,10 @@ def add_relationship_to_entity(
         args['relationships'],
     )
     return Entity(**args)
+
+
+def create_additional_property(
+        property_name:  str,
+        property_value: str,
+) -> AdditionalProperty:
+    return AdditionalProperty(python_name=property_name, value=property_value)

@@ -10,6 +10,11 @@ from sqlalchemy import UniqueConstraint
 class {{ template.entity.class_name }}(db.Model):  # type: ignore
 {%- if template.entity.table_name %}
     __table_name__ = '{{ template.entity.table_name }}'
+{% endif -%}
+{%- if template.entity.additional_properties %}
+    {%- for property in template.entity.additional_properties %}
+    {{ property.python_name }} = {{ property.value }}
+    {%- endfor %}
 {% endif %}
     id ={{ pad('id') }} db.Column(db.Integer, primary_key=True)
 {%- for column in template.entity.columns %}

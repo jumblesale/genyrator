@@ -1,7 +1,8 @@
 import dateutil
 
 from genyrator.entities.Column import create_column, create_identifier_column
-from genyrator.entities.Entity import create_entity, create_entity_from_type_dict, APIPath, APIPaths, create_api_path
+from genyrator.entities.Entity import create_entity, create_entity_from_type_dict, APIPath, APIPaths, create_api_path, \
+    create_additional_property
 from genyrator.entities.Relationship import create_relationship, JoinOption
 from genyrator.entities.Schema import Schema, create_schema
 from genyrator.types import TypeOption
@@ -27,6 +28,7 @@ owner_dogs_entity = create_entity(
         create_relationship('Owner', True, False, JoinOption.to_one, None, None,),
     ],
     table_name='owner_dogs',
+    additional_properties=[create_additional_property(property_name='__versioned__', property_value='{}')]
 )
 fave_treats_entity = create_entity(
     'FavouriteTreats',
