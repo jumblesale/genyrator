@@ -12,6 +12,8 @@ sqlalchemy = "*"
 flask-sqlalchemy = "*"
 python-dateutil = "*"
 flask-restplus = "*"
+behave = "*"
+pyhamcrest = "*"
 
 [dev-packages]
 
