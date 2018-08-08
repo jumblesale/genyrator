@@ -8,6 +8,6 @@ setup(
     license='',
     author='jumblesale',
     author_email='',
-    description=''
+    description='',
     package_dir={'' : 'genyrator'},
 )
