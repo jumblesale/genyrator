@@ -156,6 +156,7 @@ def create_entity_from_type_dict(
         uniques:                Optional[List[List[str]]]=None,
         api_paths:              Optional[APIPaths]=None,
         model_alias:            Optional[ImportAlias]=None,
+        additional_properties:  Optional[List[AdditionalProperty]]=None,
 ) -> Entity:
     columns = []
     foreign_keys_dict = {}
@@ -192,6 +193,7 @@ def create_entity_from_type_dict(
         uniques=uniques if uniques else [],
         api_paths=api_paths,
         model_alias=model_alias,
+        additional_properties=additional_properties if additional_properties is not None else [],
     )
 
 
