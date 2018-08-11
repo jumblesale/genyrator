@@ -4,7 +4,7 @@ import random
 import string
 from functools import partial
 
-from behave import *
+from behave import step, given, then, when
 from typing import List, Any, Dict, Optional
 
 from flask.testing import FlaskClient
@@ -14,8 +14,9 @@ from genyrator import (
     Entity, create_entity, Column, create_column, create_identifier_column,
     string_to_type_option,
 )
-from genyrator.entities.Entity import all_operations as all_entity_operations, OperationOption, \
+from genyrator.entities.Entity import (
     string_to_operation_option, all_operations
+)
 from genyrator.entities.Column import IdentifierColumn
 from genyrator.entities.Schema import create_schema, Schema
 
@@ -32,7 +33,11 @@ def _create_test_entity(columns: List[Column], identifier_column: IdentifierColu
     )
 
 
-def _make_request(client: FlaskClient, endpoint: str, method: str, parameters: Optional[str]=None, data: Optional[Dict]=None):
+def _make_request(
+    client: FlaskClient, endpoint: str, method: str,
+    parameters: Optional[str] = None,
+    data: Optional[Dict] = None
+):
     if parameters is not None:
         parameters = '&'.join(parameters.split(','))
         endpoint = '?'.join([endpoint, parameters])
@@ -42,7 +47,7 @@ def _make_request(client: FlaskClient, endpoint: str, method: str, parameters: O
     return method()
 
 
-def _create_schema(context: Any, module_name: Optional[str]=None):
+def _create_schema(context: Any, module_name: Optional[str] = None):
     entity_name = context.entity_name if hasattr(context, 'entity_name') else None
     operations = context.operations if hasattr(context, 'operations') else all_operations
     entity = create_entity(

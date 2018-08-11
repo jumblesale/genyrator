@@ -6,7 +6,7 @@ from genyrator.entities.Template import create_template
 TemplateConfig = NamedTuple('TemplateConfig', [
     ('root_files', List[Template.Template]),
     ('core',       List[Template.Template]),
-    ('db_init'  ,  List[Template.Template]),
+    ('db_init',    List[Template.Template]),
     ('db_models',  List[Template.Template]),
     ('resources',  List[Template.Template]), ])
 

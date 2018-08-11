@@ -1,11 +1,13 @@
 import dateutil
 
 from genyrator.entities.Column import create_column, create_identifier_column
-from genyrator.entities.Entity import create_entity, create_entity_from_type_dict, APIPath, APIPaths, create_api_path, \
-    create_additional_property
+from genyrator.entities.Entity import create_entity, create_entity_from_type_dict, APIPaths, create_api_path, create_additional_property
 from genyrator.entities.Relationship import create_relationship, JoinOption
-from genyrator.entities.Schema import Schema, create_schema
+from genyrator.entities.Schema import create_schema
 from genyrator.types import TypeOption
+
+from doggos import app, db
+from doggos.sqlalchemy.model import Dog, Owner, OwnerDogs
 
 treat_entity = create_entity(
     class_name='Treat',
@@ -82,9 +84,6 @@ schema = create_schema(
     entities=entities,
 )
 schema.write_files()
-
-from doggos import app, db
-from doggos.sqlalchemy.model import *
 
 if __name__ == '__main__':
     with app.app_context():

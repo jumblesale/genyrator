@@ -7,8 +7,8 @@ class Property(object):
     def __init__(
             self,
             type:       TypeOption,
-            nullable:   Optional[bool]=None,
-            identifier: Optional[bool]=None,
+            nullable:   Optional[bool] = None,
+            identifier: Optional[bool] = None,
     ):
         self.type =       type
         self.nullable =   nullable if nullable is not None else False

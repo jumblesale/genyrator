@@ -38,7 +38,8 @@ def create_identifier_column(
         type_option:              TypeOption,
 ) -> IdentifierColumn:
     column: IdentifierColumn = create_column(
-        name=name, type_option=type_option, index=True, nullable=False, identifier=True,
+        name=name, type_option=type_option, index=True, nullable=False,
+        identifier=True,
     )
     return column
 
@@ -46,11 +47,11 @@ def create_identifier_column(
 def create_column(
         name:                     str,
         type_option:              TypeOption,
-        index:                    bool=False,
-        nullable:                 bool=True,
-        identifier:               bool=False,
-        foreign_key_relationship: Optional[str]=None,
-        display_name:             Optional[str]=None,
+        index:                    bool = False,
+        nullable:                 bool = True,
+        identifier:               bool = False,
+        foreign_key_relationship: Optional[str] = None,
+        display_name:             Optional[str] = None,
 ) -> Column:
     if identifier is True:
         constructor = IdentifierColumn

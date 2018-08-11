@@ -1,3 +1,4 @@
+# flake8: noqa
 from genyrator.entities.Column import (
     Column,
     create_column,

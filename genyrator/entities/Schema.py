@@ -40,10 +40,10 @@ class Schema(object):
 def create_schema(
         module_name:     str,
         entities:        List[Entity],
-        db_import_path:  Optional[str]=None,
-        api_name:        Optional[str]=None,
-        api_description: Optional[str]=None,
-        file_path:       Optional[List[str]]=None,
+        db_import_path:  Optional[str] = None,
+        api_name:        Optional[str] = None,
+        api_description: Optional[str] = None,
+        file_path:       Optional[List[str]] = None,
 ) -> Schema:
     db_import_path = db_import_path if db_import_path else '{}.sqlalchemy'.format(module_name)
     file_path =  file_path if file_path else [module_name]

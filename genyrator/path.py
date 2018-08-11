@@ -10,6 +10,6 @@ def get_root_path_list() -> List[str]:
 
 def create_relative_path(paths: List[str]) -> str:
     return os.path.join(
-            *get_root_path_list(),
-            *paths,
-        )
+        *get_root_path_list(),
+        *paths,
+    )
