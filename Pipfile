@@ -4,16 +4,19 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "*"
 attrs = "*"
-inflection = "*"
-twine = "*"
-sqlalchemy = "*"
-flask-sqlalchemy = "*"
-python-dateutil = "*"
-flask-restplus = "*"
 behave = "*"
+flask = "*"
+flask-marshmallow = "*"
+flask-restplus = "*"
+flask-sqlalchemy = "*"
+inflection = "*"
+marshmallow-sqlalchemy = "*"
+pycodestyle = "*"
 pyhamcrest = "*"
+python-dateutil = "*"
+sqlalchemy = "*"
+twine = "*"
 
 [dev-packages]
 
