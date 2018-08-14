@@ -1,15 +1,14 @@
-import os
 from typing import List, Optional, NewType, Tuple, NamedTuple
 import attr
 from jinja2 import Template as JinjaTemplate, StrictUndefined
 
 from genyrator.entities.Entity import Entity
-from genyrator.path import get_root_path_list, create_relative_path
+from genyrator.path import create_relative_path
 
 OutPath = NewType('OutPath', Tuple[List[str], str])
 Import = NamedTuple('Import',
-    [('module_name', str),
-     ('imports',     List[str]), ])
+                    [('module_name', str),
+                     ('imports',     List[str]), ])
 
 
 @attr.s
@@ -34,8 +33,8 @@ class Template(object):
 
 def create_template(
         constructor,
-        template_path: Optional[List[str]]=None,
-        out_path:      Optional[OutPath]=None,
+        template_path: Optional[List[str]] = None,
+        out_path:      Optional[OutPath] = None,
         **kwargs,
 ) -> Template:
     relative_path = template_path[0:-1]

@@ -1,6 +1,5 @@
 import os
 import glob
-import shutil
 
 from genyrator.path import get_root_path_list
 

@@ -89,23 +89,29 @@ class Entity(object):
     model_alias:           Optional[ImportAlias] =    attr.ib()
     additional_properties: List[AdditionalProperty] = attr.ib()
 
+    @property
+    def has_joined_entities(self):
+        return any(
+            len(api_path.joined_entities) > 0 for api_path in self.api_paths
+        )
+
 
 def create_entity(
-        class_name:            str,
-        identifier_column:     IdentifierColumn,
-        columns:               List[Column],
-        relationships:         List[Relationship]=list(),
-        uniques:               List[List[str]]=list(),
-        operations:            Optional[Set[OperationOption]]=None,
-        display_name:          Optional[str]=None,
-        table_name:            Optional[str]=None,
-        plural:                Optional[str]=None,
-        dashed_plural:         Optional[str]=None,
-        resource_namespace:    Optional[str]=None,
-        resource_path:         Optional[str]=None,
-        api_paths:             Optional[APIPaths]=None,
-        model_alias:           Optional[ImportAlias]=None,
-        additional_properties: Optional[List[AdditionalProperty]]=None
+        class_name:         str,
+        identifier_column:  IdentifierColumn,
+        columns:            List[Column],
+        relationships:      List[Relationship] = list(),
+        uniques:            List[List[str]] = list(),
+        operations:         Optional[Set[OperationOption]] = None,
+        display_name:       Optional[str] = None,
+        table_name:         Optional[str] = None,
+        plural:             Optional[str] = None,
+        dashed_plural:      Optional[str] = None,
+        resource_namespace: Optional[str] = None,
+        resource_path:      Optional[str] = None,
+        api_paths:          Optional[APIPaths] = None,
+        model_alias:        Optional[ImportAlias] = None,
+        additional_properties: Optional[List[AdditionalProperty]] = None
 ) -> Entity:
     operations = operations if operations is not None else all_operations
     python_name = pythonize(class_name)
@@ -148,15 +154,15 @@ def create_entity_from_type_dict(
         class_name:             str,
         identifier_column_name: str,
         type_dict:              Dict,
-        foreign_keys:           Set[Tuple[str, str]]=set(),
-        indexes:                Set[str]=set(),
-        operations:             Optional[Set[OperationOption]]=None,
-        relationships:          Optional[List[Relationship]]=None,
-        table_name:             Optional[str]=None,
-        uniques:                Optional[List[List[str]]]=None,
-        api_paths:              Optional[APIPaths]=None,
-        model_alias:            Optional[ImportAlias]=None,
-        additional_properties:  Optional[List[AdditionalProperty]]=None,
+        foreign_keys:           Set[Tuple[str, str]] = set(),
+        indexes:                Set[str] = set(),
+        operations:             Optional[Set[OperationOption]] = None,
+        relationships:          Optional[List[Relationship]] = None,
+        table_name:             Optional[str] = None,
+        uniques:                Optional[List[List[str]]] = None,
+        api_paths:              Optional[APIPaths] = None,
+        model_alias:            Optional[ImportAlias] = None,
+        additional_properties:  Optional[List[AdditionalProperty]] = None,
 ) -> Entity:
     columns = []
     foreign_keys_dict = {}
@@ -200,9 +206,9 @@ def create_entity_from_type_dict(
 def create_api_path(
         joined_entities: List[str],
         route:           str,
-        endpoint:        Optional[str]=None,
-        class_name:      Optional[str]=None,
-        property_name:   Optional[str]=None,
+        endpoint:        Optional[str] = None,
+        class_name:      Optional[str] = None,
+        property_name:   Optional[str] = None,
 ) -> APIPath:
     python_name = pythonize(joined_entities[-1])
     property_name = property_name if property_name else to_json_case(python_name)

@@ -13,4 +13,3 @@ api = Api(
 {% for entity in template.entities -%}
 api.add_namespace({{ entity.plural }}_api)
 {% endfor %}
-

@@ -26,8 +26,8 @@ def create_relationship(
         nullable:                 bool,
         lazy:                     bool,
         join:                     JoinOption,
-        join_table:               Optional[str]=None,
-        property_name:            Optional[str]=None,
+        join_table:               Optional[str] = None,
+        property_name:            Optional[str] = None,
 ) -> Relationship:
     target_entity_python_name = pythonize(target_entity_class_name)
     return Relationship(
