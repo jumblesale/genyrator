@@ -69,7 +69,7 @@ class Entity(object):
     columns:               List[Column] =             attr.ib()
     relationships:         List[Relationship] =       attr.ib()
     table_name:            Optional[str] =            attr.ib()
-    uniques:               Set[List[str]] =           attr.ib()
+    uniques:               List[str] =                attr.ib()
     max_property_length:   int =                      attr.ib()
     plural:                str =                      attr.ib()
     dashed_plural:         str =                      attr.ib()
@@ -109,7 +109,7 @@ def create_entity(
         dashed_plural:      Optional[str] = None,
         resource_namespace: Optional[str] = None,
         resource_path:      Optional[str] = None,
-        api_paths:          Optional[APIPaths] = None,
+        api_paths:          Optional[List[APIPath]] = None,
         model_alias:        Optional[ImportAlias] = None,
         additional_properties: Optional[List[AdditionalProperty]] = None
 ) -> Entity:
