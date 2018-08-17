@@ -1,12 +1,16 @@
 import json
-from flask import request, abort, json as flask_json, url_for
+from flask import request, abort, url_for
 from flask_restplus import Resource, fields, Namespace
+
 from sqlalchemy.orm import joinedload
+
 from typing import Optional
-from bookshop.core.convert_dict import python_dict_to_json_dict, json_dict_to_python_dict
+from bookshop.core.convert_dict import (
+    python_dict_to_json_dict, json_dict_to_python_dict
+)
 from bookshop.sqlalchemy import db
 from bookshop.sqlalchemy.model import Book
-from bookshop.schema import *
+from bookshop.schema import BookSchema
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
 
 api = Namespace('books',
@@ -17,22 +21,25 @@ book_model = api.model('Book', {
     'bookId': fields.String(),
     'name': fields.String(),
     'rating': fields.Integer(),
+    'authorId': fields.String(),
+    'genre': fields.Url('genre'),  # noqa: E501
 })
 
 book_schema = BookSchema()
 books_many_schema = BookSchema(many=True)
 
 
-@api.route('/book/<bookId>', endpoint='book_by_id')
+@api.route('/book/<bookId>', endpoint='book_by_id')  # noqa: E501
 class BookResource(Resource):  # type: ignore
+
     @api.marshal_with(book_model)
-    @api.doc(id='get-book-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
+    @api.doc(id='get-book-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, bookId):  # type: ignore
-        result: Optional[Book] = Book.query.filter_by(book_id=bookId).first()
+        result: Optional[Book] = Book.query.filter_by(book_id=bookId).first()  # noqa: E501
         if result is None:
             abort(404)
         return python_dict_to_json_dict(model_to_dict(result))
-    
+
     @api.doc(id='delete-book-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
     def delete(self, bookId):  # type: ignore
         result: Optional[Book] = Book.query.filter_by(book_id=bookId).delete()
@@ -47,7 +54,7 @@ class BookResource(Resource):  # type: ignore
         if type(data) is not dict:
             return abort(400)
 
-        result: Optional[Book] = Book.query.filter_by(book_id=bookId).first()
+        result: Optional[Book] = Book.query.filter_by(book_id=bookId).first()  # noqa: E501
 
         if 'bookId' not in data:
             data['bookId'] = str(bookId)
@@ -85,14 +92,35 @@ class BookResource(Resource):  # type: ignore
         db.session.commit()
 
 
-@api.route('/books', endpoint='books')
+@api.route('/books', endpoint='books')  # noqa: E501
 class ManyBookResource(Resource):  # type: ignore
+
     def get(self):
         result = Book.query.all()
-        urls = [url_for('book_by_id', bookId=x.book_id) for x in result]
+        urls = [
+            url_for(
+                'book_by_id',
+                bookId=x.book_id
+            )
+            for x in result
+        ]
         return {"links": urls}
 
-    
-    
     def post(self):  # type: ignore
         ...
+
+
+@api.route('/book/<bookId>/genres', endpoint='genre')  # noqa: E501
+class Genre(Resource):  # type: ignore
+    @api.doc(id='genre', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+    def get(self, bookId):  # type: ignore
+        result: Optional[Book] = Book \
+            .query \
+            .options(
+                joinedload('genre')
+            ) \
+            .filter_by(book_id=bookId) \
+            .first()  # noqa: E501
+        if result is None:
+            abort(404)
+        return python_dict_to_json_dict(model_to_dict(result, ['genre']))  # noqa: E501

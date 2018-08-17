@@ -16,7 +16,7 @@ def convert_dict_naming(in_dict: Dict, fn: Callable[[str], str]) -> Dict:
     return out_dict
 
 
-def convert_iterable_naming(in_list: Iterable, fn: Callable[[str], str]) -> List:
+def convert_iterable_naming(in_list: Iterable, fn: Callable[[str], str]) -> List:  # noqa: E501
     out_list = []
     for v in in_list:
         if type(v) is dict:

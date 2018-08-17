@@ -24,8 +24,11 @@ def model_to_dict(model: DeclarativeMeta, paths=list()):
     next_key = next_path
     if type(next_relationship) is InstrumentedList:
         serialized_data[next_key] = [
-            python_dict_to_json_dict(model_to_dict(nr, paths[1:])) for nr in next_relationship
+            python_dict_to_json_dict(model_to_dict(nr, paths[1:]))
+            for nr in next_relationship
         ]
     else:
-        serialized_data[next_key] = python_dict_to_json_dict(model_to_dict(next_relationship, paths[1:]))
+        serialized_data[next_key] = python_dict_to_json_dict(
+            model_to_dict(next_relationship, paths[1:])
+        )
     return serialized_data
