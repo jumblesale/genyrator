@@ -17,6 +17,8 @@ pyhamcrest = "*"
 python-dateutil = "*"
 sqlalchemy = "*"
 twine = "*"
+mamba = "*"
+expects = "*"
 
 [dev-packages]
 
