@@ -31,4 +31,4 @@ def model_to_dict(model: DeclarativeMeta, paths=list()):
         serialized_data[next_key] = python_dict_to_json_dict(
             model_to_dict(next_relationship, paths[1:])
         )
-    return serialized_data
+    return python_dict_to_json_dict(serialized_data)
