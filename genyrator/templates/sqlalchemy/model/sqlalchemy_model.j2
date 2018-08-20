@@ -1,4 +1,5 @@
 from {{ template.db_import_path }} import db
+from sqlalchemy_utils import UUIDType
 from sqlalchemy import UniqueConstraint
 
 {%- macro pad(name) -%}
@@ -17,7 +18,7 @@ class {{ template.entity.class_name }}(db.Model):  # type: ignore
 {% endif %}
     id ={{ pad('id') }} db.Column(db.Integer, primary_key=True)  # noqa: E501
 {%- for column in template.entity.columns %}
-    {{ column.python_name }} ={{ pad(column.python_name) }} db.Column(db.{{ column.sqlalchemy_type.value }}
+    {{ column.python_name }} ={{ pad(column.python_name) }} db.Column({{ column.sqlalchemy_type.value }}
     {%- if column.relationship is defined %}, db.ForeignKey('{{ column.relationship }}'){% endif %}
     {%- if column.index %}, index=True{% endif %}{# -#}
     , nullable={{ column.nullable | string }})  # noqa: E501

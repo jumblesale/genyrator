@@ -55,7 +55,7 @@ class AuthorResource(Resource):  # type: ignore
         result: Optional[Author] = Author.query.filter_by(author_id=authorId).first()  # noqa: E501
 
         if 'authorId' not in data:
-            data['authorId'] = str(authorId)
+            data['authorId'] = uuid4(authorId)
 
         marshmallow_result = author_schema.load(
             json_dict_to_python_dict(data),
@@ -81,7 +81,7 @@ class AuthorResource(Resource):  # type: ignore
             abort(404)
 
         if 'authorId' not in data:
-            data['authorId'] = str(authorId)
+            data['authorId'] = uuid4(authorId)
 
         python_dict = json_dict_to_python_dict(data)
         [setattr(result, k, v) for k, v in python_dict.items()]

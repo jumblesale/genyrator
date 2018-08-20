@@ -57,7 +57,7 @@ class BookResource(Resource):  # type: ignore
         result: Optional[Book] = Book.query.filter_by(book_id=bookId).first()  # noqa: E501
 
         if 'bookId' not in data:
-            data['bookId'] = str(bookId)
+            data['bookId'] = uuid4(bookId)
 
         marshmallow_result = book_schema.load(
             json_dict_to_python_dict(data),
@@ -83,7 +83,7 @@ class BookResource(Resource):  # type: ignore
             abort(404)
 
         if 'bookId' not in data:
-            data['bookId'] = str(bookId)
+            data['bookId'] = uuid4(bookId)
 
         python_dict = json_dict_to_python_dict(data)
         [setattr(result, k, v) for k, v in python_dict.items()]

@@ -16,7 +16,7 @@ api = Namespace('genres',
                 description='Genre API', )
 
 genre_model = api.model('Genre', {
-    'genreId': fields.Integer(),
+    'genreId': fields.String(),
     'title': fields.String(),
 })
 
@@ -52,7 +52,7 @@ class GenreResource(Resource):  # type: ignore
         result: Optional[Genre] = Genre.query.filter_by(genre_id=genreId).first()  # noqa: E501
 
         if 'genreId' not in data:
-            data['genreId'] = int(genreId)
+            data['genreId'] = uuid4(genreId)
 
         marshmallow_result = genre_schema.load(
             json_dict_to_python_dict(data),
@@ -78,7 +78,7 @@ class GenreResource(Resource):  # type: ignore
             abort(404)
 
         if 'genreId' not in data:
-            data['genreId'] = int(genreId)
+            data['genreId'] = uuid4(genreId)
 
         python_dict = json_dict_to_python_dict(data)
         [setattr(result, k, v) for k, v in python_dict.items()]
