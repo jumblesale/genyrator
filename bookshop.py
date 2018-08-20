@@ -8,7 +8,7 @@ from genyrator.entities.Schema import create_schema, Schema
 book_entity = create_entity(
     class_name='Book',
     identifier_column=create_identifier_column(
-        name='book_id', type_option=TypeOption.string,
+        name='book_id', type_option=TypeOption.uuid,
     ),
     columns=[
         create_column(
@@ -60,7 +60,7 @@ book_entity = create_entity(
 author_entity = create_entity(
     class_name='Author',
     identifier_column=create_identifier_column(
-        'author_id', TypeOption.string,
+        'author_id', TypeOption.uuid,
     ),
     columns=[
         create_column(
@@ -87,7 +87,7 @@ author_entity = create_entity(
 review_entity = create_entity(
     class_name='Review',
     identifier_column=create_identifier_column(
-        name='review_id', type_option=TypeOption.string,
+        name='review_id', type_option=TypeOption.uuid,
     ),
     columns=[
         create_column(
@@ -112,7 +112,7 @@ review_entity = create_entity(
 
 genre_entity = create_entity(
     class_name='Genre',
-    identifier_column=create_identifier_column('genre_id', TypeOption.int),
+    identifier_column=create_identifier_column('genre_id', TypeOption.uuid),
     columns=[
         create_column(
             name='title',
@@ -128,7 +128,7 @@ genre_entity = create_entity(
 
 book_genre_entity = create_entity(
     class_name='BookGenre',
-    identifier_column=create_identifier_column('book_genre_id', TypeOption.int),
+    identifier_column=create_identifier_column('book_genre_id', TypeOption.uuid),
     columns=[
         create_column('book_id',  type_option=TypeOption.int, foreign_key_relationship='book.book_id'),
         create_column('genre_id', type_option=TypeOption.int, foreign_key_relationship='genre.genre_id'),
