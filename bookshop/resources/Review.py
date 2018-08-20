@@ -53,7 +53,7 @@ class ReviewResource(Resource):  # type: ignore
         result: Optional[Review] = Review.query.filter_by(review_id=reviewId).first()  # noqa: E501
 
         if 'reviewId' not in data:
-            data['reviewId'] = str(reviewId)
+            data['reviewId'] = uuid4(reviewId)
 
         marshmallow_result = review_schema.load(
             json_dict_to_python_dict(data),
@@ -79,7 +79,7 @@ class ReviewResource(Resource):  # type: ignore
             abort(404)
 
         if 'reviewId' not in data:
-            data['reviewId'] = str(reviewId)
+            data['reviewId'] = uuid4(reviewId)
 
         python_dict = json_dict_to_python_dict(data)
         [setattr(result, k, v) for k, v in python_dict.items()]

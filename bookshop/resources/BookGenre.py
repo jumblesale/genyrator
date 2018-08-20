@@ -16,7 +16,7 @@ api = Namespace('book_genres',
                 description='Bookgenre API', )
 
 book_genre_model = api.model('BookGenre', {
-    'bookGenreId': fields.Integer(),
+    'bookGenreId': fields.String(),
     'bookId': fields.Integer(),
     'genreId': fields.Integer(),
 })
@@ -53,7 +53,7 @@ class BookGenreResource(Resource):  # type: ignore
         result: Optional[BookGenre] = BookGenre.query.filter_by(book_genre_id=bookGenreId).first()  # noqa: E501
 
         if 'bookGenreId' not in data:
-            data['bookGenreId'] = int(bookGenreId)
+            data['bookGenreId'] = uuid4(bookGenreId)
 
         marshmallow_result = book_genre_schema.load(
             json_dict_to_python_dict(data),
@@ -79,7 +79,7 @@ class BookGenreResource(Resource):  # type: ignore
             abort(404)
 
         if 'bookGenreId' not in data:
-            data['bookGenreId'] = int(bookGenreId)
+            data['bookGenreId'] = uuid4(bookGenreId)
 
         python_dict = json_dict_to_python_dict(data)
         [setattr(result, k, v) for k, v in python_dict.items()]
