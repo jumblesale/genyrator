@@ -14,7 +14,17 @@ class TypeOption(Enum):
 
 
 def string_to_type_option(string_type: str) -> TypeOption:
-    return getattr(TypeOption, string_type)
+    return {
+        'str':      TypeOption.string,
+        'int':      TypeOption.int,
+        'float':    TypeOption.float,
+        'bool':     TypeOption.bool,
+        'dict':     TypeOption.dict,
+        'list':     TypeOption.list,
+        'datetime': TypeOption.datetime,
+        'date':     TypeOption.date,
+        'uuid':     TypeOption.uuid,
+    }[string_type]
 
 
 def type_option_to_type_constructor(type_option: TypeOption):
