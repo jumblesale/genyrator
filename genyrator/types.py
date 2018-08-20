@@ -14,17 +14,7 @@ class TypeOption(Enum):
 
 
 def string_to_type_option(string_type: str) -> TypeOption:
-    return {
-        'str':      TypeOption.string,
-        'int':      TypeOption.int,
-        'float':    TypeOption.float,
-        'bool':     TypeOption.bool,
-        'dict':     TypeOption.dict,
-        'list':     TypeOption.list,
-        'datetime': TypeOption.datetime,
-        'date':     TypeOption.date,
-        'uuid':     TypeOption.uuid,
-    }[string_type]
+    return getattr(TypeOption, string_type)
 
 
 def type_option_to_type_constructor(type_option: TypeOption):
@@ -62,25 +52,11 @@ class RestplusTypeOption(Enum):
 
 
 def type_option_to_sqlalchemy_type(type_option: TypeOption) -> SqlAlchemyTypeOption:
-    return {
-        TypeOption.string:   SqlAlchemyTypeOption.string,
-        TypeOption.int:      SqlAlchemyTypeOption.int,
-        TypeOption.float:    SqlAlchemyTypeOption.float,
-        TypeOption.bool:     SqlAlchemyTypeOption.bool,
-        TypeOption.datetime: SqlAlchemyTypeOption.datetime,
-        TypeOption.date:     SqlAlchemyTypeOption.date,
-    }[type_option]
+    return getattr(SqlAlchemyTypeOption, type_option.value)
 
 
 def type_option_to_restplus_type(type_option: TypeOption) -> RestplusTypeOption:
-    return {
-        TypeOption.string:   RestplusTypeOption.string,
-        TypeOption.int:      RestplusTypeOption.int,
-        TypeOption.float:    RestplusTypeOption.float,
-        TypeOption.bool:     RestplusTypeOption.bool,
-        TypeOption.datetime: RestplusTypeOption.datetime,
-        TypeOption.date:     RestplusTypeOption.date,
-    }[type_option]
+    return getattr(RestplusTypeOption, type_option.value)
 
 
 class PythonTypeOption(Enum):
@@ -96,17 +72,7 @@ class PythonTypeOption(Enum):
 
 
 def type_option_to_python_type(type_option: TypeOption) -> PythonTypeOption:
-    return {
-        TypeOption.string:   PythonTypeOption.string,
-        TypeOption.float:    PythonTypeOption.float,
-        TypeOption.int:      PythonTypeOption.int,
-        TypeOption.bool:     PythonTypeOption.bool,
-        TypeOption.dict:     PythonTypeOption.dict,
-        TypeOption.list:     PythonTypeOption.list,
-        TypeOption.datetime: PythonTypeOption.datetime,
-        TypeOption.date:     PythonTypeOption.date,
-        TypeOption.uuid:     PythonTypeOption.uuid,
-    }[type_option]
+    return getattr(PythonTypeOption, type_option.value)
 
 
 def type_option_to_default_value(type_option: TypeOption) -> str:
