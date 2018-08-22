@@ -1,4 +1,6 @@
+from datetime import datetime, date
 from enum import Enum
+from uuid import UUID
 
 
 class TypeOption(Enum):
@@ -10,7 +12,7 @@ class TypeOption(Enum):
     list =     'list'
     datetime = 'datetime'
     date =     'date'
-    uuid =     'uuid'
+    uuid =     'UUID'
 
 
 def string_to_type_option(string_type: str) -> TypeOption:
@@ -23,8 +25,22 @@ def string_to_type_option(string_type: str) -> TypeOption:
         'list':     TypeOption.list,
         'datetime': TypeOption.datetime,
         'date':     TypeOption.date,
-        'uuid':     TypeOption.uuid,
+        'UUID':     TypeOption.uuid,
     }[string_type]
+
+
+def python_type_to_type_option(python_type: Any) -> TypeOption:
+    return {
+        str:      TypeOption.string,
+        int:      TypeOption.int,
+        float:    TypeOption.float,
+        bool:     TypeOption.bool,
+        dict:     TypeOption.dict,
+        list:     TypeOption.list,
+        datetime: TypeOption.datetime,
+        date:     TypeOption.date,
+        UUID:     TypeOption.uuid,
+    }[python_type]
 
 
 def type_option_to_type_constructor(type_option: TypeOption):
@@ -78,7 +94,7 @@ class PythonTypeOption(Enum):
     list =     'List'
     datetime = 'datetime'
     date =     'date'
-    uuid =     'uuid4'
+    uuid =     'UUID'
 
 
 def type_option_to_python_type(type_option: TypeOption) -> PythonTypeOption:

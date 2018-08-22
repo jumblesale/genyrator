@@ -4,7 +4,12 @@ from genyrator.entities.Column import (
     create_column,
     create_identifier_column,
 )
-from genyrator.types import TypeOption, string_to_type_option
+from genyrator.types import (
+    TypeOption,
+    string_to_type_option,
+    python_type_to_type_option,
+    type_option_to_type_constructor,
+)
 from genyrator.entities.Relationship import (
     Relationship,
     create_relationship,
