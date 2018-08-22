@@ -1,5 +1,6 @@
 from datetime import datetime, date
 from enum import Enum
+from typing import Any
 from uuid import UUID
 
 
@@ -12,7 +13,7 @@ class TypeOption(Enum):
     list =     'list'
     datetime = 'datetime'
     date =     'date'
-    uuid =     'UUID'
+    UUID =     'UUID'
 
 
 def string_to_type_option(string_type: str) -> TypeOption:
@@ -25,7 +26,7 @@ def string_to_type_option(string_type: str) -> TypeOption:
         'list':     TypeOption.list,
         'datetime': TypeOption.datetime,
         'date':     TypeOption.date,
-        'UUID':     TypeOption.uuid,
+        'UUID':     TypeOption.UUID,
     }[string_type]
 
 
@@ -39,7 +40,7 @@ def python_type_to_type_option(python_type: Any) -> TypeOption:
         list:     TypeOption.list,
         datetime: TypeOption.datetime,
         date:     TypeOption.date,
-        UUID:     TypeOption.uuid,
+        UUID:     TypeOption.UUID,
     }[python_type]
 
 
@@ -53,7 +54,7 @@ def type_option_to_type_constructor(type_option: TypeOption):
         TypeOption.list:     list,
         TypeOption.datetime: str,
         TypeOption.date:     str,
-        TypeOption.uuid:     str,
+        TypeOption.UUID:     str,
     }[type_option]
 
 
@@ -64,7 +65,7 @@ class SqlAlchemyTypeOption(Enum):
     bool =     'db.Boolean'
     datetime = 'db.DateTime'
     date =     'db.Date'
-    uuid =     'UUIDType'
+    UUID =     'UUIDType'
 
 
 class RestplusTypeOption(Enum):
@@ -74,7 +75,7 @@ class RestplusTypeOption(Enum):
     bool =     'Boolean'
     datetime = 'DateTime'
     date =     'Date'
-    uuid =     'String'
+    UUID =     'String'
 
 
 def type_option_to_sqlalchemy_type(type_option: TypeOption) -> SqlAlchemyTypeOption:
@@ -94,7 +95,7 @@ class PythonTypeOption(Enum):
     list =     'List'
     datetime = 'datetime'
     date =     'date'
-    uuid =     'UUID'
+    UUID =     'UUID'
 
 
 def type_option_to_python_type(type_option: TypeOption) -> PythonTypeOption:
@@ -111,5 +112,5 @@ def type_option_to_default_value(type_option: TypeOption) -> str:
         TypeOption.list:     '[]',
         TypeOption.datetime: '"1970-01-01T00:00"',
         TypeOption.date:     '"1970-01-01T00:00"',
-        TypeOption.uuid:     '"00000000-0000-0000-0000-000000000000"',
+        TypeOption.UUID:     '"00000000-0000-0000-0000-000000000000"',
     }[type_option]
