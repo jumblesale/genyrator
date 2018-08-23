@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 import attr
 from genyrator.inflector import pythonize, to_class_name, to_json_case, humanize
 from genyrator.types import (
@@ -52,7 +52,7 @@ def create_column(
         identifier:               bool = False,
         foreign_key_relationship: Optional[str] = None,
         display_name:             Optional[str] = None,
-) -> Column:
+) -> Union[Column, ForeignKey]:
     if identifier is True:
         constructor = IdentifierColumn
     elif foreign_key_relationship is not None:
@@ -73,5 +73,8 @@ def create_column(
         "nullable":           nullable,
     }
     if foreign_key_relationship is not None:
-        args["relationship"] = foreign_key_relationship
+        args["relationship"] = '{}.{}'.format(
+            pythonize(foreign_key_relationship),
+            'id'
+        )
     return constructor(**args)
