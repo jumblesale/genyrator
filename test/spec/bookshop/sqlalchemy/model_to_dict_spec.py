@@ -12,17 +12,16 @@ from bookshop import db
 BOOK_ID =   uuid.uuid4()
 AUTHOR_ID = uuid.uuid4()
 
-author_model = Author(author_id=AUTHOR_ID, name='orwell')
+author_model = Author(author_id=str(AUTHOR_ID), name='orwell')
 author_dict = {
     "authorId": str(AUTHOR_ID),
     "name": 'orwell',
 }
-book_model = Book(book_id=BOOK_ID, name='animal farm', rating=4.1, author_id=3)
+book_model = Book(book_id=str(BOOK_ID), name='animal farm', rating=4.1, author_id=str(AUTHOR_ID))
 book_dict = {
-    "bookId": str(BOOK_ID),
+    "bookId": BOOK_ID,
     "name": 'animal farm',
     "rating": 4.1,
-    "authorId": str(AUTHOR_ID),
 }
 
 with app.app_context():
