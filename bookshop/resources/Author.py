@@ -125,7 +125,7 @@ class Review(Resource):  # type: ignore
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        return result, ['Book', 'Review'])  # noqa: E501
+        return model_to_dict(result, ['Book', 'Review'])  # noqa: E501
 
 
 @api.route('/author/<authorId>/books', endpoint='Book')  # noqa: E501
@@ -141,4 +141,4 @@ class Book(Resource):  # type: ignore
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        return result, ['Book'])  # noqa: E501
+        return model_to_dict(result, ['Book'])  # noqa: E501

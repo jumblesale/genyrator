@@ -189,7 +189,7 @@ class {{ api_path.class_name }}(Resource):  # type: ignore
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        return result, ['{#  -#}
+        return model_to_dict(result, ['{#  -#}
     {%- set sep = joiner("', '") -%}
     {%- for entity in api_path.joined_entities -%}
         {{ sep() }}{{ entity }}

@@ -125,4 +125,4 @@ class Genre(Resource):  # type: ignore
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        return result, ['genre'])  # noqa: E501
+        return model_to_dict(result, ['genre'])  # noqa: E501
