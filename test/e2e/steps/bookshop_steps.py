@@ -5,7 +5,6 @@ import json
 from behave import given, when, then
 from hamcrest import assert_that, equal_to
 
-from bookshop.entity_definitions import entities as bookshop_entities, write_app, create_bookshop_schema
 from test.e2e.steps.common import make_request
 
 

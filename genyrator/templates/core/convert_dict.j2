@@ -10,6 +10,8 @@ def convert_dict_naming(in_dict: Dict, fn: Callable[[str], str]) -> Dict:
             value = convert_dict_naming(v, fn)
         elif type(v) is list or type(v) is set:
             value = convert_iterable_naming(v, fn)
+        elif v.__class__.__name__ == 'UUID':
+            value = str(v)
         else:
             value = v
         out_dict[fn(k)] = dict_value_to_json_value(value)
