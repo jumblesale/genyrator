@@ -19,7 +19,7 @@ author_dict = {
 }
 book_model = Book(book_id=str(BOOK_ID), name='animal farm', rating=4.1, author_id=str(AUTHOR_ID))
 book_dict = {
-    "bookId": BOOK_ID,
+    "bookId": str(BOOK_ID),
     "name": 'animal farm',
     "rating": 4.1,
 }
