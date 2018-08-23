@@ -1,3 +1,5 @@
+import uuid
+
 from expects import expect, have_keys
 from mamba import description, it
 from sqlalchemy.orm import joinedload
@@ -7,19 +9,20 @@ from bookshop.sqlalchemy.model import Book, Author
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
 from bookshop import db
 
-BOOK_ID = '1'
+BOOK_ID =   uuid.uuid4()
+AUTHOR_ID = uuid.uuid4()
 
-author_model = Author(author_id=3, name='orwell', )
+author_model = Author(author_id=AUTHOR_ID, name='orwell')
 author_dict = {
-    "authorId": '3',
+    "authorId": str(AUTHOR_ID),
     "name": 'orwell',
 }
 book_model = Book(book_id=BOOK_ID, name='animal farm', rating=4.1, author_id=3)
 book_dict = {
-    "bookId": BOOK_ID,
+    "bookId": str(BOOK_ID),
     "name": 'animal farm',
     "rating": 4.1,
-    "authorId": '3',
+    "authorId": str(AUTHOR_ID),
 }
 
 with app.app_context():

@@ -2,12 +2,9 @@ import importlib
 import json
 import random
 import string
-from functools import partial
 
 from behave import step, given, then, when
-from typing import List, Any, Dict, Optional
-
-from flask.testing import FlaskClient
+from typing import List, Any, Optional
 from hamcrest import assert_that, equal_to, has_entry
 
 from genyrator import (
@@ -19,6 +16,7 @@ from genyrator.entities.Entity import (
 )
 from genyrator.entities.Column import IdentifierColumn
 from genyrator.entities.Schema import create_schema, Schema
+from test.e2e.steps.common import make_request
 
 
 def _random_string(n: int) -> str:
@@ -31,20 +29,6 @@ def _create_test_entity(columns: List[Column], identifier_column: IdentifierColu
         identifier_column=identifier_column,
         columns=columns,
     )
-
-
-def _make_request(
-    client: FlaskClient, endpoint: str, method: str,
-    parameters: Optional[str] = None,
-    data: Optional[Dict] = None
-):
-    if parameters is not None:
-        parameters = '&'.join(parameters.split(','))
-        endpoint = '?'.join([endpoint, parameters])
-    method = partial(getattr(client, method.lower()), endpoint)
-    if data is not None:
-        return method(data=json.dumps(data), content_type='application/json')
-    return method()
 
 
 def _create_schema(context: Any, module_name: Optional[str] = None):
@@ -149,12 +133,12 @@ def app_is_running(context: Any):
 
 @step('I make a "{method}" request to "{path}"')
 def step_impl(context, method: str, path: str):
-    context.response = _make_request(context.client, path, method)
+    context.response = make_request(context.client, path, method)
 
 
 @when('I make a "{method}" request to "{path}" with parameters "{parameters}"')
 def step_impl(context: Any, method: str, path: str, parameters: str):
-    context.response = _make_request(context.client, path, method, parameters)
+    context.response = make_request(context.client, path, method, parameters)
 
 
 @then('I get http status "{status}"')
@@ -175,18 +159,18 @@ def have_json_data(context):
 @step('I make a "{method}" request to "{path}" with that json data')
 def step_impl(context: Any, method: str, path: str):
     data = context.data
-    context.response = _make_request(context.client, path, method, data=data)
+    context.response = make_request(context.client, path, method, data=data)
 
 
 @step('I can get entity "{path}"')
 def step_impl(context, path: str):
-    context.response = response = _make_request(context.client, path, 'get')
+    context.response = response = make_request(context.client, path, 'get')
     assert_that(response.status_code, equal_to(200))
 
 
 @step('I cannot get entity "{path}"')
 def step_impl(context, path: str):
-    assert_that(_make_request(context.client, path, 'get').status_code, equal_to(404))
+    assert_that(make_request(context.client, path, 'get').status_code, equal_to(404))
 
 
 @step("that response matches the original data")
@@ -218,7 +202,7 @@ def step_impl(context, entity_name):
 @step('making "{operations_list}" requests to "{endpoint}" gives http status "{status}"')
 def step_impl(context, operations_list: str, endpoint: str, status: int):
     for operation in operations_list.split(','):
-        response = _make_request(
+        response = make_request(
             client=context.client,
             endpoint=endpoint,
             method=operation,
