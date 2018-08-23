@@ -116,7 +116,8 @@ def create_entity(
     operations = operations if operations is not None else all_operations
     python_name = pythonize(class_name)
     columns = [identifier_column, *columns]
-    uniques = [[identifier_column.python_name], *uniques]
+    if [identifier_column.python_name] not in uniques:
+        uniques = [[identifier_column.python_name], *uniques]
     max_property_length = _calculate_max_property_length(
         identifier_column, columns, relationships
     )
