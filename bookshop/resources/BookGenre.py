@@ -3,6 +3,8 @@ from flask import request, abort, url_for
 from flask_restplus import Resource, fields, Namespace
 
 from typing import Optional
+from uuid import UUID
+
 from bookshop.core.convert_dict import (
     python_dict_to_json_dict, json_dict_to_python_dict
 )
@@ -53,7 +55,7 @@ class BookGenreResource(Resource):  # type: ignore
         result: Optional[BookGenre] = BookGenre.query.filter_by(book_genre_id=bookGenreId).first()  # noqa: E501
 
         if 'bookGenreId' not in data:
-            data['bookGenreId'] = uuid4(bookGenreId)
+            data['bookGenreId'] = UUID(bookGenreId)
 
         marshmallow_result = book_genre_schema.load(
             json_dict_to_python_dict(data),
@@ -79,7 +81,7 @@ class BookGenreResource(Resource):  # type: ignore
             abort(404)
 
         if 'bookGenreId' not in data:
-            data['bookGenreId'] = uuid4(bookGenreId)
+            data['bookGenreId'] = UUID(bookGenreId)
 
         python_dict = json_dict_to_python_dict(data)
         [setattr(result, k, v) for k, v in python_dict.items()]

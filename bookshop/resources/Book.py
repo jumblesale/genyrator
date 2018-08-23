@@ -5,6 +5,8 @@ from flask_restplus import Resource, fields, Namespace
 from sqlalchemy.orm import joinedload
 
 from typing import Optional
+from uuid import UUID
+
 from bookshop.core.convert_dict import (
     python_dict_to_json_dict, json_dict_to_python_dict
 )
@@ -57,7 +59,7 @@ class BookResource(Resource):  # type: ignore
         result: Optional[Book] = Book.query.filter_by(book_id=bookId).first()  # noqa: E501
 
         if 'bookId' not in data:
-            data['bookId'] = uuid4(bookId)
+            data['bookId'] = UUID(bookId)
 
         marshmallow_result = book_schema.load(
             json_dict_to_python_dict(data),
@@ -83,7 +85,7 @@ class BookResource(Resource):  # type: ignore
             abort(404)
 
         if 'bookId' not in data:
-            data['bookId'] = uuid4(bookId)
+            data['bookId'] = UUID(bookId)
 
         python_dict = json_dict_to_python_dict(data)
         [setattr(result, k, v) for k, v in python_dict.items()]
@@ -123,4 +125,4 @@ class Genre(Resource):  # type: ignore
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        return python_dict_to_json_dict(model_to_dict(result, ['genre']))  # noqa: E501
+        return result, ['genre'])  # noqa: E501

@@ -5,6 +5,8 @@ from flask_restplus import Resource, fields, Namespace
 from sqlalchemy.orm import joinedload
 
 from typing import Optional
+from uuid import UUID
+
 from bookshop.core.convert_dict import (
     python_dict_to_json_dict, json_dict_to_python_dict
 )
@@ -20,7 +22,8 @@ api = Namespace('authors',
 author_model = api.model('Author', {
     'authorId': fields.String(),
     'name': fields.String(),
-    'review': fields.Url('Author-Book-Review'),  # noqa: E501
+    'review': fields.Url('Book-Review'),  # noqa: E501
+    'book': fields.Url('Book'),  # noqa: E501
 })
 
 author_schema = AuthorSchema()
@@ -55,7 +58,7 @@ class AuthorResource(Resource):  # type: ignore
         result: Optional[Author] = Author.query.filter_by(author_id=authorId).first()  # noqa: E501
 
         if 'authorId' not in data:
-            data['authorId'] = uuid4(authorId)
+            data['authorId'] = UUID(authorId)
 
         marshmallow_result = author_schema.load(
             json_dict_to_python_dict(data),
@@ -81,7 +84,7 @@ class AuthorResource(Resource):  # type: ignore
             abort(404)
 
         if 'authorId' not in data:
-            data['authorId'] = uuid4(authorId)
+            data['authorId'] = UUID(authorId)
 
         python_dict = json_dict_to_python_dict(data)
         [setattr(result, k, v) for k, v in python_dict.items()]
@@ -108,19 +111,34 @@ class ManyAuthorResource(Resource):  # type: ignore
         ...
 
 
-@api.route('/author/<authorId>/books/reviews', endpoint='Author-Book-Review')  # noqa: E501
+@api.route('/author/<authorId>/books/reviews', endpoint='Book-Review')  # noqa: E501
 class Review(Resource):  # type: ignore
-    @api.doc(id='Author-Book-Review', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+    @api.doc(id='Book-Review', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, authorId):  # type: ignore
         result: Optional[Author] = Author \
             .query \
             .options(
-                joinedload('Author')
-                .joinedload('Book')
+                joinedload('Book')
                 .joinedload('Review')
             ) \
             .filter_by(author_id=authorId) \
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        return python_dict_to_json_dict(model_to_dict(result, ['Author', 'Book', 'Review']))  # noqa: E501
+        return result, ['Book', 'Review'])  # noqa: E501
+
+
+@api.route('/author/<authorId>/books', endpoint='Book')  # noqa: E501
+class Book(Resource):  # type: ignore
+    @api.doc(id='Book', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+    def get(self, authorId):  # type: ignore
+        result: Optional[Author] = Author \
+            .query \
+            .options(
+                joinedload('Book')
+            ) \
+            .filter_by(author_id=authorId) \
+            .first()  # noqa: E501
+        if result is None:
+            abort(404)
+        return result, ['Book'])  # noqa: E501
