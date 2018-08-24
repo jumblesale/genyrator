@@ -1,19 +1,23 @@
 import json
+from typing import Optional
+from uuid import UUID
+
 from flask import request, abort, url_for
 from flask_restplus import Resource, fields, Namespace
 
 from sqlalchemy.orm import joinedload
 
-from typing import Optional
-from uuid import UUID
 
 from bookshop.core.convert_dict import (
     python_dict_to_json_dict, json_dict_to_python_dict
 )
 from bookshop.sqlalchemy import db
 from bookshop.sqlalchemy.model import Author
+from bookshop.sqlalchemy.convert_properties import convert_properties_to_sqlalchemy_properties
+from bookshop.sqlalchemy.join_entities import create_joined_entity_map
 from bookshop.schema import AuthorSchema
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
+from bookshop.domain.Author import author as author_domain_model
 
 api = Namespace('authors',
                 path='/',
@@ -57,8 +61,16 @@ class AuthorResource(Resource):  # type: ignore
 
         result: Optional[Author] = Author.query.filter_by(author_id=authorId).first()  # noqa: E501
 
-        if 'authorId' not in data:
-            data['authorId'] = UUID(authorId)
+        joined_entities = create_joined_entity_map(
+            author_domain_model,
+            data,
+        )
+
+        data = convert_properties_to_sqlalchemy_properties(
+            author_domain_model,
+            joined_entities,
+            json_dict_to_python_dict(data),
+        )
 
         marshmallow_result = author_schema.load(
             json_dict_to_python_dict(data),

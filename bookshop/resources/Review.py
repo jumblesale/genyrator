@@ -1,17 +1,21 @@
 import json
+from typing import Optional
+from uuid import UUID
+
 from flask import request, abort, url_for
 from flask_restplus import Resource, fields, Namespace
 
-from typing import Optional
-from uuid import UUID
 
 from bookshop.core.convert_dict import (
     python_dict_to_json_dict, json_dict_to_python_dict
 )
 from bookshop.sqlalchemy import db
 from bookshop.sqlalchemy.model import Review
+from bookshop.sqlalchemy.convert_properties import convert_properties_to_sqlalchemy_properties
+from bookshop.sqlalchemy.join_entities import create_joined_entity_map
 from bookshop.schema import ReviewSchema
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
+from bookshop.domain.Review import review as review_domain_model
 
 api = Namespace('reviews',
                 path='/',
@@ -54,8 +58,16 @@ class ReviewResource(Resource):  # type: ignore
 
         result: Optional[Review] = Review.query.filter_by(review_id=reviewId).first()  # noqa: E501
 
-        if 'reviewId' not in data:
-            data['reviewId'] = UUID(reviewId)
+        joined_entities = create_joined_entity_map(
+            review_domain_model,
+            data,
+        )
+
+        data = convert_properties_to_sqlalchemy_properties(
+            review_domain_model,
+            joined_entities,
+            json_dict_to_python_dict(data),
+        )
 
         marshmallow_result = review_schema.load(
             json_dict_to_python_dict(data),

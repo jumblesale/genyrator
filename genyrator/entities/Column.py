@@ -25,7 +25,8 @@ class Column(object):
 
 @attr.s
 class ForeignKey(Column):
-    relationship: str = attr.ib()
+    relationship: str =         attr.ib()
+    target_restplus_type: str = attr.ib()
 
 
 @attr.s
@@ -50,8 +51,9 @@ def create_column(
         index:                    bool = False,
         nullable:                 bool = True,
         identifier:               bool = False,
-        foreign_key_relationship: Optional[str] = None,
         display_name:             Optional[str] = None,
+        foreign_key_relationship: Optional[str] = None,
+        target_type_option:       Optional[TypeOption] = None,
 ) -> Union[Column, ForeignKey]:
     if identifier is True:
         constructor = IdentifierColumn
@@ -73,8 +75,9 @@ def create_column(
         "nullable":           nullable,
     }
     if foreign_key_relationship is not None:
-        args["relationship"] = '{}.{}'.format(
+        args['relationship'] = '{}.{}'.format(
             pythonize(foreign_key_relationship),
             'id'
         )
+        args['target_restplus_type'] = type_option_to_restplus_type(target_type_option)
     return constructor(**args)

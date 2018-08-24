@@ -8,7 +8,7 @@ class Book(db.Model):  # type: ignore
     book_id =   db.Column(UUIDType, index=True, nullable=False)  # noqa: E501
     name =      db.Column(db.String, index=True, nullable=False)  # noqa: E501
     rating =    db.Column(db.BigInteger, index=True, nullable=False)  # noqa: E501
-    author_id = db.Column(db.String, db.ForeignKey('author.author_id'), nullable=True)  # noqa: E501
+    author_id = db.Column(db.BigInteger, db.ForeignKey('author.id'), nullable=True)  # noqa: E501
     author =    db.relationship(
         'Author',
         lazy=False,
@@ -18,12 +18,6 @@ class Book(db.Model):  # type: ignore
         'Review',
         lazy=False,
         uselist=True
-    )
-    genre =     db.relationship(
-        'Genre',
-        lazy=False,
-        uselist=False,
-        secondary='book_genre'
     )
 
     __table_args__ = (UniqueConstraint('book_id', ), )
