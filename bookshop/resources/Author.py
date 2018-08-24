@@ -1,12 +1,9 @@
 import json
 from typing import Optional
-from uuid import UUID
 
 from flask import request, abort, url_for
 from flask_restplus import Resource, fields, Namespace
-
 from sqlalchemy.orm import joinedload
-
 
 from bookshop.core.convert_dict import (
     python_dict_to_json_dict, json_dict_to_python_dict
@@ -18,16 +15,18 @@ from bookshop.sqlalchemy.join_entities import create_joined_entity_map
 from bookshop.schema import AuthorSchema
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
 from bookshop.domain.Author import author as author_domain_model
+from bookshop.resources.Review import review_model
+from bookshop.resources.Book import book_model
 
 api = Namespace('authors',
                 path='/',
                 description='Author API', )
 
 author_model = api.model('Author', {
-    'authorId': fields.String(),
+    'id': fields.String(attribute='authorId'),
     'name': fields.String(),
-    'review': fields.Url('Book-Review'),  # noqa: E501
-    'book': fields.Url('Book'),  # noqa: E501
+    'review': fields.Nested(review_model),  # noqa: E501
+    'book': fields.Nested(book_model),  # noqa: E501
 })
 
 author_schema = AuthorSchema()
@@ -36,14 +35,16 @@ authors_many_schema = AuthorSchema(many=True)
 
 @api.route('/author/<authorId>', endpoint='author_by_id')  # noqa: E501
 class AuthorResource(Resource):  # type: ignore
-
     @api.marshal_with(author_model)
     @api.doc(id='get-author-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, authorId):  # type: ignore
         result: Optional[Author] = Author.query.filter_by(author_id=authorId).first()  # noqa: E501
         if result is None:
             abort(404)
-        return python_dict_to_json_dict(model_to_dict(result))
+        return model_to_dict(
+            result,
+            author_domain_model,
+        ), 200
 
     @api.doc(id='delete-author-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
     def delete(self, authorId):  # type: ignore
@@ -54,6 +55,7 @@ class AuthorResource(Resource):  # type: ignore
         return '', 204
 
     @api.expect(author_model, validate=False)
+    @api.marshal_with(author_model)
     def put(self, authorId):  # type: ignore
         data = json.loads(request.data)
         if type(data) is not dict:
@@ -82,7 +84,11 @@ class AuthorResource(Resource):  # type: ignore
 
         db.session.add(marshmallow_result.data)
         db.session.commit()
-        return '', 201
+
+        return model_to_dict(
+            marshmallow_result.data,
+            author_domain_model,
+        ), 201
 
     @api.expect(author_model, validate=False)
     def patch(self, authorId):  # type: ignore
@@ -123,6 +129,7 @@ class ManyAuthorResource(Resource):  # type: ignore
 @api.route('/author/<authorId>/books/reviews', endpoint='Book-Review')  # noqa: E501
 class Review(Resource):  # type: ignore
     @api.doc(id='Book-Review', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+    @api.marshal_with(author_model)  # noqa: E501
     def get(self, authorId):  # type: ignore
         result: Optional[Author] = Author \
             .query \
@@ -134,12 +141,14 @@ class Review(Resource):  # type: ignore
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        return model_to_dict(result, ['Book', 'Review'])  # noqa: E501
+        result_dict = model_to_dict(result, author_domain_model, ['Book', 'Review'])  # noqa: E501
+        return result_dict
 
 
 @api.route('/author/<authorId>/books', endpoint='Book')  # noqa: E501
 class Book(Resource):  # type: ignore
     @api.doc(id='Book', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+    @api.marshal_with(author_model)  # noqa: E501
     def get(self, authorId):  # type: ignore
         result: Optional[Author] = Author \
             .query \
@@ -150,4 +159,5 @@ class Book(Resource):  # type: ignore
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        return model_to_dict(result, ['Book'])  # noqa: E501
+        result_dict = model_to_dict(result, author_domain_model, ['Book'])  # noqa: E501
+        return result_dict

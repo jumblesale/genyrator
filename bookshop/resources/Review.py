@@ -1,6 +1,5 @@
 import json
 from typing import Optional
-from uuid import UUID
 
 from flask import request, abort, url_for
 from flask_restplus import Resource, fields, Namespace
@@ -22,7 +21,7 @@ api = Namespace('reviews',
                 description='Review API', )
 
 review_model = api.model('Review', {
-    'reviewId': fields.String(),
+    'id': fields.String(attribute='reviewId'),
     'text': fields.String(),
     'bookId': fields.String(),
 })
@@ -33,14 +32,16 @@ reviews_many_schema = ReviewSchema(many=True)
 
 @api.route('/review/<reviewId>', endpoint='review_by_id')  # noqa: E501
 class ReviewResource(Resource):  # type: ignore
-
     @api.marshal_with(review_model)
     @api.doc(id='get-review-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, reviewId):  # type: ignore
         result: Optional[Review] = Review.query.filter_by(review_id=reviewId).first()  # noqa: E501
         if result is None:
             abort(404)
-        return python_dict_to_json_dict(model_to_dict(result))
+        return model_to_dict(
+            result,
+            review_domain_model,
+        ), 200
 
     @api.doc(id='delete-review-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
     def delete(self, reviewId):  # type: ignore
@@ -51,6 +52,7 @@ class ReviewResource(Resource):  # type: ignore
         return '', 204
 
     @api.expect(review_model, validate=False)
+    @api.marshal_with(review_model)
     def put(self, reviewId):  # type: ignore
         data = json.loads(request.data)
         if type(data) is not dict:
@@ -79,7 +81,11 @@ class ReviewResource(Resource):  # type: ignore
 
         db.session.add(marshmallow_result.data)
         db.session.commit()
-        return '', 201
+
+        return model_to_dict(
+            marshmallow_result.data,
+            review_domain_model,
+        ), 201
 
     @api.expect(review_model, validate=False)
     def patch(self, reviewId):  # type: ignore

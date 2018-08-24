@@ -42,7 +42,7 @@ Feature: performing operations on a simple schema
     Given I have json data
     """
     {
-      "bookId": 3,
+      "id": 3,
       "bookName": 3,
       "publishDate": "hello",
       "inStock": null,
@@ -56,7 +56,7 @@ Feature: performing operations on a simple schema
     Given I have json data
     """
     {
-      "bookId": 3,
+      "id": 3,
       "bookName": "the dispossessed",
       "publishDate": "1974-05-21",
       "inStock": 3,
@@ -73,7 +73,7 @@ Feature: performing operations on a simple schema
       And I have json data
       """
       {
-        "bookId": 3,
+        "id": 3,
         "bookName": "the disposssesssed",
         "publishDate": "1974-05-22",
         "inStock": 2,
