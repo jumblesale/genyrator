@@ -19,5 +19,11 @@ class Book(db.Model):  # type: ignore
         lazy=False,
         uselist=True
     )
+    genre =     db.relationship(
+        'Genre',
+        lazy=False,
+        uselist=False,
+        secondary='book_genre'
+    )
 
     __table_args__ = (UniqueConstraint('book_id', ), )

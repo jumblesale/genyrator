@@ -119,10 +119,6 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
         if result is None:
             abort(404)
 
-        if '{{ entity.identifier_column.json_property_name }}' not in data:
-            data['{{ entity.identifier_column.json_property_name }}'] = {# -#}
-                {{ identifier_column.python_type.value }}({{ entity.identifier_column.json_property_name }})
-
         python_dict = json_dict_to_python_dict(data)
         [setattr(result, k, v) for k, v in python_dict.items()]
 

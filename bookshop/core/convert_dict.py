@@ -48,5 +48,5 @@ def dict_value_to_json_value(param: Any) -> Any:
     if property_type is datetime.datetime or property_type is datetime.date:
         return param.isoformat()
     if param.__class__.__name__ == 'UUID':
-        return str(v)
+        return str(param)
     return param

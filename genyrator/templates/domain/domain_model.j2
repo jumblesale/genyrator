@@ -6,12 +6,14 @@ from {{ template.module_name }}.sqlalchemy.model.{{ relationship.target_entity_c
 
 {{ template.entity.python_name }} = DomainModel(
     relationship_map={
-{%- for relationship in template.entity.relationships %}
+{%- for relationship in template.entity.relationships -%}
+    {% if relationship.__class__.__name__ == 'RelationshipWithoutJoinTable' %}
         '{{ relationship.source_column_name }}': Relationship(
             target={{ relationship.target_entity_class_name }},
             target_identifier_column='{{ relationship.target_identifier_column_name }}',
             lazy=True,
         ),
+    {%- endif %}
 {%- endfor %}
     },
     identifier_column_name='{{ template.entity.identifier_column.python_name }}',

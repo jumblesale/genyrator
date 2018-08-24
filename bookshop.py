@@ -41,16 +41,15 @@ book_entity = create_entity(
             lazy=False,
             join=JoinOption.to_many,
         ),
-        # create_relationship(
-        #     target_entity_class_name='Genre',
-        #     source_column_name='genre_id',
-        #     target_identifier_column_name='genre_id',
-        #     nullable=False,
-        #     lazy=False,
-        #     join=JoinOption.to_one,
-        #     join_table='book_genre',
-        #     property_name='genre',
-        # ),
+        create_relationship(
+            target_entity_class_name='Genre',
+            source_column_name='genre_id',
+            nullable=False,
+            lazy=False,
+            join=JoinOption.to_one,
+            join_table='book_genre',
+            property_name='genre',
+        ),
     ],
     operations=all_operations,
     api_paths=[
@@ -134,10 +133,10 @@ genre_entity = create_entity(
         ),
     ],
     relationships=[
-        # create_relationship(
-        #     target_entity_class_name='Book', nullable=True, lazy=False, join=JoinOption.to_many,
-        #     join_table='book_genre', source_column_name='', target_identifier_column_name='book_id',
-        # ),
+        create_relationship(
+            target_entity_class_name='Book', nullable=True, lazy=False, join=JoinOption.to_many,
+            join_table='book_genre', source_column_name='', target_identifier_column_name='book_id',
+        ),
     ],
 )
 

@@ -92,9 +92,6 @@ class BookGenreResource(Resource):  # type: ignore
         if result is None:
             abort(404)
 
-        if 'bookGenreId' not in data:
-            data['bookGenreId'] = UUID(bookGenreId)
-
         python_dict = json_dict_to_python_dict(data)
         [setattr(result, k, v) for k, v in python_dict.items()]
 

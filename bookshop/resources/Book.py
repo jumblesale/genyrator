@@ -96,9 +96,6 @@ class BookResource(Resource):  # type: ignore
         if result is None:
             abort(404)
 
-        if 'bookId' not in data:
-            data['bookId'] = UUID(bookId)
-
         python_dict = json_dict_to_python_dict(data)
         [setattr(result, k, v) for k, v in python_dict.items()]
 

@@ -95,9 +95,6 @@ class AuthorResource(Resource):  # type: ignore
         if result is None:
             abort(404)
 
-        if 'authorId' not in data:
-            data['authorId'] = UUID(authorId)
-
         python_dict = json_dict_to_python_dict(data)
         [setattr(result, k, v) for k, v in python_dict.items()]
 
