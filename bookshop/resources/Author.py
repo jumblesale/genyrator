@@ -145,19 +145,19 @@ class Review(Resource):  # type: ignore
         return result_dict
 
 
-@api.route('/author/<authorId>/books', endpoint='Book')  # noqa: E501
+@api.route('/author/<authorId>/books', endpoint='book')  # noqa: E501
 class Book(Resource):  # type: ignore
-    @api.doc(id='Book', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+    @api.doc(id='book', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     @api.marshal_with(author_model)  # noqa: E501
     def get(self, authorId):  # type: ignore
         result: Optional[Author] = Author \
             .query \
             .options(
-                joinedload('Book')
+                joinedload('book')
             ) \
             .filter_by(author_id=authorId) \
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        result_dict = model_to_dict(result, author_domain_model, ['Book'])  # noqa: E501
+        result_dict = model_to_dict(result, author_domain_model, ['book'])  # noqa: E501
         return result_dict

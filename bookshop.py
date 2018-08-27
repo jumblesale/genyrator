@@ -16,12 +16,18 @@ book_entity = create_entity(
             index=True, nullable=False,
         ),
         create_column(
-            name='rating', type_option=TypeOption.int,
+            name='rating', type_option=TypeOption.float,
             index=True, nullable=False,
         ),
         create_column(
             name='author_id', type_option=TypeOption.int,
             foreign_key_relationship='author', target_type_option=TypeOption.UUID,
+        ),
+        create_column(
+            name='published', type_option=TypeOption.date,
+        ),
+        create_column(
+            name='created', type_option=TypeOption.datetime,
         ),
     ],
     relationships=[
@@ -89,7 +95,7 @@ author_entity = create_entity(
             route='books/reviews',
         ),
         create_api_path(
-            joined_entities=['Book'],
+            joined_entities=['book'],
             route='books',
         ),
     ],
