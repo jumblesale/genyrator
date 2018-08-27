@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Mapping, Any, Optional
 
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.orm.collections import InstrumentedList
@@ -8,13 +8,15 @@ from {{ template.module_name }}.domain.types import DomainModel
 
 
 def model_to_dict(
-    sql_alchemy_model: DeclarativeMeta,
+    sql_alchemy_model: Optional[DeclarativeMeta],
     domain_model:      DomainModel,
     paths:             List[str] = list(),
-):
+) -> Optional[Mapping[str, Any]]:
     """
     recursively convert a sql alchemy result into a dictionary
     """
+    if sql_alchemy_model is None:
+        return None
     serialized_data = {}
     for c in sql_alchemy_model.__table__.columns:
         if c.primary_key:

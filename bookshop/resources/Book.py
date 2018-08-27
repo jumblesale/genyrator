@@ -103,39 +103,11 @@ class BookResource(Resource):  # type: ignore
         if result is None:
             abort(404)
 
-        result_dict = model_to_dict(
-            result,
-            book_domain_model,
-        )
+        python_dict = json_dict_to_python_dict(data)
+        [setattr(result, k, v) for k, v in python_dict.items()]
 
-        data = {**result_dict, **data}
-
-        joined_entities = create_joined_entity_map(
-            book_domain_model,
-            data,
-        )
-
-        data = convert_properties_to_sqlalchemy_properties(
-            book_domain_model,
-            joined_entities,
-            json_dict_to_python_dict(data),
-        )
-
-        marshmallow_result = book_schema.load(
-            data,
-            session=db.session,
-            instance=result,
-        )
-        if marshmallow_result.errors:
-            abort(400, python_dict_to_json_dict(marshmallow_result.errors))
-
-        db.session.add(marshmallow_result.data)
+        db.session.add(result)
         db.session.commit()
-
-        return model_to_dict(
-            marshmallow_result.data,
-            book_domain_model,
-        ), 200
 
 
 @api.route('/books', endpoint='books')  # noqa: E501

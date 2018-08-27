@@ -1,12 +1,14 @@
 import datetime
-from typing import Mapping, Dict, Callable, Any, Iterable, List
+from typing import Mapping, Dict, Callable, Any, Iterable, List, Optional
 from {{ template.module_name }}.core.convert_case import to_json_name, to_python_name
 
 
 def convert_dict_naming(
-    in_dict: Dict,
+    in_dict: Optional[Dict],
     fn:      Callable[[str], str],
-) -> Mapping[str, Any]:
+) -> Optional[Mapping[str, Any]]:
+    if in_dict is None:
+        return None
     out_dict = {}
     for k, v in in_dict.items():
         if type(v) is dict:
