@@ -2,6 +2,7 @@ from typing import List
 
 from genyrator import create_entity, create_column, TypeOption, create_identifier_column, create_relationship, \
     JoinOption
+from genyrator.entities.Column import ForeignKeyRelationship
 from genyrator.entities.Entity import all_operations, Entity, create_api_path
 from genyrator.entities.Schema import create_schema, Schema
 
@@ -20,8 +21,11 @@ book_entity = create_entity(
             index=True, nullable=False,
         ),
         create_column(
-            name='author_id', type_option=TypeOption.UUID,
-            foreign_key_relationship='author',
+            name='author_id', type_option=TypeOption.int,
+            foreign_key_relationship=ForeignKeyRelationship(
+                target_entity='author',
+                target_entity_identifier_column_type=TypeOption.UUID,
+            ),
         ),
         create_column(
             name='published', type_option=TypeOption.date,
@@ -112,8 +116,11 @@ review_entity = create_entity(
             index=True, nullable=False,
         ),
         create_column(
-            name='book_id', type_option=TypeOption.UUID,
-            foreign_key_relationship='book',
+            name='book_id', type_option=TypeOption.int,
+            foreign_key_relationship=ForeignKeyRelationship(
+                target_entity='book',
+                target_entity_identifier_column_type=TypeOption.UUID,
+            ),
         )
     ],
     relationships=[
@@ -151,10 +158,18 @@ book_genre_entity = create_entity(
     identifier_column=create_identifier_column('book_genre_id', TypeOption.UUID),
     columns=[
         create_column(
-            'book_id',  type_option=TypeOption.int, foreign_key_relationship='book',
+            'book_id',  type_option=TypeOption.int,
+            foreign_key_relationship=ForeignKeyRelationship(
+                target_entity='book',
+                target_entity_identifier_column_type=TypeOption.UUID,
+            ),
         ),
         create_column(
-            'genre_id', type_option=TypeOption.UUID, foreign_key_relationship='genre',
+            'genre_id', type_option=TypeOption.int,
+            foreign_key_relationship=ForeignKeyRelationship(
+                target_entity='genre',
+                target_entity_identifier_column_type=TypeOption.UUID,
+            ),
         ),
     ],
     relationships=[

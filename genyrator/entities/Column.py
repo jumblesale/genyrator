@@ -7,6 +7,12 @@ from genyrator.types import (
     type_option_to_restplus_type
 )
 
+ForeignKeyRelationship = NamedTuple(
+    'ForeignKeyRelationship', [
+        ('target_entity',                        str),
+        ('target_entity_identifier_column_type', TypeOption), ]
+)
+
 
 @attr.s
 class Column(object):
@@ -41,7 +47,7 @@ def create_column(
         nullable:                 bool = True,
         identifier:               bool = False,
         display_name:             Optional[str] = None,
-        foreign_key_relationship: Optional[str] = None,
+        foreign_key_relationship: Optional[ForeignKeyRelationship] = None,
 ) -> Union[Column, ForeignKey]:
     if identifier is True:
         constructor = IdentifierColumn
@@ -64,11 +70,12 @@ def create_column(
     }
     if foreign_key_relationship is not None:
         args['relationship'] = '{}.{}'.format(
-            pythonize(foreign_key_relationship),
+            pythonize(foreign_key_relationship.target_entity),
             'id'
         )
-        # for now this is always an int, as will always be foreign primary key
-        args['target_restplus_type'] = TypeOption.int
+        args['target_restplus_type'] = type_option_to_restplus_type(
+            foreign_key_relationship.target_entity_identifier_column_type
+        )
     return constructor(**args)
 
 
