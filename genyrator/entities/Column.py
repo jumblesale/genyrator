@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, NamedTuple
 import attr
 from genyrator.inflector import pythonize, to_class_name, to_json_case, humanize
 from genyrator.types import (
@@ -34,17 +34,6 @@ class IdentifierColumn(Column):
     ...
 
 
-def create_identifier_column(
-        name:                     str,
-        type_option:              TypeOption,
-) -> IdentifierColumn:
-    column: IdentifierColumn = create_column(
-        name=name, type_option=type_option, index=True, nullable=False,
-        identifier=True,
-    )
-    return column
-
-
 def create_column(
         name:                     str,
         type_option:              TypeOption,
@@ -53,7 +42,6 @@ def create_column(
         identifier:               bool = False,
         display_name:             Optional[str] = None,
         foreign_key_relationship: Optional[str] = None,
-        target_type_option:       Optional[TypeOption] = None,
 ) -> Union[Column, ForeignKey]:
     if identifier is True:
         constructor = IdentifierColumn
@@ -79,5 +67,17 @@ def create_column(
             pythonize(foreign_key_relationship),
             'id'
         )
-        args['target_restplus_type'] = type_option_to_restplus_type(target_type_option)
+        # for now this is always an int, as will always be foreign primary key
+        args['target_restplus_type'] = TypeOption.int
     return constructor(**args)
+
+
+def create_identifier_column(
+        name:                     str,
+        type_option:              TypeOption,
+) -> IdentifierColumn:
+    column: IdentifierColumn = create_column(
+        name=name, type_option=type_option, index=True, nullable=False,
+        identifier=True,
+    )
+    return column

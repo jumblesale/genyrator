@@ -36,6 +36,10 @@ class Schema(object):
         for core_file in self.files.core:
             core_file.write()
 
+    def write_domain_models(self):
+        for domain_model in self.files.domain_models:
+            domain_model.write()
+
 
 def create_schema(
         module_name:     str,

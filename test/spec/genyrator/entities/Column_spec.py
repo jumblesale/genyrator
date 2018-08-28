@@ -8,7 +8,6 @@ with description('create_column'):
     with it('does not create a foreign key if no relationship is specified'):
         column = create_column(
             name='test', type_option=TypeOption.string, foreign_key_relationship=None,
-            target_type_option=TypeOption.string
         )
 
         expect(column).to(be_a(Column))
@@ -16,8 +15,8 @@ with description('create_column'):
 
     with it('creates a foreign key relationship to the joined entity id column'):
         column = create_column(
-            name='test', type_option=TypeOption.string, foreign_key_relationship='EntityTable',
-            target_type_option=TypeOption.string
+            name='test', type_option=TypeOption.string,
+            foreign_key_relationship='EntityTable',
         )
 
         expect(column).to(be_a(ForeignKey))
