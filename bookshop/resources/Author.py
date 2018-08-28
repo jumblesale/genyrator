@@ -25,8 +25,8 @@ api = Namespace('authors',
 author_model = api.model('Author', {
     'id': fields.String(attribute='authorId'),
     'name': fields.String(),
-    'review': fields.Nested(review_model),  # noqa: E501
-    'book': fields.Nested(book_model),  # noqa: E501
+    'review': fields.Url('review'),  # noqa: E501
+    'book': fields.Url('book'),  # noqa: E501
 })
 
 author_schema = AuthorSchema()
@@ -92,20 +92,8 @@ class AuthorResource(Resource):  # type: ignore
 
     @api.expect(author_model, validate=False)
     def patch(self, authorId):  # type: ignore
-        data = json.loads(request.data)
-        if type(data) is not dict:
-            return abort(400)
+        ...
 
-        result: Optional[Author] = Author.query.filter_by(author_id=authorId).first()
-
-        if result is None:
-            abort(404)
-
-        python_dict = json_dict_to_python_dict(data)
-        [setattr(result, k, v) for k, v in python_dict.items()]
-
-        db.session.add(result)
-        db.session.commit()
 
 
 @api.route('/authors', endpoint='authors')  # noqa: E501
@@ -129,7 +117,6 @@ class ManyAuthorResource(Resource):  # type: ignore
 @api.route('/author/<authorId>/books/reviews', endpoint='Book-Review')  # noqa: E501
 class Review(Resource):  # type: ignore
     @api.doc(id='Book-Review', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
-    @api.marshal_with(author_model)  # noqa: E501
     def get(self, authorId):  # type: ignore
         result: Optional[Author] = Author \
             .query \
@@ -142,13 +129,13 @@ class Review(Resource):  # type: ignore
         if result is None:
             abort(404)
         result_dict = model_to_dict(result, author_domain_model, ['Book', 'Review'])  # noqa: E501
+
         return result_dict
 
 
 @api.route('/author/<authorId>/books', endpoint='book')  # noqa: E501
 class Book(Resource):  # type: ignore
     @api.doc(id='book', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
-    @api.marshal_with(author_model)  # noqa: E501
     def get(self, authorId):  # type: ignore
         result: Optional[Author] = Author \
             .query \
@@ -160,4 +147,5 @@ class Book(Resource):  # type: ignore
         if result is None:
             abort(404)
         result_dict = model_to_dict(result, author_domain_model, ['book'])  # noqa: E501
+
         return result_dict

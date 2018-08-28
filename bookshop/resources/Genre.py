@@ -88,20 +88,8 @@ class GenreResource(Resource):  # type: ignore
 
     @api.expect(genre_model, validate=False)
     def patch(self, genreId):  # type: ignore
-        data = json.loads(request.data)
-        if type(data) is not dict:
-            return abort(400)
+        ...
 
-        result: Optional[Genre] = Genre.query.filter_by(genre_id=genreId).first()
-
-        if result is None:
-            abort(404)
-
-        python_dict = json_dict_to_python_dict(data)
-        [setattr(result, k, v) for k, v in python_dict.items()]
-
-        db.session.add(result)
-        db.session.commit()
 
 
 @api.route('/genres', endpoint='genres')  # noqa: E501

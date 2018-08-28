@@ -25,10 +25,10 @@ book_model = api.model('Book', {
     'id': fields.String(attribute='bookId'),
     'name': fields.String(),
     'rating': fields.Float(),
-    'authorId': fields.int(),
+    'authorId': fields.String(),
     'published': fields.Date(),
     'created': fields.DateTime(),
-    'genre': fields.Nested(genre_model),  # noqa: E501
+    'genre': fields.Url('genre'),  # noqa: E501
 })
 
 book_schema = BookSchema()
@@ -94,20 +94,8 @@ class BookResource(Resource):  # type: ignore
 
     @api.expect(book_model, validate=False)
     def patch(self, bookId):  # type: ignore
-        data = json.loads(request.data)
-        if type(data) is not dict:
-            return abort(400)
+        ...
 
-        result: Optional[Book] = Book.query.filter_by(book_id=bookId).first()
-
-        if result is None:
-            abort(404)
-
-        python_dict = json_dict_to_python_dict(data)
-        [setattr(result, k, v) for k, v in python_dict.items()]
-
-        db.session.add(result)
-        db.session.commit()
 
 
 @api.route('/books', endpoint='books')  # noqa: E501
@@ -131,7 +119,6 @@ class ManyBookResource(Resource):  # type: ignore
 @api.route('/book/<bookId>/genres', endpoint='genre')  # noqa: E501
 class Genre(Resource):  # type: ignore
     @api.doc(id='genre', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
-    @api.marshal_with(book_model)  # noqa: E501
     def get(self, bookId):  # type: ignore
         result: Optional[Book] = Book \
             .query \
@@ -143,4 +130,5 @@ class Genre(Resource):  # type: ignore
         if result is None:
             abort(404)
         result_dict = model_to_dict(result, book_domain_model, ['genre'])  # noqa: E501
+
         return result_dict

@@ -119,20 +119,21 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
 
     @api.expect({{ entity.python_name }}_model, validate=False)
     def patch(self, {{ entity.identifier_column.json_property_name }}):  # type: ignore
-        data = json.loads(request.data)
-        if type(data) is not dict:
-            return abort(400)
-
-        {{ find_element_by_id() }}.first()
-
-        if result is None:
-            abort(404)
-
-        python_dict = json_dict_to_python_dict(data)
-        [setattr(result, k, v) for k, v in python_dict.items()]
-
-        db.session.add(result)
-        db.session.commit()
+        ...
+{#        data = json.loads(request.data) -#}
+{#        if type(data) is not dict: -#}
+{#            return abort(400) -#}
+{# -#}
+{#        {{ find_element_by_id() }}.first() -#}
+{# -#}
+{#        if result is None: -#}
+{#            abort(404) -#}
+{# -#}
+{#        python_dict = json_dict_to_python_dict(data) -#}
+{#        [setattr(result, k, v) for k, v in python_dict.items()] -#}
+{# -#}
+{#        db.session.add(result) -#}
+{#        db.session.commit() -#}
     {%- endif -%}{# patch method #}
 {%- endif -%}{# single class #}
 {%- if entity.supports_get_all or entity.supports_delete_all or entity.supports_post %}
@@ -190,7 +191,7 @@ class Many{{ entity.class_name }}Resource(Resource):  # type: ignore
 @api.route('/{{ entity.dashed_name }}/<{{ entity.identifier_column.json_property_name }}>/{{ api_path.route }}', endpoint='{{ api_path.endpoint }}')  # noqa: E501
 class {{ api_path.class_name }}(Resource):  # type: ignore
     @api.doc(id='{{ api_path.endpoint }}', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
-    @api.marshal_with({{ entity.python_name }}_model)  # noqa: E501
+{#-    @api.marshal_with({{ entity.python_name }}_model)  # noqa: E501 #}
     def get(self, {{ entity.identifier_column.json_property_name }}):  # type: ignore
         result: Optional[{{ entity.class_name }}] = {{ entity.class_name }} \
             .query \
@@ -212,6 +213,7 @@ class {{ api_path.class_name }}(Resource):  # type: ignore
     {%- for entity in api_path.joined_entities -%}
         {{ sep() }}{{ entity }}
     {%- endfor %}'])  # noqa: E501
+
         return result_dict
 {%- endfor -%}
 {%- endif %}

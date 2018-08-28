@@ -23,7 +23,7 @@ api = Namespace('reviews',
 review_model = api.model('Review', {
     'id': fields.String(attribute='reviewId'),
     'text': fields.String(),
-    'bookId': fields.int(),
+    'bookId': fields.String(),
 })
 
 review_schema = ReviewSchema()
@@ -89,20 +89,8 @@ class ReviewResource(Resource):  # type: ignore
 
     @api.expect(review_model, validate=False)
     def patch(self, reviewId):  # type: ignore
-        data = json.loads(request.data)
-        if type(data) is not dict:
-            return abort(400)
+        ...
 
-        result: Optional[Review] = Review.query.filter_by(review_id=reviewId).first()
-
-        if result is None:
-            abort(404)
-
-        python_dict = json_dict_to_python_dict(data)
-        [setattr(result, k, v) for k, v in python_dict.items()]
-
-        db.session.add(result)
-        db.session.commit()
 
 
 @api.route('/reviews', endpoint='reviews')  # noqa: E501

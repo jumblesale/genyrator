@@ -22,8 +22,8 @@ api = Namespace('book_genres',
 
 book_genre_model = api.model('BookGenre', {
     'id': fields.String(attribute='bookGenreId'),
-    'bookId': fields.int(),
-    'genreId': fields.int(),
+    'bookId': fields.String(),
+    'genreId': fields.String(),
 })
 
 book_genre_schema = BookGenreSchema()
@@ -89,20 +89,8 @@ class BookGenreResource(Resource):  # type: ignore
 
     @api.expect(book_genre_model, validate=False)
     def patch(self, bookGenreId):  # type: ignore
-        data = json.loads(request.data)
-        if type(data) is not dict:
-            return abort(400)
+        ...
 
-        result: Optional[BookGenre] = BookGenre.query.filter_by(book_genre_id=bookGenreId).first()
-
-        if result is None:
-            abort(404)
-
-        python_dict = json_dict_to_python_dict(data)
-        [setattr(result, k, v) for k, v in python_dict.items()]
-
-        db.session.add(result)
-        db.session.commit()
 
 
 @api.route('/book-genres', endpoint='book_genres')  # noqa: E501

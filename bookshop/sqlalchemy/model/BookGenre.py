@@ -7,7 +7,7 @@ class BookGenre(db.Model):  # type: ignore
     id =            db.Column(db.Integer, primary_key=True)  # noqa: E501
     book_genre_id = db.Column(UUIDType, index=True, nullable=False)  # noqa: E501
     book_id =       db.Column(db.BigInteger, db.ForeignKey('book.id'), nullable=True)  # noqa: E501
-    genre_id =      db.Column(UUIDType, db.ForeignKey('genre.id'), nullable=True)  # noqa: E501
+    genre_id =      db.Column(db.BigInteger, db.ForeignKey('genre.id'), nullable=True)  # noqa: E501
     book =          db.relationship(
         'Book',
         lazy=False,

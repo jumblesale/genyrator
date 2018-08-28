@@ -16,3 +16,4 @@ def create_joined_entity_map(
         filter_kwargs = {relationship.target_identifier_column: data[json_relationship_name]}
         joined_entities[relationship_name] = relationship.target.query.filter_by(**filter_kwargs).one()
     return joined_entities
+

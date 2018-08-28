@@ -10,6 +10,6 @@
     {%- endif %}
 {%- endfor %}
 {%- for api_path in entity.api_paths %}
-    '{{ api_path.property_name }}': fields.Nested({{ api_path.python_name }}_model),  # noqa: E501
+    '{{ api_path.property_name }}': fields.Url('{{ api_path.python_name }}'),  # noqa: E501
 {%- endfor %}
 })
