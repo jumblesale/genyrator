@@ -28,9 +28,6 @@ from {{ template.module_name }}.schema import {{ entity.class_name }}Schema
 from {{ template.module_name }}.sqlalchemy.model_to_dict import model_to_dict
 from {{ template.module_name }}.domain.{{ entity.class_name }} import {{ entity.python_name }} as {# -#}
     {{ template.entity.python_name }}_domain_model
-{%- for api_path in entity.api_paths %}
-from {{ template.module_name }}.resources.{{ api_path.class_name }} import {{ api_path.python_name }}_model
-{%- endfor %}
 
 api = Namespace('{{ entity.resource_namespace }}',
                 path='{{ entity.resource_path }}',
