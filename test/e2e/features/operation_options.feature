@@ -22,7 +22,8 @@ Feature: restricting endpoints with operation options
       And I have json data
       """
       {
-        "testName": "test"
+        "testName": "test",
+        "testId": 4
       }
       """
      When I make a "PUT" request to "/example-entity/3" with that json data

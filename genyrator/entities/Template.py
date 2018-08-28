@@ -109,3 +109,19 @@ class ResourcesInit(Template):
     module_name:     str =          attr.ib()
     api_name:        str =          attr.ib()
     api_description: str =          attr.ib()
+
+
+@attr.s
+class DomainModel(Template):
+    entity:      Entity = attr.ib()
+    module_name: str =    attr.ib()
+
+
+@attr.s
+class ConvertProperties(Template):
+    module_name: str = attr.ib()
+
+
+@attr.s
+class JoinEntities(Template):
+    module_name: str = attr.ib()

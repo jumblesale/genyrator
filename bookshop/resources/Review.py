@@ -1,24 +1,27 @@
 import json
+from typing import Optional
+
 from flask import request, abort, url_for
 from flask_restplus import Resource, fields, Namespace
 
-from typing import Optional
-from uuid import UUID
 
 from bookshop.core.convert_dict import (
     python_dict_to_json_dict, json_dict_to_python_dict
 )
 from bookshop.sqlalchemy import db
 from bookshop.sqlalchemy.model import Review
+from bookshop.sqlalchemy.convert_properties import convert_properties_to_sqlalchemy_properties
+from bookshop.sqlalchemy.join_entities import create_joined_entity_map
 from bookshop.schema import ReviewSchema
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
+from bookshop.domain.Review import review as review_domain_model
 
 api = Namespace('reviews',
                 path='/',
                 description='Review API', )
 
 review_model = api.model('Review', {
-    'reviewId': fields.String(),
+    'id': fields.String(attribute='reviewId'),
     'text': fields.String(),
     'bookId': fields.String(),
 })
@@ -29,14 +32,16 @@ reviews_many_schema = ReviewSchema(many=True)
 
 @api.route('/review/<reviewId>', endpoint='review_by_id')  # noqa: E501
 class ReviewResource(Resource):  # type: ignore
-
     @api.marshal_with(review_model)
     @api.doc(id='get-review-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, reviewId):  # type: ignore
         result: Optional[Review] = Review.query.filter_by(review_id=reviewId).first()  # noqa: E501
         if result is None:
             abort(404)
-        return python_dict_to_json_dict(model_to_dict(result))
+        return model_to_dict(
+            result,
+            review_domain_model,
+        ), 200
 
     @api.doc(id='delete-review-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
     def delete(self, reviewId):  # type: ignore
@@ -47,6 +52,7 @@ class ReviewResource(Resource):  # type: ignore
         return '', 204
 
     @api.expect(review_model, validate=False)
+    @api.marshal_with(review_model)
     def put(self, reviewId):  # type: ignore
         data = json.loads(request.data)
         if type(data) is not dict:
@@ -54,8 +60,16 @@ class ReviewResource(Resource):  # type: ignore
 
         result: Optional[Review] = Review.query.filter_by(review_id=reviewId).first()  # noqa: E501
 
-        if 'reviewId' not in data:
-            data['reviewId'] = UUID(reviewId)
+        joined_entities = create_joined_entity_map(
+            review_domain_model,
+            data,
+        )
+
+        data = convert_properties_to_sqlalchemy_properties(
+            review_domain_model,
+            joined_entities,
+            json_dict_to_python_dict(data),
+        )
 
         marshmallow_result = review_schema.load(
             json_dict_to_python_dict(data),
@@ -67,27 +81,16 @@ class ReviewResource(Resource):  # type: ignore
 
         db.session.add(marshmallow_result.data)
         db.session.commit()
-        return '', 201
+
+        return model_to_dict(
+            marshmallow_result.data,
+            review_domain_model,
+        ), 201
 
     @api.expect(review_model, validate=False)
     def patch(self, reviewId):  # type: ignore
-        data = json.loads(request.data)
-        if type(data) is not dict:
-            return abort(400)
+        ...
 
-        result: Optional[Review] = Review.query.filter_by(review_id=reviewId).first()
-
-        if result is None:
-            abort(404)
-
-        if 'reviewId' not in data:
-            data['reviewId'] = UUID(reviewId)
-
-        python_dict = json_dict_to_python_dict(data)
-        [setattr(result, k, v) for k, v in python_dict.items()]
-
-        db.session.add(result)
-        db.session.commit()
 
 
 @api.route('/reviews', endpoint='reviews')  # noqa: E501

@@ -1,16 +1,10 @@
 from marshmallow_sqlalchemy import ModelSchema
 from bookshop.sqlalchemy.model import (
-
     Book,
-
     Author,
-
     Review,
-
     Genre,
-
     BookGenre,
-
 )
 
 

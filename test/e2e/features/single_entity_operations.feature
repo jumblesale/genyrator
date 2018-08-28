@@ -42,7 +42,7 @@ Feature: performing operations on a simple schema
     Given I have json data
     """
     {
-      "bookId": 3,
+      "id": 3,
       "bookName": 3,
       "publishDate": "hello",
       "inStock": null,
@@ -56,7 +56,7 @@ Feature: performing operations on a simple schema
     Given I have json data
     """
     {
-      "bookId": 3,
+      "id": 3,
       "bookName": "the dispossessed",
       "publishDate": "1974-05-21",
       "inStock": 3,
@@ -73,7 +73,7 @@ Feature: performing operations on a simple schema
       And I have json data
       """
       {
-        "bookId": 3,
+        "id": 3,
         "bookName": "the disposssesssed",
         "publishDate": "1974-05-22",
         "inStock": 2,
@@ -91,15 +91,15 @@ Feature: performing operations on a simple schema
      Then I get http status "204"
       And I cannot get entity "/book-store/3"
 
-  Scenario: patching an entity
-    Given I make a "PUT" request to "/book-store/3" with that json data
-      And I have json data
-      """
-      {
-        "bookName": "the disposssesssed"
-      }
-      """
-    When I make a "PATCH" request to "/book-store/3" with that json data
-    Then I get http status "200"
-    And I can get entity "/book-store/3"
-    And the response has "bookName" with value "the disposssesssed"
+#  Scenario: patching an entity
+#    Given I make a "PUT" request to "/book-store/3" with that json data
+#      And I have json data
+#      """
+#      {
+#        "bookName": "the disposssesssed"
+#      }
+#      """
+#    When I make a "PATCH" request to "/book-store/3" with that json data
+#    Then I get http status "200"
+#    And I can get entity "/book-store/3"
+#    And the response has "bookName" with value "the disposssesssed"

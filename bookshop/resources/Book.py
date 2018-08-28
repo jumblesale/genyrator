@@ -1,29 +1,33 @@
 import json
+from typing import Optional
+
 from flask import request, abort, url_for
 from flask_restplus import Resource, fields, Namespace
-
 from sqlalchemy.orm import joinedload
-
-from typing import Optional
-from uuid import UUID
 
 from bookshop.core.convert_dict import (
     python_dict_to_json_dict, json_dict_to_python_dict
 )
 from bookshop.sqlalchemy import db
 from bookshop.sqlalchemy.model import Book
+from bookshop.sqlalchemy.convert_properties import convert_properties_to_sqlalchemy_properties
+from bookshop.sqlalchemy.join_entities import create_joined_entity_map
 from bookshop.schema import BookSchema
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
+from bookshop.domain.Book import book as book_domain_model
+from bookshop.resources.Genre import genre_model
 
 api = Namespace('books',
                 path='/',
                 description='Book API', )
 
 book_model = api.model('Book', {
-    'bookId': fields.String(),
+    'id': fields.String(attribute='bookId'),
     'name': fields.String(),
-    'rating': fields.Integer(),
+    'rating': fields.Float(),
     'authorId': fields.String(),
+    'published': fields.Date(),
+    'created': fields.DateTime(),
     'genre': fields.Url('genre'),  # noqa: E501
 })
 
@@ -33,14 +37,16 @@ books_many_schema = BookSchema(many=True)
 
 @api.route('/book/<bookId>', endpoint='book_by_id')  # noqa: E501
 class BookResource(Resource):  # type: ignore
-
     @api.marshal_with(book_model)
     @api.doc(id='get-book-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, bookId):  # type: ignore
         result: Optional[Book] = Book.query.filter_by(book_id=bookId).first()  # noqa: E501
         if result is None:
             abort(404)
-        return python_dict_to_json_dict(model_to_dict(result))
+        return model_to_dict(
+            result,
+            book_domain_model,
+        ), 200
 
     @api.doc(id='delete-book-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
     def delete(self, bookId):  # type: ignore
@@ -51,6 +57,7 @@ class BookResource(Resource):  # type: ignore
         return '', 204
 
     @api.expect(book_model, validate=False)
+    @api.marshal_with(book_model)
     def put(self, bookId):  # type: ignore
         data = json.loads(request.data)
         if type(data) is not dict:
@@ -58,8 +65,16 @@ class BookResource(Resource):  # type: ignore
 
         result: Optional[Book] = Book.query.filter_by(book_id=bookId).first()  # noqa: E501
 
-        if 'bookId' not in data:
-            data['bookId'] = UUID(bookId)
+        joined_entities = create_joined_entity_map(
+            book_domain_model,
+            data,
+        )
+
+        data = convert_properties_to_sqlalchemy_properties(
+            book_domain_model,
+            joined_entities,
+            json_dict_to_python_dict(data),
+        )
 
         marshmallow_result = book_schema.load(
             json_dict_to_python_dict(data),
@@ -71,27 +86,16 @@ class BookResource(Resource):  # type: ignore
 
         db.session.add(marshmallow_result.data)
         db.session.commit()
-        return '', 201
+
+        return model_to_dict(
+            marshmallow_result.data,
+            book_domain_model,
+        ), 201
 
     @api.expect(book_model, validate=False)
     def patch(self, bookId):  # type: ignore
-        data = json.loads(request.data)
-        if type(data) is not dict:
-            return abort(400)
+        ...
 
-        result: Optional[Book] = Book.query.filter_by(book_id=bookId).first()
-
-        if result is None:
-            abort(404)
-
-        if 'bookId' not in data:
-            data['bookId'] = UUID(bookId)
-
-        python_dict = json_dict_to_python_dict(data)
-        [setattr(result, k, v) for k, v in python_dict.items()]
-
-        db.session.add(result)
-        db.session.commit()
 
 
 @api.route('/books', endpoint='books')  # noqa: E501
@@ -125,4 +129,6 @@ class Genre(Resource):  # type: ignore
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        return model_to_dict(result, ['genre'])  # noqa: E501
+        result_dict = model_to_dict(result, book_domain_model, ['genre'])  # noqa: E501
+
+        return result_dict

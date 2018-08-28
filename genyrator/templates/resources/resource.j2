@@ -9,21 +9,28 @@
     {%- set model_import = 'from ' + template.module_name + '.sqlalchemy.model import ' + entity.class_name -%}
 {%- endif -%}
 import json
+from typing import Optional
+
 from flask import request, abort, url_for
 from flask_restplus import Resource, fields, Namespace
-{% if entity.has_joined_entities %}
+{% if entity.has_joined_entities -%}
 from sqlalchemy.orm import joinedload
-{% endif %}
-from typing import Optional
-from uuid import UUID
+{%- endif %}
 
 from {{ template.module_name }}.core.convert_dict import (
     python_dict_to_json_dict, json_dict_to_python_dict
 )
 from {{ template.db_import_path }} import db
 {{ model_import }}
+from {{ template.module_name }}.sqlalchemy.convert_properties import convert_properties_to_sqlalchemy_properties
+from {{ template.module_name }}.sqlalchemy.join_entities import create_joined_entity_map
 from {{ template.module_name }}.schema import {{ entity.class_name }}Schema
 from {{ template.module_name }}.sqlalchemy.model_to_dict import model_to_dict
+from {{ template.module_name }}.domain.{{ entity.class_name }} import {{ entity.python_name }} as {# -#}
+    {{ template.entity.python_name }}_domain_model
+{%- for api_path in entity.api_paths %}
+from {{ template.module_name }}.resources.{{ api_path.class_name }} import {{ api_path.python_name }}_model
+{%- endfor %}
 
 api = Namespace('{{ entity.resource_namespace }}',
                 path='{{ entity.resource_path }}',
@@ -46,14 +53,16 @@ api = Namespace('{{ entity.resource_namespace }}',
 @api.route('/{{ entity.dashed_name }}/<{{ entity.identifier_column.json_property_name }}>', endpoint='{{ entity.python_name }}_by_id')  # noqa: E501
 class {{ entity.class_name }}Resource(Resource):  # type: ignore
     {%- if entity.supports_get_one %}
-
     @api.marshal_with({{ entity.python_name }}_model)
     @api.doc(id='get-{{ entity.python_name }}-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, {{ entity.identifier_column.json_property_name }}):  # type: ignore
         {{ find_element_by_id() }}.first()  # noqa: E501
         if result is None:
             abort(404)
-        return python_dict_to_json_dict(model_to_dict(result))
+        return model_to_dict(
+            result,
+            {{ entity.python_name }}_domain_model,
+        ), 200
     {%- endif -%}{# get_one method #}
     {%- if entity.supports_delete_one %}
 
@@ -71,6 +80,7 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
     {%- if entity.supports_put %}
 
     @api.expect({{ entity.python_name }}_model, validate=False)
+    @api.marshal_with({{ entity.python_name }}_model)
     def put(self, {{ entity.identifier_column.json_property_name }}):  # type: ignore
         data = json.loads(request.data)
         if type(data) is not dict:
@@ -78,9 +88,16 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
 
         {{ find_element_by_id() }}.first()  # noqa: E501
 
-        if '{{ entity.identifier_column.json_property_name }}' not in data:
-            data['{{ entity.identifier_column.json_property_name }}'] = {# -#}
-                {{ identifier_column.python_type.value }}({{ entity.identifier_column.json_property_name }})
+        joined_entities = create_joined_entity_map(
+            {{ entity.python_name }}_domain_model,
+            data,
+        )
+
+        data = convert_properties_to_sqlalchemy_properties(
+            {{ entity.python_name }}_domain_model,
+            joined_entities,
+            json_dict_to_python_dict(data),
+        )
 
         marshmallow_result = {{ entity.python_name }}_schema.load(
             json_dict_to_python_dict(data),
@@ -92,30 +109,31 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
 
         db.session.add(marshmallow_result.data)
         db.session.commit()
-        return '', 201
+
+        return model_to_dict(
+            marshmallow_result.data,
+            {{ entity.python_name }}_domain_model,
+        ), 201
     {%- endif -%}{# put method #}
     {%- if entity.supports_patch %}
 
     @api.expect({{ entity.python_name }}_model, validate=False)
     def patch(self, {{ entity.identifier_column.json_property_name }}):  # type: ignore
-        data = json.loads(request.data)
-        if type(data) is not dict:
-            return abort(400)
-
-        {{ find_element_by_id() }}.first()
-
-        if result is None:
-            abort(404)
-
-        if '{{ entity.identifier_column.json_property_name }}' not in data:
-            data['{{ entity.identifier_column.json_property_name }}'] = {# -#}
-                {{ identifier_column.python_type.value }}({{ entity.identifier_column.json_property_name }})
-
-        python_dict = json_dict_to_python_dict(data)
-        [setattr(result, k, v) for k, v in python_dict.items()]
-
-        db.session.add(result)
-        db.session.commit()
+        ...
+{#        data = json.loads(request.data) -#}
+{#        if type(data) is not dict: -#}
+{#            return abort(400) -#}
+{# -#}
+{#        {{ find_element_by_id() }}.first() -#}
+{# -#}
+{#        if result is None: -#}
+{#            abort(404) -#}
+{# -#}
+{#        python_dict = json_dict_to_python_dict(data) -#}
+{#        [setattr(result, k, v) for k, v in python_dict.items()] -#}
+{# -#}
+{#        db.session.add(result) -#}
+{#        db.session.commit() -#}
     {%- endif -%}{# patch method #}
 {%- endif -%}{# single class #}
 {%- if entity.supports_get_all or entity.supports_delete_all or entity.supports_post %}
@@ -173,6 +191,7 @@ class Many{{ entity.class_name }}Resource(Resource):  # type: ignore
 @api.route('/{{ entity.dashed_name }}/<{{ entity.identifier_column.json_property_name }}>/{{ api_path.route }}', endpoint='{{ api_path.endpoint }}')  # noqa: E501
 class {{ api_path.class_name }}(Resource):  # type: ignore
     @api.doc(id='{{ api_path.endpoint }}', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+{#-    @api.marshal_with({{ entity.python_name }}_model)  # noqa: E501 #}
     def get(self, {{ entity.identifier_column.json_property_name }}):  # type: ignore
         result: Optional[{{ entity.class_name }}] = {{ entity.class_name }} \
             .query \
@@ -189,11 +208,13 @@ class {{ api_path.class_name }}(Resource):  # type: ignore
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        return model_to_dict(result, ['{#  -#}
+        result_dict = model_to_dict(result, {{ entity.python_name }}_domain_model, ['{#  -#}
     {%- set sep = joiner("', '") -%}
     {%- for entity in api_path.joined_entities -%}
         {{ sep() }}{{ entity }}
     {%- endfor %}'])  # noqa: E501
+
+        return result_dict
 {%- endfor -%}
 {%- endif %}
 

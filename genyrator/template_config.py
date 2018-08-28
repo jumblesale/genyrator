@@ -4,11 +4,12 @@ import genyrator.entities.Template as Template
 from genyrator.entities.Template import create_template
 
 TemplateConfig = NamedTuple('TemplateConfig', [
-    ('root_files', List[Template.Template]),
-    ('core',       List[Template.Template]),
-    ('db_init',    List[Template.Template]),
-    ('db_models',  List[Template.Template]),
-    ('resources',  List[Template.Template]), ])
+    ('root_files',    List[Template.Template]),
+    ('core',          List[Template.Template]),
+    ('db_init',       List[Template.Template]),
+    ('db_models',     List[Template.Template]),
+    ('domain_models', List[Template.Template]),
+    ('resources',     List[Template.Template]), ])
 
 
 def create_template_config(
@@ -41,6 +42,15 @@ def create_template_config(
             imports=[Template.Import(e.class_name, [e.class_name]) for e in entities], module_name=module_name,
         ),
         create_template(Template.ModelToDict, ['sqlalchemy', 'model_to_dict'], module_name=module_name),
+        create_template(Template.ConvertProperties, ['sqlalchemy', 'convert_properties'], module_name=module_name),
+        create_template(Template.JoinEntities, ['sqlalchemy', 'join_entities'], module_name=module_name),
+    ]
+    domain_models = [
+        create_template(Template.Template, ['domain', 'types']),
+        *[create_template(
+            Template.DomainModel, ['domain', 'domain_model'], module_name=module_name, entity=entity,
+            out_path=Template.OutPath((['domain'], entity.class_name))
+        ) for entity in entities]
     ]
     resources = [
         create_template(
@@ -48,12 +58,12 @@ def create_template_config(
         ),
         *[create_template(
             Template.Resource, ['resources', 'resource'],
-            entity=e, out_path=Template.OutPath((['resources'], e.class_name)),
+            entity=entity, out_path=Template.OutPath((['resources'], entity.class_name)),
             db_import_path=db_import_path, module_name=module_name,
             restplus_template=create_template(
-                Template.RestplusModel, ['resources', 'restplus_model'], entity=e
+                Template.RestplusModel, ['resources', 'restplus_model'], entity=entity
             ).render()
-        ) for e in entities],
+        ) for entity in entities],
         create_template(
             Template.ResourcesInit, ['resources', '__init__'], entities=entities,
             module_name=module_name, api_name=api_name, api_description=api_description,
@@ -64,5 +74,6 @@ def create_template_config(
         core=core_files,
         db_init=db_init,
         db_models=db_models,
+        domain_models=domain_models,
         resources=resources,
     )

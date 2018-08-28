@@ -1,24 +1,27 @@
 import json
+from typing import Optional
+
 from flask import request, abort, url_for
 from flask_restplus import Resource, fields, Namespace
 
-from typing import Optional
-from uuid import UUID
 
 from bookshop.core.convert_dict import (
     python_dict_to_json_dict, json_dict_to_python_dict
 )
 from bookshop.sqlalchemy import db
 from bookshop.sqlalchemy.model import Genre
+from bookshop.sqlalchemy.convert_properties import convert_properties_to_sqlalchemy_properties
+from bookshop.sqlalchemy.join_entities import create_joined_entity_map
 from bookshop.schema import GenreSchema
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
+from bookshop.domain.Genre import genre as genre_domain_model
 
 api = Namespace('genres',
                 path='/',
                 description='Genre API', )
 
 genre_model = api.model('Genre', {
-    'genreId': fields.String(),
+    'id': fields.String(attribute='genreId'),
     'title': fields.String(),
 })
 
@@ -28,14 +31,16 @@ genres_many_schema = GenreSchema(many=True)
 
 @api.route('/genre/<genreId>', endpoint='genre_by_id')  # noqa: E501
 class GenreResource(Resource):  # type: ignore
-
     @api.marshal_with(genre_model)
     @api.doc(id='get-genre-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, genreId):  # type: ignore
         result: Optional[Genre] = Genre.query.filter_by(genre_id=genreId).first()  # noqa: E501
         if result is None:
             abort(404)
-        return python_dict_to_json_dict(model_to_dict(result))
+        return model_to_dict(
+            result,
+            genre_domain_model,
+        ), 200
 
     @api.doc(id='delete-genre-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
     def delete(self, genreId):  # type: ignore
@@ -46,6 +51,7 @@ class GenreResource(Resource):  # type: ignore
         return '', 204
 
     @api.expect(genre_model, validate=False)
+    @api.marshal_with(genre_model)
     def put(self, genreId):  # type: ignore
         data = json.loads(request.data)
         if type(data) is not dict:
@@ -53,8 +59,16 @@ class GenreResource(Resource):  # type: ignore
 
         result: Optional[Genre] = Genre.query.filter_by(genre_id=genreId).first()  # noqa: E501
 
-        if 'genreId' not in data:
-            data['genreId'] = UUID(genreId)
+        joined_entities = create_joined_entity_map(
+            genre_domain_model,
+            data,
+        )
+
+        data = convert_properties_to_sqlalchemy_properties(
+            genre_domain_model,
+            joined_entities,
+            json_dict_to_python_dict(data),
+        )
 
         marshmallow_result = genre_schema.load(
             json_dict_to_python_dict(data),
@@ -66,27 +80,16 @@ class GenreResource(Resource):  # type: ignore
 
         db.session.add(marshmallow_result.data)
         db.session.commit()
-        return '', 201
+
+        return model_to_dict(
+            marshmallow_result.data,
+            genre_domain_model,
+        ), 201
 
     @api.expect(genre_model, validate=False)
     def patch(self, genreId):  # type: ignore
-        data = json.loads(request.data)
-        if type(data) is not dict:
-            return abort(400)
+        ...
 
-        result: Optional[Genre] = Genre.query.filter_by(genre_id=genreId).first()
-
-        if result is None:
-            abort(404)
-
-        if 'genreId' not in data:
-            data['genreId'] = UUID(genreId)
-
-        python_dict = json_dict_to_python_dict(data)
-        [setattr(result, k, v) for k, v in python_dict.items()]
-
-        db.session.add(result)
-        db.session.commit()
 
 
 @api.route('/genres', endpoint='genres')  # noqa: E501

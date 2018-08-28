@@ -1,8 +1,8 @@
 from marshmallow_sqlalchemy import ModelSchema
 from {{ template.module_name }}.sqlalchemy.model import (
-{% for entity in template.entities %}
+{%- for entity in template.entities %}
     {{ entity.class_name }},
-{% endfor %}
+{%- endfor %}
 )
 {% for entity in template.entities %}
 

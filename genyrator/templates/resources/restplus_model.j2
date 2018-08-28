@@ -1,8 +1,15 @@
-{{ template.entity.python_name }}_model = api.model('{{ template.entity.class_name }}', {
-{%- for column in template.entity.columns %}
-    '{{ column.json_property_name }}': fields.{{ column.restplus_type.value }}(),
+{% set entity = template.entity -%}
+{{ entity.python_name }}_model = api.model('{{ entity.class_name }}', {
+{%- for column in entity.columns %}
+    {%- set column_type = column.restplus_type.value if column.__class__.__name__ != 'ForeignKey'
+                                                   else column.target_restplus_type.value %}
+    {%- if column.__class__.__name__ == 'IdentifierColumn' %}
+    'id': fields.{{ column_type }}(attribute='{{ column.json_property_name }}'),
+    {%- else %}
+    '{{ column.json_property_name }}': fields.{{ column_type }}(),
+    {%- endif %}
 {%- endfor %}
-{%- for api_path in template.entity.api_paths %}
-    '{{ api_path.property_name }}': fields.Url('{{ api_path.endpoint }}'),  # noqa: E501
+{%- for api_path in entity.api_paths %}
+    '{{ api_path.property_name }}': fields.Url('{{ api_path.python_name }}'),  # noqa: E501
 {%- endfor %}
 })

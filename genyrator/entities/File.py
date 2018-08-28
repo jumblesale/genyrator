@@ -6,11 +6,12 @@ from genyrator.entities import Template
 from genyrator.template_config import TemplateConfig
 
 FileList = NamedTuple('FileList', [
-    ('root_files', List['File']),
-    ('core',       List['File']),
-    ('db_models',  List['File']),
-    ('db_init',    List['File']),
-    ('resources',  List['File']), ])
+    ('root_files',       List['File']),
+    ('core',             List['File']),
+    ('db_models',        List['File']),
+    ('db_init',          List['File']),
+    ('domain_models',    List['File']),
+    ('resources',        List['File']), ])
 
 
 @attr.s

@@ -2,6 +2,7 @@ from typing import List
 
 from genyrator import create_entity, create_column, TypeOption, create_identifier_column, create_relationship, \
     JoinOption
+from genyrator.entities.Column import ForeignKeyRelationship
 from genyrator.entities.Entity import all_operations, Entity, create_api_path
 from genyrator.entities.Schema import create_schema, Schema
 
@@ -16,16 +17,27 @@ book_entity = create_entity(
             index=True, nullable=False,
         ),
         create_column(
-            name='rating', type_option=TypeOption.int,
+            name='rating', type_option=TypeOption.float,
             index=True, nullable=False,
         ),
         create_column(
-            name='author_id', type_option=TypeOption.string,
-            foreign_key_relationship='author.author_id'
+            name='author_id', type_option=TypeOption.int,
+            foreign_key_relationship=ForeignKeyRelationship(
+                target_entity='author',
+                target_entity_identifier_column_type=TypeOption.UUID,
+            ),
+        ),
+        create_column(
+            name='published', type_option=TypeOption.date,
+        ),
+        create_column(
+            name='created', type_option=TypeOption.datetime,
         ),
     ],
     relationships=[
         create_relationship(
+            source_column_name='author_id',
+            target_identifier_column_name='author_id',
             target_entity_class_name='Author',
             nullable=False,
             lazy=False,
@@ -33,12 +45,15 @@ book_entity = create_entity(
         ),
         create_relationship(
             target_entity_class_name='Review',
+            source_column_name='review_id',
+            target_identifier_column_name='review_id',
             nullable=False,
             lazy=False,
             join=JoinOption.to_many,
         ),
         create_relationship(
             target_entity_class_name='Genre',
+            source_column_name='genre_id',
             nullable=False,
             lazy=False,
             join=JoinOption.to_one,
@@ -71,6 +86,8 @@ author_entity = create_entity(
     relationships=[
         create_relationship(
             target_entity_class_name='Book',
+            source_column_name='book_id',
+            target_identifier_column_name='book_id',
             nullable=False,
             lazy=False,
             join=JoinOption.to_many,
@@ -82,7 +99,7 @@ author_entity = create_entity(
             route='books/reviews',
         ),
         create_api_path(
-            joined_entities=['Book'],
+            joined_entities=['book'],
             route='books',
         ),
     ],
@@ -99,13 +116,18 @@ review_entity = create_entity(
             index=True, nullable=False,
         ),
         create_column(
-            name='book_id', type_option=TypeOption.string,
-            foreign_key_relationship='book.book_id'
+            name='book_id', type_option=TypeOption.int,
+            foreign_key_relationship=ForeignKeyRelationship(
+                target_entity='book',
+                target_entity_identifier_column_type=TypeOption.UUID,
+            ),
         )
     ],
     relationships=[
         create_relationship(
             target_entity_class_name='Book',
+            source_column_name='book_id',
+            target_identifier_column_name='book_id',
             nullable=False,
             lazy=False,
             join=JoinOption.to_one,
@@ -125,7 +147,8 @@ genre_entity = create_entity(
     ],
     relationships=[
         create_relationship(
-            target_entity_class_name='Book', nullable=True, lazy=False, join=JoinOption.to_many, join_table='book_genre'
+            target_entity_class_name='Book', nullable=True, lazy=False, join=JoinOption.to_many,
+            join_table='book_genre', source_column_name='', target_identifier_column_name='book_id',
         ),
     ],
 )
@@ -134,12 +157,30 @@ book_genre_entity = create_entity(
     class_name='BookGenre',
     identifier_column=create_identifier_column('book_genre_id', TypeOption.UUID),
     columns=[
-        create_column('book_id',  type_option=TypeOption.UUID, foreign_key_relationship='book.book_id'),
-        create_column('genre_id', type_option=TypeOption.UUID, foreign_key_relationship='genre.genre_id'),
+        create_column(
+            'book_id',  type_option=TypeOption.int,
+            foreign_key_relationship=ForeignKeyRelationship(
+                target_entity='book',
+                target_entity_identifier_column_type=TypeOption.UUID,
+            ),
+        ),
+        create_column(
+            'genre_id', type_option=TypeOption.int,
+            foreign_key_relationship=ForeignKeyRelationship(
+                target_entity='genre',
+                target_entity_identifier_column_type=TypeOption.UUID,
+            ),
+        ),
     ],
     relationships=[
-        create_relationship('Book',  nullable=False, lazy=False, join=JoinOption.to_one),
-        create_relationship('Genre', nullable=False, lazy=False, join=JoinOption.to_one),
+        create_relationship(
+            'Book', source_column_name='book_id', target_identifier_column_name='book_id', nullable=False,
+            lazy=False, join=JoinOption.to_one
+        ),
+        create_relationship(
+            'Genre', source_column_name='genre_id', target_identifier_column_name='genre_id', nullable=False,
+            lazy=False, join=JoinOption.to_one
+        ),
     ],
 )
 
