@@ -20,8 +20,8 @@ book_entity = create_entity(
             index=True, nullable=False,
         ),
         create_column(
-            name='author_id', type_option=TypeOption.int,
-            foreign_key_relationship='author', target_type_option=TypeOption.UUID,
+            name='author_id', type_option=TypeOption.UUID,
+            foreign_key_relationship='author',
         ),
         create_column(
             name='published', type_option=TypeOption.date,
@@ -112,8 +112,8 @@ review_entity = create_entity(
             index=True, nullable=False,
         ),
         create_column(
-            name='book_id', type_option=TypeOption.string,
-            foreign_key_relationship='book', target_type_option=TypeOption.UUID,
+            name='book_id', type_option=TypeOption.UUID,
+            foreign_key_relationship='book',
         )
     ],
     relationships=[
@@ -152,11 +152,9 @@ book_genre_entity = create_entity(
     columns=[
         create_column(
             'book_id',  type_option=TypeOption.int, foreign_key_relationship='book',
-            target_type_option=TypeOption.UUID,
         ),
         create_column(
-            'genre_id', type_option=TypeOption.int, foreign_key_relationship='genre',
-            target_type_option=TypeOption.UUID,
+            'genre_id', type_option=TypeOption.UUID, foreign_key_relationship='genre',
         ),
     ],
     relationships=[

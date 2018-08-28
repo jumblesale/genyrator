@@ -22,8 +22,8 @@ api = Namespace('book_genres',
 
 book_genre_model = api.model('BookGenre', {
     'id': fields.String(attribute='bookGenreId'),
-    'bookId': fields.String(),
-    'genreId': fields.String(),
+    'bookId': fields.int(),
+    'genreId': fields.int(),
 })
 
 book_genre_schema = BookGenreSchema()

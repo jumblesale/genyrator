@@ -23,7 +23,7 @@ api = Namespace('reviews',
 review_model = api.model('Review', {
     'id': fields.String(attribute='reviewId'),
     'text': fields.String(),
-    'bookId': fields.String(),
+    'bookId': fields.int(),
 })
 
 review_schema = ReviewSchema()

@@ -25,7 +25,7 @@ book_model = api.model('Book', {
     'id': fields.String(attribute='bookId'),
     'name': fields.String(),
     'rating': fields.Float(),
-    'authorId': fields.String(),
+    'authorId': fields.int(),
     'published': fields.Date(),
     'created': fields.DateTime(),
     'genre': fields.Nested(genre_model),  # noqa: E501
