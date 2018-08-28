@@ -4,7 +4,8 @@ import attr
 from typing import List, Optional, NewType, Union, Tuple, Dict, NamedTuple, Set
 
 from genyrator.entities.Relationship import Relationship
-from genyrator.entities.Column import Column, create_column, IdentifierColumn, create_identifier_column
+from genyrator.entities.Column import Column, create_column, IdentifierColumn, create_identifier_column, \
+    ForeignKeyRelationship
 from genyrator.inflector import pythonize, pluralize, dasherize, humanize, to_class_name, to_json_case
 from genyrator.types import string_to_type_option
 
@@ -167,9 +168,9 @@ def create_entity_from_type_dict(
 ) -> Entity:
     columns = []
     foreign_keys_dict = {}
-    for fk_key, fk_value in foreign_keys:
-        foreign_keys_dict[fk_key] = '{table}.{fk_column}'.format(
-            table=fk_value, fk_column=pythonize(fk_key)
+    for fk_key, fk_value, fk_type in foreign_keys:
+        foreign_keys_dict[fk_key] = ForeignKeyRelationship(
+            f'{pythonize(fk_value)}', string_to_type_option(fk_type)
         )
     identifier_column = None
     for k, v in type_dict.items():
