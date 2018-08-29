@@ -7,9 +7,11 @@ from {{ template.module_name }}.sqlalchemy.model.{{ relationship.target_entity_c
 {{ template.entity.python_name }} = DomainModel(
     relationship_map={
 {%- for relationship in template.entity.relationships -%}
-    {% if relationship.__class__.__name__ == 'RelationshipWithoutJoinTable' %}
+    {% if relationship.__class__.__name__ == 'RelationshipWithoutJoinTable' and
+            relationship.join.value == 'to_one' %}
         '{{ relationship.source_column_name }}': Relationship(
             target={{ relationship.target_entity_class_name }},
+            target_name='{{ relationship.target_entity_python_name }}',
             target_identifier_column='{{ relationship.target_identifier_column_name }}',
             target_foreign_key_column='{{ relationship.target_foreign_key_column_name }}',
             lazy=True,

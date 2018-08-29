@@ -35,7 +35,8 @@ def create_template_config(
     db_models = [
         *[create_template(
             Template.SQLAlchemyModel, ['sqlalchemy', 'model', 'sqlalchemy_model'],
-            db_import_path=db_import_path, entity=e, out_path=Template.OutPath((['sqlalchemy', 'model'], e.class_name))
+            db_import_path=db_import_path, entity=e, module_name=module_name,
+            out_path=Template.OutPath((['sqlalchemy', 'model'], e.class_name))
         ) for e in entities],
         create_template(
             Template.SQLAlchemyModelInit, ['sqlalchemy', 'model', '__init__'], db_import_path=db_import_path,
@@ -44,6 +45,7 @@ def create_template_config(
         create_template(Template.ModelToDict, ['sqlalchemy', 'model_to_dict'], module_name=module_name),
         create_template(Template.ConvertProperties, ['sqlalchemy', 'convert_properties'], module_name=module_name),
         create_template(Template.JoinEntities, ['sqlalchemy', 'join_entities'], module_name=module_name),
+        create_template(Template.Template, ['sqlalchemy', 'model', 'types']),
     ]
     domain_models = [
         create_template(Template.Template, ['domain', 'types']),

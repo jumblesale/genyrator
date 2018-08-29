@@ -7,7 +7,9 @@ review = DomainModel(
     relationship_map={
         'book_id': Relationship(
             target=Book,
+            target_name='book',
             target_identifier_column='book_id',
+            target_foreign_key_column='book_id',
             lazy=True,
         ),
     },

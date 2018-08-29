@@ -9,12 +9,9 @@ book = DomainModel(
     relationship_map={
         'author_id': Relationship(
             target=Author,
+            target_name='author',
             target_identifier_column='author_id',
-            lazy=True,
-        ),
-        'review_id': Relationship(
-            target=Review,
-            target_identifier_column='review_id',
+            target_foreign_key_column='author_id',
             lazy=True,
         ),
     },

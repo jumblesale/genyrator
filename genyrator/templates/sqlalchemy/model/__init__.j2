@@ -2,3 +2,4 @@
 {% for import in template.imports -%}
 from {{ template.module_name }}.sqlalchemy.model.{{ import.module_name }} import {% for import in import.imports %}{{ import }}{% endfor %}
 {% endfor %}
+

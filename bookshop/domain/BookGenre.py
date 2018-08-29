@@ -8,12 +8,16 @@ book_genre = DomainModel(
     relationship_map={
         'book_id': Relationship(
             target=Book,
+            target_name='book',
             target_identifier_column='book_id',
+            target_foreign_key_column='book_id',
             lazy=True,
         ),
         'genre_id': Relationship(
             target=Genre,
+            target_name='genre',
             target_identifier_column='genre_id',
+            target_foreign_key_column='genre_id',
             lazy=True,
         ),
     },

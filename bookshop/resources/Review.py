@@ -58,12 +58,18 @@ class ReviewResource(Resource):  # type: ignore
         if type(data) is not dict:
             return abort(400)
 
+        if 'id' not in data:
+            data['id'] = reviewId
+
         result: Optional[Review] = Review.query.filter_by(review_id=reviewId).first()  # noqa: E501
 
         joined_entities = create_joined_entity_map(
             review_domain_model,
             data,
         )
+
+        if type(joined_entities) is list:
+            abort(400, joined_entities)
 
         data = convert_properties_to_sqlalchemy_properties(
             review_domain_model,

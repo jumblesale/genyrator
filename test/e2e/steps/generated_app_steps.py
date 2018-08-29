@@ -193,6 +193,7 @@ def step_impl(context, entity_name):
     args = {}
     for row in context.table:
         args[row['name']] = row['value']
+    args['id'] = None
     model = constructor(**args)
     with context.app.app_context():
         db.session.add(model)

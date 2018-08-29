@@ -57,12 +57,18 @@ class GenreResource(Resource):  # type: ignore
         if type(data) is not dict:
             return abort(400)
 
+        if 'id' not in data:
+            data['id'] = genreId
+
         result: Optional[Genre] = Genre.query.filter_by(genre_id=genreId).first()  # noqa: E501
 
         joined_entities = create_joined_entity_map(
             genre_domain_model,
             data,
         )
+
+        if type(joined_entities) is list:
+            abort(400, joined_entities)
 
         data = convert_properties_to_sqlalchemy_properties(
             genre_domain_model,

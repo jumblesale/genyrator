@@ -1,6 +1,8 @@
-from {{ template.db_import_path }} import db
 from sqlalchemy_utils import UUIDType
 from sqlalchemy import UniqueConstraint
+
+from {{ template.db_import_path }} import db
+from {{ template.module_name }}.sqlalchemy.model.types import BigIntegerVariantType
 
 {%- macro pad(name) -%}
 {{ ' ' * (template.entity.max_property_length - (name | length)) }}
@@ -16,7 +18,7 @@ class {{ template.entity.class_name }}(db.Model):  # type: ignore
     {{ property.python_name }} = {{ property.value }}
     {%- endfor %}
 {% endif %}
-    id ={{ pad('id') }} db.Column(db.BigInteger, primary_key=True)  # noqa: E501
+    id ={{ pad('id') }} db.Column(BigIntegerVariantType, primary_key=True, autoincrement=True)  # noqa: E501
 {%- for column in template.entity.columns %}
     {{ column.python_name }} ={{ pad(column.python_name) }} db.Column({{ column.sqlalchemy_type.value }}
     {%- if column.relationship is defined %}, db.ForeignKey('{{ column.relationship }}'){% endif %}

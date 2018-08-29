@@ -93,6 +93,9 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
             data,
         )
 
+        if type(joined_entities) is list:
+            abort(400, joined_entities)
+
         data = convert_properties_to_sqlalchemy_properties(
             {{ entity.python_name }}_domain_model,
             joined_entities,

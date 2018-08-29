@@ -15,7 +15,6 @@ from bookshop.sqlalchemy.join_entities import create_joined_entity_map
 from bookshop.schema import BookSchema
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
 from bookshop.domain.Book import book as book_domain_model
-from bookshop.resources.Genre import genre_model
 
 api = Namespace('books',
                 path='/',
@@ -28,7 +27,6 @@ book_model = api.model('Book', {
     'authorId': fields.String(),
     'published': fields.Date(),
     'created': fields.DateTime(),
-    'genre': fields.Url('genre'),  # noqa: E501
 })
 
 book_schema = BookSchema()
@@ -63,12 +61,18 @@ class BookResource(Resource):  # type: ignore
         if type(data) is not dict:
             return abort(400)
 
+        if 'id' not in data:
+            data['id'] = bookId
+
         result: Optional[Book] = Book.query.filter_by(book_id=bookId).first()  # noqa: E501
 
         joined_entities = create_joined_entity_map(
             book_domain_model,
             data,
         )
+
+        if type(joined_entities) is list:
+            abort(400, joined_entities)
 
         data = convert_properties_to_sqlalchemy_properties(
             book_domain_model,

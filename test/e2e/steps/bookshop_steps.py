@@ -97,3 +97,19 @@ def step_impl(context, url: str):
     assert_that(response.status_code, equal_to(200))
     data = json.loads(response.data)
     ...
+
+
+@given('I put an incorrect "book_genre" join entity')
+def step_impl(context):
+    book_genre_entity = generate_example_book_genre(
+        book_uuid=str(uuid.uuid4()), genre_uuid=str(uuid.uuid4()),
+    )
+    context.book_genre_uuid = book_genre_uuid = book_genre_entity['id']
+    response = make_request(client=context.client, endpoint=f'book-genre/{book_genre_uuid}',
+                            method='put', data=book_genre_entity)
+    context.response = response
+
+
+@then("I get http status 400")
+def step_impl(context):
+    assert_that(context.response.status_code, equal_to(400))
