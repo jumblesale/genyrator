@@ -11,7 +11,7 @@ book = DomainModel(
             target=Author,
             target_name='author',
             target_identifier_column='author_id',
-            target_foreign_key_column='author_id',
+            source_foreign_key_column='author_id',
             lazy=True,
         ),
     },

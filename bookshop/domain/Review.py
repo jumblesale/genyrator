@@ -9,7 +9,7 @@ review = DomainModel(
             target=Book,
             target_name='book',
             target_identifier_column='book_id',
-            target_foreign_key_column='book_id',
+            source_foreign_key_column='book_id',
             lazy=True,
         ),
     },

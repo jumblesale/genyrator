@@ -14,7 +14,6 @@ class Relationship(object):
     python_name:                    str =        attr.ib()
     target_entity_class_name:       str =        attr.ib()
     target_entity_python_name:      str =        attr.ib()
-    target_foreign_key_column_name: str =        attr.ib()
     source_column_name:             str =        attr.ib()
     property_name:                  str =        attr.ib()
     nullable:                       bool =       attr.ib()
@@ -40,8 +39,6 @@ def create_relationship(
         source_column_name:             Optional[str] = None,
         join_table:                     Optional[str] = None,
         target_identifier_column_name:  Optional[str] = None,
-        # our column which stores their primary key
-        target_foreign_key_column_name: Optional[str] = None,
         property_name:                  Optional[str] = None,
 ) -> Relationship:
     target_entity_python_name = pythonize(target_entity_class_name)
@@ -49,9 +46,7 @@ def create_relationship(
         python_name=target_entity_python_name,
         target_entity_class_name=target_entity_class_name,
         target_entity_python_name=target_entity_python_name,
-        target_foreign_key_column_name=
-        target_foreign_key_column_name if target_foreign_key_column_name else f'{target_entity_python_name}_id',
-        source_column_name=pythonize(source_column_name),
+        source_column_name=pythonize(source_column_name) if source_column_name else f'{target_entity_python_name}_id',
         property_name=property_name if property_name else target_entity_python_name,
         nullable=nullable,
         lazy=lazy,

@@ -13,7 +13,7 @@ from {{ template.module_name }}.sqlalchemy.model.{{ relationship.target_entity_c
             target={{ relationship.target_entity_class_name }},
             target_name='{{ relationship.target_entity_python_name }}',
             target_identifier_column='{{ relationship.target_identifier_column_name }}',
-            target_foreign_key_column='{{ relationship.target_foreign_key_column_name }}',
+            source_foreign_key_column='{{ relationship.source_column_name }}',
             lazy=True,
         ),
     {%- endif %}

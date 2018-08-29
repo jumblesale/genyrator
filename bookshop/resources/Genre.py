@@ -97,10 +97,8 @@ class GenreResource(Resource):  # type: ignore
         ...
 
 
-
 @api.route('/genres', endpoint='genres')  # noqa: E501
 class ManyGenreResource(Resource):  # type: ignore
-
     def get(self):
         result = Genre.query.all()
         urls = [

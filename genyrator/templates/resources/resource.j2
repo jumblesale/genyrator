@@ -137,15 +137,13 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
 {# -#}
 {#        db.session.add(result) -#}
 {#        db.session.commit() -#}
-    {%- endif -%}{# patch method #}
-{%- endif -%}{# single class #}
+    {%- endif -%}{# patch method -#}
+{%- endif -%}{# single class -#}
 {%- if entity.supports_get_all or entity.supports_delete_all or entity.supports_post %}
-
 
 @api.route('/{{ entity.dashed_plural }}', endpoint='{{ entity.resource_namespace }}')  # noqa: E501
 class Many{{ entity.class_name }}Resource(Resource):  # type: ignore
     {%- if entity.supports_get_all %}
-
     def get(self):
         {%- if entity.supports_get_one %}
         result = {{ entity.class_name }}.query.all()

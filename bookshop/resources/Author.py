@@ -97,10 +97,8 @@ class AuthorResource(Resource):  # type: ignore
         ...
 
 
-
 @api.route('/authors', endpoint='authors')  # noqa: E501
 class ManyAuthorResource(Resource):  # type: ignore
-
     def get(self):
         result = Author.query.all()
         urls = [

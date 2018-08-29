@@ -8,8 +8,8 @@ class Relationship:
     target:                    Any =  attr.ib()
     target_name:               str =  attr.ib()
     target_identifier_column:  str =  attr.ib()
+    source_foreign_key_column: str =  attr.ib()
     lazy:                      bool = attr.ib()
-    target_foreign_key_column: str =  attr.ib()
 
 
 @attr.s

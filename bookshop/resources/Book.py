@@ -101,10 +101,8 @@ class BookResource(Resource):  # type: ignore
         ...
 
 
-
 @api.route('/books', endpoint='books')  # noqa: E501
 class ManyBookResource(Resource):  # type: ignore
-
     def get(self):
         result = Book.query.all()
         urls = [

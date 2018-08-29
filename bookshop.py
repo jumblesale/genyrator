@@ -91,7 +91,17 @@ author_entity = create_entity(
             nullable=False,
             lazy=False,
             join=JoinOption.to_many,
-        )
+            property_name='books',
+        ),
+        create_relationship(
+            target_entity_class_name='Book',
+            source_column_name='favourite_book_id',
+            target_identifier_column_name='book_id',
+            nullable=False,
+            lazy=False,
+            join=JoinOption.to_one,
+            property_name='favourite_book',
+        ),
     ],
     api_paths=[
         create_api_path(

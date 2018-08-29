@@ -13,8 +13,8 @@ Feature: Posting new entities with foreign keys
     Given I put an incorrect "book_genre" join entity
      Then I get http status 400
 
-#  Scenario: PATCHing a relationship
-#    Given I put an example "book" entity
-#      And I put an example "author" entity
-#     When I patch that "book" entity with that "author" id
-#     Then I can see that book in the response from "author/{id}/books"
+  Scenario: PATCHing a relationship
+    Given I put an example "book" entity
+      And I put an example "author" entity
+     When I patch that "book" entity with that "author" id
+     Then I can see that book in the response from "author/{id}/books"

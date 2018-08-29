@@ -75,7 +75,7 @@ def step_impl(context, url: str):
     assert_that(response.status_code, equal_to(200))
     data = json.loads(response.data)
     genre = data['genre']
-    assert_that(genre['id'], equal_to(context.genre_entity['id']))
+    assert_that(genre['genreId'], equal_to(context.genre_entity['id']))
 
 
 @when('I patch that "{entity_name}" entity with that "{entity_id}" id')

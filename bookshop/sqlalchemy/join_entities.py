@@ -19,7 +19,8 @@ def create_joined_entity_map(
         result = relationship.target.query.filter_by(**filter_kwargs).first()
         if result is None:
             errors.append(
-                [f'Could not find {relationship.target_name} with {json_relationship_name} equal to {target_identifier_value}']
+                [f'Could not find {relationship.target_name} with {json_relationship_name} '
+                 f'equal to {target_identifier_value}']
             )
         else:
             joined_entities[relationship_name] = result

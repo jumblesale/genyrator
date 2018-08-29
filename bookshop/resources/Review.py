@@ -98,10 +98,8 @@ class ReviewResource(Resource):  # type: ignore
         ...
 
 
-
 @api.route('/reviews', endpoint='reviews')  # noqa: E501
 class ManyReviewResource(Resource):  # type: ignore
-
     def get(self):
         result = Review.query.all()
         urls = [
