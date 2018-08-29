@@ -83,6 +83,9 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
         if type(data) is not dict:
             return abort(400)
 
+        if 'id' not in data:
+            data['id'] = {{ identifier_column.json_property_name }}
+
         {{ find_element_by_id() }}.first()  # noqa: E501
 
         joined_entities = create_joined_entity_map(

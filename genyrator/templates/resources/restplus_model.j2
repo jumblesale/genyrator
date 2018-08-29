@@ -9,7 +9,4 @@
     '{{ column.json_property_name }}': fields.{{ column_type }}(),
     {%- endif %}
 {%- endfor %}
-{%- for api_path in entity.api_paths %}
-    '{{ api_path.property_name }}': fields.Url('{{ api_path.python_name }}'),  # noqa: E501
-{%- endfor %}
 })
