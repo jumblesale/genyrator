@@ -20,7 +20,9 @@ class {{ template.entity.class_name }}(db.Model):  # type: ignore
 {% endif %}
     id ={{ pad('id') }} db.Column(BigIntegerVariantType, primary_key=True, autoincrement=True)  # noqa: E501
 {%- for column in template.entity.columns %}
-    {{ column.python_name }} ={{ pad(column.python_name) }} db.Column({{ column.sqlalchemy_type.value }}
+    {{ column.python_name }} ={{ pad(column.python_name) }} db.Column(
+    {%- if column.alias %}'{{ column.alias }}', {% endif -%}
+    {{ column.sqlalchemy_type.value }}{# -#}
     {%- if column.relationship is defined %}, db.ForeignKey('{{ column.relationship }}'){% endif %}
     {%- if column.index %}, index=True{% endif %}{# -#}
     , nullable={{ column.nullable | string }})  # noqa: E501

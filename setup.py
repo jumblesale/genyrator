@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='genyrator',
-    version='0.0.99',
+    version='0.0.119',
     packages=find_packages(exclude=['test', 'bookshop', 'domain']),
     url='https://github.com/jumblesale/genyrator',
     license='',

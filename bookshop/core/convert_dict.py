@@ -4,7 +4,7 @@ from bookshop.core.convert_case import to_json_name, to_python_name
 
 
 def convert_dict_naming(
-    in_dict: Optional[Dict],
+    in_dict: Optional[Mapping[str, Any]],
     fn:      Callable[[str], str],
 ) -> Optional[Mapping[str, Any]]:
     if in_dict is None:
@@ -16,7 +16,7 @@ def convert_dict_naming(
         elif type(v) is list or type(v) is set:
             value = convert_iterable_naming(v, fn)
         else:
-            value = v
+            value = dict_value_to_json_value(v)
         out_dict[fn(k)] = dict_value_to_json_value(value)
     return out_dict
 

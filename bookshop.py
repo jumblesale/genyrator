@@ -29,6 +29,7 @@ book_entity = create_entity(
         ),
         create_column(
             name='published', type_option=TypeOption.date,
+            alias='date_published',
         ),
         create_column(
             name='created', type_option=TypeOption.datetime,

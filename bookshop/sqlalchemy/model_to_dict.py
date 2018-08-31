@@ -2,6 +2,7 @@ from typing import List, Mapping, Any, Optional
 
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.orm.collections import InstrumentedList
+from sqlalchemy import inspect
 
 from bookshop.core.convert_dict import python_dict_to_json_dict
 from bookshop.domain.types import DomainModel
@@ -18,12 +19,10 @@ def model_to_dict(
     if sql_alchemy_model is None:
         return None
     serialized_data = {}
-    for c in sql_alchemy_model.__table__.columns:
-        if c.primary_key:
-            continue
-        key = c.key
-        value = getattr(sql_alchemy_model, c.key)
-        serialized_data[key] = value
+    for attribute_name in inspect(sql_alchemy_model).attrs.keys():
+        value = getattr(sql_alchemy_model, attribute_name)
+        if type(value) is not InstrumentedList:
+            serialized_data[attribute_name] = value
     if not paths:
         return python_dict_to_json_dict(serialized_data)
     next_path = paths[0]

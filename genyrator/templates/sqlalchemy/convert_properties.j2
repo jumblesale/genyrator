@@ -17,7 +17,7 @@ def convert_properties_to_sqlalchemy_properties(
             result[model.identifier_column_name] = data[k]
         elif k in joined_entities:
             entity = joined_entities[k]
-            result[model.relationship_map[k].target_foreign_key_column] = getattr(entity, 'id')
+            result[model.relationship_map[k].source_foreign_key_column] = getattr(entity, 'id')
         else:
             result[k] = v
     return result

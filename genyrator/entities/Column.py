@@ -19,6 +19,7 @@ class Column(object):
     python_name:        str =                  attr.ib()
     class_name:         str =                  attr.ib()
     display_name:       str =                  attr.ib()
+    alias:              str =                  attr.ib()
     json_property_name: str =                  attr.ib()
     type_option:        TypeOption =           attr.ib()
     sqlalchemy_type:    SqlAlchemyTypeOption = attr.ib()
@@ -31,7 +32,7 @@ class Column(object):
 
 @attr.s
 class ForeignKey(Column):
-    relationship: str =         attr.ib()
+    relationship:         str = attr.ib()
     target_restplus_type: str = attr.ib()
 
 
@@ -47,6 +48,7 @@ def create_column(
         nullable:                 bool = True,
         identifier:               bool = False,
         display_name:             Optional[str] = None,
+        alias:                    Optional[str] = None,
         foreign_key_relationship: Optional[ForeignKeyRelationship] = None,
 ) -> Union[Column, ForeignKey]:
     if identifier is True:
@@ -67,6 +69,7 @@ def create_column(
         "default":            type_option_to_default_value(type_option),
         "index":              index,
         "nullable":           nullable,
+        "alias":              alias,
     }
     if foreign_key_relationship is not None:
         args['relationship'] = '{}.{}'.format(
@@ -80,8 +83,8 @@ def create_column(
 
 
 def create_identifier_column(
-        name:                     str,
-        type_option:              TypeOption,
+        name:        str,
+        type_option: TypeOption,
 ) -> IdentifierColumn:
     column: IdentifierColumn = create_column(
         name=name, type_option=type_option, index=True, nullable=False,
