@@ -156,7 +156,7 @@ def create_entity_from_type_dict(
         class_name:             str,
         identifier_column_name: str,
         type_dict:              Dict,
-        foreign_keys:           Set[Tuple[str, str]] = set(),
+        foreign_keys:           Set[Tuple[str, str, str]] = set(),
         indexes:                Set[str] = set(),
         operations:             Optional[Set[OperationOption]] = None,
         relationships:          Optional[List[Relationship]] = None,
