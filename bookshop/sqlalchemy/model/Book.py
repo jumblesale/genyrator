@@ -11,7 +11,7 @@ class Book(db.Model):  # type: ignore
     name =      db.Column(db.String, index=True, nullable=False)  # noqa: E501
     rating =    db.Column(db.Float, index=True, nullable=False)  # noqa: E501
     author_id = db.Column(db.BigInteger, db.ForeignKey('author.id'), nullable=True)  # noqa: E501
-    published = db.Column('date_published', db.Date, nullable=True)  # noqa: E501
+    published = db.Column(db.Date, nullable=True)  # noqa: E501
     created =   db.Column(db.DateTime, nullable=True)  # noqa: E501
     author =    db.relationship(
         'Author',

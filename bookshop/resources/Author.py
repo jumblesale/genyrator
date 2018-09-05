@@ -10,7 +10,9 @@ from bookshop.core.convert_dict import (
 )
 from bookshop.sqlalchemy import db
 from bookshop.sqlalchemy.model import Author
-from bookshop.sqlalchemy.convert_properties import convert_properties_to_sqlalchemy_properties
+from bookshop.sqlalchemy.convert_properties import (
+    convert_properties_to_sqlalchemy_properties, convert_sqlalchemy_properties_to_dict_properties
+)
 from bookshop.sqlalchemy.join_entities import create_joined_entity_map
 from bookshop.schema import AuthorSchema
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
@@ -124,7 +126,7 @@ class Review(Resource):  # type: ignore
                 joinedload('book')
                 .joinedload('review')
             ) \
-            .filter_by( -
+            .filter_by(
                 author_id=authorId) \
             .first()  # noqa: E501
         if result is None:
@@ -133,12 +135,12 @@ class Review(Resource):  # type: ignore
             sqlalchemy_model=result,
             domain_model=author_domain_model,
             paths=[
-                ('book'),
-                ('review'),
-            ]
+                'book',
+                'review',
+            ],
         )
 
-        return result_dict
+        return python_dict_to_json_dict(result_dict)
 
 
 @api.route('/author/<authorId>/books', endpoint='book')  # noqa: E501
@@ -150,7 +152,7 @@ class Book(Resource):  # type: ignore
             .options(
                 joinedload('book')
             ) \
-            .filter_by( -
+            .filter_by(
                 author_id=authorId) \
             .first()  # noqa: E501
         if result is None:
@@ -159,8 +161,8 @@ class Book(Resource):  # type: ignore
             sqlalchemy_model=result,
             domain_model=author_domain_model,
             paths=[
-                ('book'),
-            ]
+                'book',
+            ],
         )
 
-        return result_dict
+        return python_dict_to_json_dict(result_dict)

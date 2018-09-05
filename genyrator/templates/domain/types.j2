@@ -1,20 +1,25 @@
-from typing import Any, Mapping, List
+from typing import Mapping, List
+
+from sqlalchemy.ext.declarative import DeclarativeMeta
 
 import attr
 
 
-@attr.s
+@attr.s(frozen=True, auto_attribs=True)
 class Relationship:
-    target:                    Any =       attr.ib()
-    target_name:               str =       attr.ib()
-    target_identifier_column:  str =       attr.ib()
-    source_foreign_key_column: str =       attr.ib()
-    lazy:                      bool =      attr.ib()
+    sqlalchemy_model_class:    DeclarativeMeta
+    target_name:               str
+    target_identifier_column:  str
+    source_foreign_key_column: str
+    lazy:                      bool
+    nullable:                  bool
 
 
-@attr.s
+@attr.s(frozen=True, auto_attribs=True)
 class DomainModel:
-    relationship_map:       Mapping[str, Relationship] = attr.ib()
-    identifier_column_name: str =                        attr.ib()
-    relationship_keys:      List[str] =                  attr.ib()
+    external_identifier_map: Mapping[str, Relationship]
+    identifier_column_name:  str
+    relationship_keys:       List[str]
+    property_keys:           List[str]
+    json_translation_map:    Mapping[str, str]
 

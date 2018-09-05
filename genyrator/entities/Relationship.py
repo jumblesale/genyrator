@@ -56,8 +56,8 @@ def create_relationship(
         pythonize(source_foreign_key_column_name)
         if source_foreign_key_column_name
         else f'{target_entity_python_name}_id',
-        property_name=property_name if property_name else target_entity_python_name,
-        key_alias_in_json=key_alias_in_json if key_alias_in_json else target_identifier_column_name,
+        property_name=property_name if property_name is not None else target_entity_python_name,
+        key_alias_in_json=key_alias_in_json if key_alias_in_json is not None else target_identifier_column_name,
         nullable=nullable,
         lazy=lazy,
         join=join,

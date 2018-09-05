@@ -10,7 +10,9 @@ from bookshop.core.convert_dict import (
 )
 from bookshop.sqlalchemy import db
 from bookshop.sqlalchemy.model import Book
-from bookshop.sqlalchemy.convert_properties import convert_properties_to_sqlalchemy_properties
+from bookshop.sqlalchemy.convert_properties import (
+    convert_properties_to_sqlalchemy_properties, convert_sqlalchemy_properties_to_dict_properties
+)
 from bookshop.sqlalchemy.join_entities import create_joined_entity_map
 from bookshop.schema import BookSchema
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
@@ -136,8 +138,8 @@ class Genre(Resource):  # type: ignore
             sqlalchemy_model=result,
             domain_model=book_domain_model,
             paths=[
-                ('genre'),
-            ]
+                'genre',
+            ],
         )
 
-        return result_dict
+        return python_dict_to_json_dict(result_dict)

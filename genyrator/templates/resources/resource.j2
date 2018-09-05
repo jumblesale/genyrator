@@ -22,7 +22,9 @@ from {{ template.module_name }}.core.convert_dict import (
 )
 from {{ template.db_import_path }} import db
 {{ model_import }}
-from {{ template.module_name }}.sqlalchemy.convert_properties import convert_properties_to_sqlalchemy_properties
+from {{ template.module_name }}.sqlalchemy.convert_properties import (
+    convert_properties_to_sqlalchemy_properties, convert_sqlalchemy_properties_to_dict_properties
+)
 from {{ template.module_name }}.sqlalchemy.join_entities import create_joined_entity_map
 from {{ template.module_name }}.schema import {{ entity.class_name }}Schema
 from {{ template.module_name }}.sqlalchemy.model_to_dict import model_to_dict
@@ -214,12 +216,12 @@ class {{ api_path.class_name }}(Resource):  # type: ignore
             domain_model={{ entity.python_name }}_domain_model,
             paths=[
     {%- for entity in api_path.joined_entities %}
-                ('{{ entity }}'),
+                '{{ entity }}',
     {%- endfor %}
-            ]
+            ],
         )
 
-        return result_dict
+        return python_dict_to_json_dict(result_dict)
 {%- endfor -%}
 {%- endif %}
 

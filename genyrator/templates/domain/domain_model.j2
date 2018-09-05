@@ -5,16 +5,17 @@ from {{ template.module_name }}.sqlalchemy.model.{{ relationship.target_entity_c
 {%- endfor %}
 
 {{ template.entity.python_name }} = DomainModel(
-    relationship_map={
+    external_identifier_map={
 {%- for relationship in template.entity.relationships -%}
     {% if relationship.__class__.__name__ == 'RelationshipWithoutJoinTable' and
-            relationship.join.value == 'to_one' %}
+                  relationship.join.value == 'to_one' %}
         '{{ relationship.key_alias_in_json }}': Relationship(
-            target={{ relationship.target_entity_class_name }},
+            sqlalchemy_model_class={{ relationship.target_entity_class_name }},
             target_name='{{ relationship.target_entity_python_name }}',
             target_identifier_column='{{ relationship.target_identifier_column_name }}',
             source_foreign_key_column='{{ relationship.source_foreign_key_column_name }}',
             lazy=True,
+            nullable={{ relationship.nullable }},
         ),
     {%- endif %}
 {%- endfor %}
@@ -25,5 +26,16 @@ from {{ template.module_name }}.sqlalchemy.model.{{ relationship.target_entity_c
         '{{ relationship.property_name }}',
 {%- endfor %}
     ],
+    property_keys=[
+{%- for column in template.entity.columns %}
+        '{{ column.python_name }}',
+{%- endfor %}
+    ],
+    json_translation_map={
+        '{{ template.entity.identifier_column.python_name }}': 'id',
+{%- for relationship in template.entity.relationships %}
+        '{{ relationship.key_alias_in_json }}': '{{ relationship.source_foreign_key_column_name }}',
+{%- endfor %}
+    }
 )
 

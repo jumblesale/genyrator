@@ -10,7 +10,9 @@ from bookshop.core.convert_dict import (
 )
 from bookshop.sqlalchemy import db
 from bookshop.sqlalchemy.model import Genre
-from bookshop.sqlalchemy.convert_properties import convert_properties_to_sqlalchemy_properties
+from bookshop.sqlalchemy.convert_properties import (
+    convert_properties_to_sqlalchemy_properties, convert_sqlalchemy_properties_to_dict_properties
+)
 from bookshop.sqlalchemy.join_entities import create_joined_entity_map
 from bookshop.schema import GenreSchema
 from bookshop.sqlalchemy.model_to_dict import model_to_dict

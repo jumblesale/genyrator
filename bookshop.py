@@ -29,7 +29,7 @@ book_entity = create_entity(
         ),
         create_column(
             name='published', type_option=TypeOption.date,
-            alias='date_published',
+            # alias='date_published',
         ),
         create_column(
             name='created', type_option=TypeOption.datetime,
@@ -58,6 +58,7 @@ book_entity = create_entity(
             target_entity_class_name='Genre',
             source_identifier_column_name='book_uuid',
             source_foreign_key_column_name='genre_id',
+            target_identifier_column_name='genre_uuid',
             nullable=False,
             lazy=False,
             join=JoinOption.to_one,
