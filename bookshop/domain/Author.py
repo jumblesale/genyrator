@@ -6,7 +6,7 @@ from bookshop.sqlalchemy.model.Book import Book
 
 author = DomainModel(
     relationship_map={
-        'favourite_book_id': Relationship(
+        'book_id': Relationship(
             target=Book,
             target_name='book',
             target_identifier_column='book_id',
@@ -15,4 +15,8 @@ author = DomainModel(
         ),
     },
     identifier_column_name='author_id',
+    relationship_keys=[
+        'books',
+        'favourite_book',
+    ],
 )

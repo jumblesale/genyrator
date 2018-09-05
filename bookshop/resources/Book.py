@@ -127,10 +127,17 @@ class Genre(Resource):  # type: ignore
             .options(
                 joinedload('genre')
             ) \
-            .filter_by(book_id=bookId) \
+            .filter_by(
+                book_id=bookId) \
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        result_dict = model_to_dict(result, book_domain_model, ['genre'])  # noqa: E501
+        result_dict = model_to_dict(
+            sqlalchemy_model=result,
+            domain_model=book_domain_model,
+            paths=[
+                ('genre'),
+            ]
+        )
 
         return result_dict

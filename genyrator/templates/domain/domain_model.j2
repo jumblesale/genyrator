@@ -9,16 +9,21 @@ from {{ template.module_name }}.sqlalchemy.model.{{ relationship.target_entity_c
 {%- for relationship in template.entity.relationships -%}
     {% if relationship.__class__.__name__ == 'RelationshipWithoutJoinTable' and
             relationship.join.value == 'to_one' %}
-        '{{ relationship.source_column_name }}': Relationship(
+        '{{ relationship.key_alias_in_json }}': Relationship(
             target={{ relationship.target_entity_class_name }},
             target_name='{{ relationship.target_entity_python_name }}',
             target_identifier_column='{{ relationship.target_identifier_column_name }}',
-            source_foreign_key_column='{{ relationship.source_column_name }}',
+            source_foreign_key_column='{{ relationship.source_foreign_key_column_name }}',
             lazy=True,
         ),
     {%- endif %}
 {%- endfor %}
     },
     identifier_column_name='{{ template.entity.identifier_column.python_name }}',
+    relationship_keys=[
+{%- for relationship in template.entity.relationships %}
+        '{{ relationship.property_name }}',
+{%- endfor %}
+    ],
 )
 

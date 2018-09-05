@@ -6,13 +6,14 @@ from mamba import description, it
 from sqlalchemy.orm import joinedload
 
 from bookshop import app
-from bookshop.sqlalchemy.model import Book, Author
+from bookshop.sqlalchemy.model import Book, Author, Genre, BookGenre
 from bookshop.domain.Book import book as book_domain_model
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
 from bookshop import db
 
 BOOK_UUID =   uuid.uuid4()
 AUTHOR_UUID = uuid.uuid4()
+GENRE_UUID =  uuid.uuid4()
 
 datetime_now = datetime.datetime.now()
 date_now =     datetime.datetime.today()
@@ -22,6 +23,7 @@ author_dict = {
     "authorId": str(AUTHOR_UUID),
     "name": 'orwell',
 }
+
 book_model = Book(
     id=1,
     book_id=str(BOOK_UUID),
@@ -31,7 +33,6 @@ book_model = Book(
     published=date_now,
     created=datetime_now,
 )
-
 book_dict = {
     "bookId": str(BOOK_UUID),
     "name": 'animal farm',
@@ -39,6 +40,16 @@ book_dict = {
     "published": date_now.strftime('%Y-%m-%d'),
     "created": datetime_now.isoformat(),
 }
+
+genre_model = Genre(
+    id=1,
+    genre_id=GENRE_UUID,
+    title='genre title',
+)
+book_genre_model = BookGenre(
+    id=1, book_genre_id=uuid.uuid4(),
+    book_id=1, genre_id=1,
+)
 
 with app.app_context():
     db.drop_all()
@@ -63,11 +74,11 @@ with description('model_to_dict') as self:
                 filter_by(book_id=BOOK_UUID).\
                 options(joinedload('author')).\
                 first()
-        result = model_to_dict(
-            sql_alchemy_model=retrieved_book,
-            domain_model=book_domain_model,
-            paths=['author'],
-        )
+            result = model_to_dict(
+                sql_alchemy_model=retrieved_book,
+                domain_model=book_domain_model,
+                paths=['author'],
+            )
         expect(result).to(have_keys(**book_dict))
         expect(result['author']).to(have_keys(**author_dict))
 
@@ -90,3 +101,19 @@ with description('model_to_dict') as self:
         )
         expect(result).to(have_key('author'))
         expect(result['author']).to(equal(None))
+
+    with it('converts a deeply nested relationship'):
+        with app.app_context():
+            db.session.add(genre_model)
+            db.session.add(book_genre_model)
+            db.session.commit()
+            retrieved_genre = Book.query. \
+                filter_by(id=1). \
+                options(joinedload('genre')). \
+                first()
+            result = model_to_dict(
+                sql_alchemy_model=retrieved_genre,
+                domain_model=book_domain_model,
+                paths=['genre'],
+            )
+        expect(result['genre']['id']).to(equal(GENRE_UUID))

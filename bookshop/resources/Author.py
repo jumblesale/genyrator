@@ -114,21 +114,29 @@ class ManyAuthorResource(Resource):  # type: ignore
         ...
 
 
-@api.route('/author/<authorId>/books/reviews', endpoint='Book-Review')  # noqa: E501
+@api.route('/author/<authorId>/books/reviews', endpoint='book-review')  # noqa: E501
 class Review(Resource):  # type: ignore
-    @api.doc(id='Book-Review', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+    @api.doc(id='book-review', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, authorId):  # type: ignore
         result: Optional[Author] = Author \
             .query \
             .options(
-                joinedload('Book')
-                .joinedload('Review')
+                joinedload('book')
+                .joinedload('review')
             ) \
-            .filter_by(author_id=authorId) \
+            .filter_by( -
+                author_id=authorId) \
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        result_dict = model_to_dict(result, author_domain_model, ['Book', 'Review'])  # noqa: E501
+        result_dict = model_to_dict(
+            sqlalchemy_model=result,
+            domain_model=author_domain_model,
+            paths=[
+                ('book'),
+                ('review'),
+            ]
+        )
 
         return result_dict
 
@@ -142,10 +150,17 @@ class Book(Resource):  # type: ignore
             .options(
                 joinedload('book')
             ) \
-            .filter_by(author_id=authorId) \
+            .filter_by( -
+                author_id=authorId) \
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        result_dict = model_to_dict(result, author_domain_model, ['book'])  # noqa: E501
+        result_dict = model_to_dict(
+            sqlalchemy_model=result,
+            domain_model=author_domain_model,
+            paths=[
+                ('book'),
+            ]
+        )
 
         return result_dict

@@ -22,4 +22,8 @@ book_genre = DomainModel(
         ),
     },
     identifier_column_name='book_genre_id',
+    relationship_keys=[
+        'book',
+        'genre',
+    ],
 )

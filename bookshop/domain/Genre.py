@@ -7,4 +7,7 @@ genre = DomainModel(
     relationship_map={
     },
     identifier_column_name='genre_id',
+    relationship_keys=[
+        'book',
+    ],
 )

@@ -17,11 +17,12 @@ def create_joined_entity_map(
         target_identifier_value = data[json_relationship_name]
         filter_kwargs = {relationship.target_identifier_column: target_identifier_value}
         result = relationship.target.query.filter_by(**filter_kwargs).first()
+        # this should check if the relationship is nullable
         if result is None:
             errors.append(
                 [f'Could not find {relationship.target_name} with {json_relationship_name} equal to {target_identifier_value}']
             )
         else:
             joined_entities[relationship_name] = result
-    return errors if errors else joined_entities
+    return joined_entities
 

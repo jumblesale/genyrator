@@ -22,3 +22,11 @@ def convert_properties_to_sqlalchemy_properties(
             result[k] = v
     return result
 
+
+def convert_sqlalchemy_properties_to_dict_properties(
+        domain_model:     DomainModel,
+        sqlalchemy_model: DeclarativeMeta,
+        data:             Mapping[str, Any],
+) -> Mapping[str, Any]:
+    ...
+

@@ -14,4 +14,7 @@ review = DomainModel(
         ),
     },
     identifier_column_name='review_id',
+    relationship_keys=[
+        'book',
+    ],
 )

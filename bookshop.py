@@ -37,8 +37,9 @@ book_entity = create_entity(
     ],
     relationships=[
         create_relationship(
-            source_column_name='author_id',
-            target_identifier_column_name='author_id',
+            source_foreign_key_column_name='author_id',
+            source_identifier_column_name='book_uuid',
+            target_identifier_column_name='author_uuid',
             target_entity_class_name='Author',
             nullable=False,
             lazy=False,
@@ -46,15 +47,17 @@ book_entity = create_entity(
         ),
         create_relationship(
             target_entity_class_name='Review',
-            source_column_name='review_id',
-            target_identifier_column_name='review_id',
+            source_identifier_column_name='book_uuid',
+            source_foreign_key_column_name='review_id',
+            target_identifier_column_name='review_uuid',
             nullable=False,
             lazy=False,
             join=JoinOption.to_many,
         ),
         create_relationship(
             target_entity_class_name='Genre',
-            source_column_name='genre_id',
+            source_identifier_column_name='book_uuid',
+            source_foreign_key_column_name='genre_id',
             nullable=False,
             lazy=False,
             join=JoinOption.to_one,
@@ -87,7 +90,8 @@ author_entity = create_entity(
     relationships=[
         create_relationship(
             target_entity_class_name='Book',
-            source_column_name='book_id',
+            source_foreign_key_column_name='book_id',
+            source_identifier_column_name='author_uuid',
             target_identifier_column_name='book_id',
             nullable=False,
             lazy=False,
@@ -96,7 +100,8 @@ author_entity = create_entity(
         ),
         create_relationship(
             target_entity_class_name='Book',
-            source_column_name='favourite_book_id',
+            source_foreign_key_column_name='favourite_book_id',
+            source_identifier_column_name='author_uuid',
             target_identifier_column_name='book_id',
             nullable=False,
             lazy=False,
@@ -106,7 +111,7 @@ author_entity = create_entity(
     ],
     api_paths=[
         create_api_path(
-            joined_entities=['Book', 'Review'],
+            joined_entities=['book', 'review'],
             route='books/reviews',
         ),
         create_api_path(
@@ -137,7 +142,8 @@ review_entity = create_entity(
     relationships=[
         create_relationship(
             target_entity_class_name='Book',
-            source_column_name='book_id',
+            source_foreign_key_column_name='book_id',
+            source_identifier_column_name='review_uuid',
             target_identifier_column_name='book_id',
             nullable=False,
             lazy=False,
@@ -159,7 +165,8 @@ genre_entity = create_entity(
     relationships=[
         create_relationship(
             target_entity_class_name='Book', nullable=True, lazy=False, join=JoinOption.to_many,
-            join_table='book_genre', source_column_name='', target_identifier_column_name='book_id',
+            join_table='book_genre', source_foreign_key_column_name='',
+            target_identifier_column_name='book_id', source_identifier_column_name='genre_uuid'
         ),
     ],
 )
@@ -185,12 +192,12 @@ book_genre_entity = create_entity(
     ],
     relationships=[
         create_relationship(
-            'Book', source_column_name='book_id', target_identifier_column_name='book_id', nullable=False,
-            lazy=False, join=JoinOption.to_one
+            'Book', source_foreign_key_column_name='book_id', target_identifier_column_name='book_id', nullable=False,
+            lazy=False, join=JoinOption.to_one, source_identifier_column_name='book_genre_uuid',
         ),
         create_relationship(
-            'Genre', source_column_name='genre_id', target_identifier_column_name='genre_id', nullable=False,
-            lazy=False, join=JoinOption.to_one
+            'Genre', source_foreign_key_column_name='genre_id', target_identifier_column_name='genre_id',
+            nullable=False, lazy=False, join=JoinOption.to_one, source_identifier_column_name='book_genre_uuid',
         ),
     ],
 )
