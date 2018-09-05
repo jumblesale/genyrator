@@ -1,13 +1,11 @@
 from enum import Enum
 
 import attr
-from typing import List, Optional, NewType, Union, Tuple, Dict, NamedTuple, Set
+from typing import List, Optional, NewType, Union, NamedTuple, Set
 
 from genyrator.entities.Relationship import Relationship
-from genyrator.entities.Column import Column, create_column, IdentifierColumn, create_identifier_column, \
-    ForeignKeyRelationship
+from genyrator.entities.Column import Column, IdentifierColumn
 from genyrator.inflector import pythonize, pluralize, dasherize, humanize, to_class_name, to_json_case
-from genyrator.types import string_to_type_option
 
 APIPath = NamedTuple(
     'APIPath',
@@ -147,59 +145,6 @@ def create_entity(
         supports_patch=OperationOption.patch in operations,
         supports_delete_one=OperationOption.delete_one in operations,
         supports_delete_all=OperationOption.delete_all in operations,
-        model_alias=model_alias,
-        additional_properties=additional_properties if additional_properties is not None else [],
-    )
-
-
-def create_entity_from_type_dict(
-        class_name:             str,
-        identifier_column_name: str,
-        type_dict:              Dict,
-        foreign_keys:           Set[Tuple[str, str, str]] = set(),
-        indexes:                Set[str] = set(),
-        operations:             Optional[Set[OperationOption]] = None,
-        relationships:          Optional[List[Relationship]] = None,
-        table_name:             Optional[str] = None,
-        uniques:                Optional[List[List[str]]] = None,
-        api_paths:              Optional[APIPaths] = None,
-        model_alias:            Optional[ImportAlias] = None,
-        additional_properties:  Optional[List[AdditionalProperty]] = None,
-) -> Entity:
-    columns = []
-    foreign_keys_dict = {}
-    for fk_key, fk_value, fk_type in foreign_keys:
-        foreign_keys_dict[fk_key] = ForeignKeyRelationship(
-            f'{pythonize(fk_value)}', string_to_type_option(fk_type)
-        )
-    identifier_column = None
-    for k, v in type_dict.items():
-        nullable = v.endswith('?')
-        v = v.replace('?', '')
-        type_option = string_to_type_option(v)
-        foreign_key = foreign_keys_dict[k] if k in foreign_keys_dict else None
-        index = k in indexes
-        if k == identifier_column_name:
-            identifier_column = create_identifier_column(k, type_option)
-        else:
-            column = create_column(
-                name=k,
-                type_option=type_option,
-                foreign_key_relationship=foreign_key,
-                index=index,
-                nullable=nullable,
-                identifier=False
-            )
-            columns.append(column)
-    return create_entity(
-        class_name=class_name,
-        identifier_column=identifier_column,
-        columns=columns,
-        operations=operations if operations is not None else all_operations,
-        relationships=relationships if relationships else [],
-        table_name=table_name,
-        uniques=uniques if uniques else [],
-        api_paths=api_paths,
         model_alias=model_alias,
         additional_properties=additional_properties if additional_properties is not None else [],
     )

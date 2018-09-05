@@ -22,3 +22,6 @@ from genyrator.entities.Entity import (
     create_api_path,
     add_relationship_to_entity,
 )
+from genyrator.entities.entity.create_entity_from_type_dict import (
+    create_entity_from_type_dict
+)
