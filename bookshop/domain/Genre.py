@@ -16,6 +16,6 @@ genre = DomainModel(
     ],
     json_translation_map={
         'genre_id': 'id',
-        'book_id': 'book_id',
+        'book_id': '',
     }
 )

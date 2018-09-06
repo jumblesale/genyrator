@@ -10,7 +10,7 @@ author = DomainModel(
             sqlalchemy_model_class=Book,
             target_name='book',
             target_identifier_column='book_id',
-            source_foreign_key_column='favourite_book_id',
+            source_foreign_key_column='None',
             lazy=True,
             nullable=False,
         ),
@@ -26,7 +26,7 @@ author = DomainModel(
     ],
     json_translation_map={
         'author_id': 'id',
-        'book_id': 'book_id',
-        'book_id': 'favourite_book_id',
+        'book_id': 'None',
+        'book_id': 'None',
     }
 )

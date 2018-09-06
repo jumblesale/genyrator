@@ -13,7 +13,8 @@ class Review(db.Model):  # type: ignore
     book =      db.relationship(
         'Book',
         lazy=False,
-        uselist=False
+        uselist=False,
+        foreign_keys=[book_id],
     )
 
     __table_args__ = (UniqueConstraint('review_id', ), )

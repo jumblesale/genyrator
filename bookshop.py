@@ -48,7 +48,7 @@ book_entity = create_entity(
         create_relationship(
             target_entity_class_name='Review',
             source_identifier_column_name='book_uuid',
-            source_foreign_key_column_name='review_id',
+            source_foreign_key_column_name=None,
             target_identifier_column_name='review_uuid',
             nullable=False,
             lazy=False,
@@ -57,7 +57,7 @@ book_entity = create_entity(
         create_relationship(
             target_entity_class_name='Genre',
             source_identifier_column_name='book_uuid',
-            source_foreign_key_column_name='genre_id',
+            source_foreign_key_column_name=None,
             target_identifier_column_name='genre_uuid',
             nullable=False,
             lazy=False,
@@ -91,7 +91,7 @@ author_entity = create_entity(
     relationships=[
         create_relationship(
             target_entity_class_name='Book',
-            source_foreign_key_column_name='book_id',
+            source_foreign_key_column_name=None,
             source_identifier_column_name='author_uuid',
             target_identifier_column_name='book_id',
             nullable=False,
@@ -101,7 +101,7 @@ author_entity = create_entity(
         ),
         create_relationship(
             target_entity_class_name='Book',
-            source_foreign_key_column_name='favourite_book_id',
+            source_foreign_key_column_name=None,
             source_identifier_column_name='author_uuid',
             target_identifier_column_name='book_id',
             nullable=False,

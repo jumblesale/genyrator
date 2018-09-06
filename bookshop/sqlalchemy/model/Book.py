@@ -16,18 +16,19 @@ class Book(db.Model):  # type: ignore
     author =    db.relationship(
         'Author',
         lazy=False,
-        uselist=False
+        uselist=False,
+        foreign_keys=[author_id],
     )
     review =    db.relationship(
         'Review',
         lazy=False,
-        uselist=True
+        uselist=True,
     )
     genre =     db.relationship(
         'Genre',
         lazy=False,
         uselist=False,
-        secondary='book_genre'
+        secondary='book_genre',
     )
 
     __table_args__ = (UniqueConstraint('book_id', ), )

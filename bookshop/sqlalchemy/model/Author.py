@@ -12,12 +12,12 @@ class Author(db.Model):  # type: ignore
     books =          db.relationship(
         'Book',
         lazy=False,
-        uselist=True
+        uselist=True,
     )
     favourite_book = db.relationship(
         'Book',
         lazy=False,
-        uselist=False
+        uselist=False,
     )
 
     __table_args__ = (UniqueConstraint('author_id', ), )

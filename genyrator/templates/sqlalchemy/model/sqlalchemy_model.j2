@@ -31,9 +31,12 @@ class {{ template.entity.class_name }}(db.Model):  # type: ignore
     {{ relationship.property_name }} ={{ pad(relationship.property_name) }} db.relationship(
         '{{ relationship.target_entity_class_name }}',
         lazy={{ relationship.lazy | string }},
-        uselist={{ relationship.join.value == 'to_many' | string }}
-    {%- if relationship.__class__.__name__ == 'RelationshipWithJoinTable' -%},
-        secondary='{{ relationship.join_table }}'
+        uselist={{ relationship.join.value == 'to_many' | string }},
+    {%- if relationship.source_foreign_key_column_name %}
+        foreign_keys=[{{ relationship.source_foreign_key_column_name }}],
+    {%- endif %}
+    {%- if relationship.__class__.__name__ == 'RelationshipWithJoinTable' %}
+        secondary='{{ relationship.join_table }}',
     {%- endif %}
     )
 {%- endfor %}

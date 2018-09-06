@@ -13,12 +13,14 @@ class BookGenre(db.Model):  # type: ignore
     book =          db.relationship(
         'Book',
         lazy=False,
-        uselist=False
+        uselist=False,
+        foreign_keys=[book_id],
     )
     genre =         db.relationship(
         'Genre',
         lazy=False,
-        uselist=False
+        uselist=False,
+        foreign_keys=[genre_id],
     )
 
     __table_args__ = (UniqueConstraint('book_genre_id', ), )

@@ -33,7 +33,7 @@ book = DomainModel(
     json_translation_map={
         'book_id': 'id',
         'author_uuid': 'author_id',
-        'review_uuid': 'review_id',
-        'genre_uuid': 'genre_id',
+        'review_uuid': 'None',
+        'genre_uuid': 'None',
     }
 )
