@@ -17,8 +17,8 @@ def model_to_dict(
     # always hydrate eager relationships
     for relationship in domain_model.eager_relationships:
         relationship_model = getattr(sqlalchemy_model, relationship)
-        eager_relationships[relationship] = _model_to_dict(
-            sqlalchemy_model=relationship_model,
+        eager_relationships[relationship] = _recurse_on_model_or_list(
+            model_or_list=relationship_model,
             return_immediately=True,
         )
     return {
@@ -75,6 +75,7 @@ def _serialize_data(
 def _recurse_on_model_or_list(
     model_or_list:      Union[InstrumentedList, DeclarativeMeta],
     paths:              List[str]=list(),
+    return_immediately: bool=False,
 ) -> Optional[Union[List[Mapping[str, Any]], Mapping[str, Any]]]:
     next_paths = paths[1:] if paths else []
     if type(model_or_list) is InstrumentedList:
@@ -82,6 +83,7 @@ def _recurse_on_model_or_list(
             python_dict_to_json_dict(_model_to_dict(
                 sqlalchemy_model=nr,
                 paths=next_paths,
+                return_immediately=return_immediately,
             ))
             for nr in model_or_list
         ]
@@ -90,4 +92,5 @@ def _recurse_on_model_or_list(
             _model_to_dict(
                 sqlalchemy_model=model_or_list,
                 paths=next_paths,
+                return_immediately=return_immediately,
             ))

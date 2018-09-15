@@ -44,6 +44,7 @@ def create_template_config(
         ),
         create_template(Template.ModelToDict, ['sqlalchemy', 'model_to_dict'], module_name=module_name),
         create_template(Template.ConvertProperties, ['sqlalchemy', 'convert_properties'], module_name=module_name),
+        create_template(Template.ConvertModels, ['sqlalchemy', 'convert_between_models'], module_name=module_name),
         create_template(Template.JoinEntities, ['sqlalchemy', 'join_entities'], module_name=module_name),
         create_template(Template.Template, ['sqlalchemy', 'model', 'types']),
     ]
