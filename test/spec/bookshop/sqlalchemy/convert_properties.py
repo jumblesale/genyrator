@@ -2,7 +2,6 @@ import datetime
 import uuid
 
 from mamba import description, it
-from sqlalchemy.orm import joinedload
 
 from bookshop.sqlalchemy.convert_properties import convert_sqlalchemy_properties_to_dict_properties
 from bookshop.domain.Genre import genre as genre_domain_model
