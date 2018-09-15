@@ -42,7 +42,6 @@ class ReviewResource(Resource):  # type: ignore
             abort(404)
         return model_to_dict(
             result,
-            review_domain_model,
         ), 200
 
     @api.doc(id='delete-review-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
@@ -92,7 +91,6 @@ class ReviewResource(Resource):  # type: ignore
 
         return model_to_dict(
             marshmallow_result.data,
-            review_domain_model,
         ), 201
 
     @api.expect(review_model, validate=False)

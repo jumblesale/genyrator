@@ -41,7 +41,6 @@ class GenreResource(Resource):  # type: ignore
             abort(404)
         return model_to_dict(
             result,
-            genre_domain_model,
         ), 200
 
     @api.doc(id='delete-genre-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
@@ -91,7 +90,6 @@ class GenreResource(Resource):  # type: ignore
 
         return model_to_dict(
             marshmallow_result.data,
-            genre_domain_model,
         ), 201
 
     @api.expect(genre_model, validate=False)

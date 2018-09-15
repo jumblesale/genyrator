@@ -41,7 +41,6 @@ class AuthorResource(Resource):  # type: ignore
             abort(404)
         return model_to_dict(
             result,
-            author_domain_model,
         ), 200
 
     @api.doc(id='delete-author-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
@@ -91,7 +90,6 @@ class AuthorResource(Resource):  # type: ignore
 
         return model_to_dict(
             marshmallow_result.data,
-            author_domain_model,
         ), 201
 
     @api.expect(author_model, validate=False)
@@ -133,14 +131,13 @@ class Review(Resource):  # type: ignore
             abort(404)
         result_dict = model_to_dict(
             sqlalchemy_model=result,
-            domain_model=author_domain_model,
             paths=[
                 'book',
                 'review',
             ],
         )
 
-        return python_dict_to_json_dict(result_dict)
+        return result_dict
 
 
 @api.route('/author/<authorId>/books', endpoint='book')  # noqa: E501
@@ -159,10 +156,9 @@ class Book(Resource):  # type: ignore
             abort(404)
         result_dict = model_to_dict(
             sqlalchemy_model=result,
-            domain_model=author_domain_model,
             paths=[
                 'book',
             ],
         )
 
-        return python_dict_to_json_dict(result_dict)
+        return result_dict

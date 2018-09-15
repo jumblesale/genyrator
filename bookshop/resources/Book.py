@@ -45,7 +45,6 @@ class BookResource(Resource):  # type: ignore
             abort(404)
         return model_to_dict(
             result,
-            book_domain_model,
         ), 200
 
     @api.doc(id='delete-book-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
@@ -95,7 +94,6 @@ class BookResource(Resource):  # type: ignore
 
         return model_to_dict(
             marshmallow_result.data,
-            book_domain_model,
         ), 201
 
     @api.expect(book_model, validate=False)
@@ -136,10 +134,9 @@ class Genre(Resource):  # type: ignore
             abort(404)
         result_dict = model_to_dict(
             sqlalchemy_model=result,
-            domain_model=book_domain_model,
             paths=[
                 'genre',
             ],
         )
 
-        return python_dict_to_json_dict(result_dict)
+        return result_dict
