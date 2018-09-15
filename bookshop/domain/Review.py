@@ -25,6 +25,8 @@ review = DomainModel(
     ],
     json_translation_map={
         'review_id': 'id',
-        'book_id': 'book_id',
-    }
+    },
+    eager_relationships=[
+        'book',
+    ],
 )

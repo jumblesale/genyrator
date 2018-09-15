@@ -80,6 +80,18 @@ with description('model_to_dict') as self:
         expect(result).to(have_keys(**book_dict))
         expect(result['author']).to(have_keys(**author_dict))
 
+    with it('always converts eager relationships'):
+        with app.app_context():
+            retrieved_book = Book.query.\
+                filter_by(book_id=BOOK_UUID).\
+                options(joinedload('author')).\
+                first()
+            result = model_to_dict(
+                sqlalchemy_model=retrieved_book
+            )
+        expect(result).to(have_keys(**book_dict))
+        expect(result['author']).to(have_keys(**author_dict))
+
     with it('gives an empty response when relationship does not exist'):
         book_without_author = Book(
             book_id=str(uuid.uuid4()),

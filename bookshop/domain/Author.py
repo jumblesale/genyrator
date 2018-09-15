@@ -26,7 +26,9 @@ author = DomainModel(
     ],
     json_translation_map={
         'author_id': 'id',
-        'book_id': 'None',
-        'book_id': 'None',
-    }
+    },
+    eager_relationships=[
+        'books',
+        'favourite_book',
+    ],
 )

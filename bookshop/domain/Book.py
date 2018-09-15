@@ -19,7 +19,7 @@ book = DomainModel(
     identifier_column_name='book_id',
     relationship_keys=[
         'author',
-        'review',
+        'reviews',
         'genre',
     ],
     property_keys=[
@@ -32,8 +32,9 @@ book = DomainModel(
     ],
     json_translation_map={
         'book_id': 'id',
-        'author_uuid': 'author_id',
-        'review_uuid': 'None',
-        'genre_uuid': 'None',
-    }
+    },
+    eager_relationships=[
+        'author',
+        'genre',
+    ],
 )

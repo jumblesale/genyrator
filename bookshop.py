@@ -50,8 +50,9 @@ book_entity = create_entity(
             source_identifier_column_name='book_uuid',
             source_foreign_key_column_name=None,
             target_identifier_column_name='review_uuid',
+            property_name='reviews',
             nullable=False,
-            lazy=False,
+            lazy=True,
             join=JoinOption.to_many,
         ),
         create_relationship(

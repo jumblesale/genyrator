@@ -33,9 +33,13 @@ from {{ template.module_name }}.sqlalchemy.model.{{ relationship.target_entity_c
     ],
     json_translation_map={
         '{{ template.entity.identifier_column.python_name }}': 'id',
+    },
+    eager_relationships=[
 {%- for relationship in template.entity.relationships %}
-        '{{ relationship.key_alias_in_json }}': '{{ relationship.source_foreign_key_column_name }}',
+    {%- if not relationship.lazy %}
+        '{{ relationship.property_name }}',
+    {%- endif %}
 {%- endfor %}
-    }
+    ],
 )
 

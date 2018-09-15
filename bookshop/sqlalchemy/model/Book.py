@@ -19,9 +19,9 @@ class Book(db.Model):  # type: ignore
         uselist=False,
         foreign_keys=[author_id],
     )
-    review =    db.relationship(
+    reviews =   db.relationship(
         'Review',
-        lazy=False,
+        lazy=True,
         uselist=True,
     )
     genre =     db.relationship(

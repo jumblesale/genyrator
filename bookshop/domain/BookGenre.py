@@ -35,7 +35,9 @@ book_genre = DomainModel(
     ],
     json_translation_map={
         'book_genre_id': 'id',
-        'book_id': 'book_id',
-        'genre_id': 'genre_id',
-    }
+    },
+    eager_relationships=[
+        'book',
+        'genre',
+    ],
 )
