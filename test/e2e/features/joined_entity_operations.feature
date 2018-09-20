@@ -11,7 +11,13 @@ Feature: Posting new entities with foreign keys
 
   Scenario: Putting a join entity where the join does not exist
     Given I put an incorrect "book_genre" join entity
-     Then I get http status 400
+     Then I get http status "400"
+
+  Scenario: Getting a non-lazy joined entity
+    Given I put an example "author" entity
+      And I put a book entity with a relationship to that author
+     When I get that book entity
+     Then I can see that author in the response
 
   Scenario: PATCHing a relationship
     Given I put an example "book" entity

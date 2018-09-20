@@ -20,7 +20,7 @@ date_now =     datetime.datetime.today()
 
 author_model = Author(id=1, author_id=str(AUTHOR_UUID), name='orwell')
 author_dict = {
-    "authorId": str(AUTHOR_UUID),
+    "id": str(AUTHOR_UUID),
     "name": 'orwell',
 }
 
@@ -34,7 +34,7 @@ book_model = Book(
     created=datetime_now,
 )
 book_dict = {
-    "bookId": str(BOOK_UUID),
+    "id": str(BOOK_UUID),
     "name": 'animal farm',
     "rating": 4.1,
     "published": date_now.strftime('%Y-%m-%d'),
@@ -63,8 +63,7 @@ with description('model_to_dict') as self:
         with app.app_context():
             retrieved_book = Book.query.filter_by(book_id=BOOK_UUID).first()
         result = model_to_dict(
-            sql_alchemy_model=retrieved_book,
-            domain_model=book_domain_model,
+            sqlalchemy_model=retrieved_book,
         )
         expect(result).to(have_keys(**book_dict))
 
@@ -75,9 +74,20 @@ with description('model_to_dict') as self:
                 options(joinedload('author')).\
                 first()
             result = model_to_dict(
-                sql_alchemy_model=retrieved_book,
-                domain_model=book_domain_model,
+                sqlalchemy_model=retrieved_book,
                 paths=['author'],
+            )
+        expect(result).to(have_keys(**book_dict))
+        expect(result['author']).to(have_keys(**author_dict))
+
+    with it('always converts eager relationships'):
+        with app.app_context():
+            retrieved_book = Book.query.\
+                filter_by(book_id=BOOK_UUID).\
+                options(joinedload('author')).\
+                first()
+            result = model_to_dict(
+                sqlalchemy_model=retrieved_book
             )
         expect(result).to(have_keys(**book_dict))
         expect(result['author']).to(have_keys(**author_dict))
@@ -95,8 +105,7 @@ with description('model_to_dict') as self:
                 filter_by(book_id=book_without_author.book_id).\
                 first()
         result = model_to_dict(
-            sql_alchemy_model=retrieved_book,
-            domain_model=book_domain_model,
+            sqlalchemy_model=retrieved_book,
             paths=['author'],
         )
         expect(result).to(have_key('author'))
@@ -112,8 +121,7 @@ with description('model_to_dict') as self:
                 options(joinedload('genre')). \
                 first()
             result = model_to_dict(
-                sql_alchemy_model=retrieved_genre,
-                domain_model=book_domain_model,
+                sqlalchemy_model=retrieved_genre,
                 paths=['genre'],
             )
-        expect(result['genre']['id']).to(equal(GENRE_UUID))
+        expect(result['genre']['id']).to(equal(str(GENRE_UUID)))

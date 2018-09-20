@@ -52,16 +52,16 @@ api = Namespace('{{ entity.resource_namespace }}',
 @api.route('/{{ entity.dashed_name }}/<{{ entity.identifier_column.json_property_name }}>', endpoint='{{ entity.python_name }}_by_id')  # noqa: E501
 class {{ entity.class_name }}Resource(Resource):  # type: ignore
     {%- if entity.supports_get_one %}
-    @api.marshal_with({{ entity.python_name }}_model)
+{#-    @api.marshal_with({{ entity.python_name }}_model) #}
     @api.doc(id='get-{{ entity.python_name }}-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, {{ entity.identifier_column.json_property_name }}):  # type: ignore
         {{ find_element_by_id() }}.first()  # noqa: E501
         if result is None:
             abort(404)
-        return model_to_dict(
+        response = model_to_dict(
             result,
-            {{ entity.python_name }}_domain_model,
         ), 200
+        return response
     {%- endif -%}{# get_one method #}
     {%- if entity.supports_delete_one %}
 
@@ -117,7 +117,6 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
 
         return model_to_dict(
             marshmallow_result.data,
-            {{ entity.python_name }}_domain_model,
         ), 201
     {%- endif -%}{# put method #}
     {%- if entity.supports_patch %}
@@ -213,7 +212,6 @@ class {{ api_path.class_name }}(Resource):  # type: ignore
             abort(404)
         result_dict = model_to_dict(
             sqlalchemy_model=result,
-            domain_model={{ entity.python_name }}_domain_model,
             paths=[
     {%- for entity in api_path.joined_entities %}
                 '{{ entity }}',
@@ -221,7 +219,7 @@ class {{ api_path.class_name }}(Resource):  # type: ignore
             ],
         )
 
-        return python_dict_to_json_dict(result_dict)
+        return result_dict
 {%- endfor -%}
 {%- endif %}
 

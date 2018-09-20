@@ -124,5 +124,10 @@ class ConvertProperties(Template):
 
 
 @attr.s
+class ConvertModels(Template):
+    module_name: str = attr.ib()
+
+
+@attr.s
 class JoinEntities(Template):
     module_name: str = attr.ib()

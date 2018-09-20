@@ -14,7 +14,7 @@ from {{ template.module_name }}.sqlalchemy.model.{{ relationship.target_entity_c
             target_name='{{ relationship.target_entity_python_name }}',
             target_identifier_column='{{ relationship.target_identifier_column_name }}',
             source_foreign_key_column='{{ relationship.source_foreign_key_column_name }}',
-            lazy=True,
+            lazy={{ relationship.lazy }},
             nullable={{ relationship.nullable }},
         ),
     {%- endif %}
@@ -33,9 +33,19 @@ from {{ template.module_name }}.sqlalchemy.model.{{ relationship.target_entity_c
     ],
     json_translation_map={
         '{{ template.entity.identifier_column.python_name }}': 'id',
-{%- for relationship in template.entity.relationships %}
-        '{{ relationship.key_alias_in_json }}': '{{ relationship.source_foreign_key_column_name }}',
+{%- for relationship in template.entity.relationships -%}
+    {%- if relationship.__class__.__name__ == 'RelationshipWithoutJoinTable' and
+                  relationship.join.value == 'to_one' %}
+        '{{ relationship.key_alias_in_json }}': '{{ relationship.property_name }}',
+    {%- endif %}
 {%- endfor %}
-    }
+    },
+    eager_relationships=[
+{%- for relationship in template.entity.relationships %}
+    {%- if not relationship.lazy %}
+        '{{ relationship.property_name }}',
+    {%- endif %}
+{%- endfor %}
+    ],
 )
 

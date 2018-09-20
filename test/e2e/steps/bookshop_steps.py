@@ -1,6 +1,6 @@
 import datetime
 import uuid
-from typing import Mapping
+from typing import Mapping, cast, MutableMapping
 import json
 
 from behave import given, when, then
@@ -75,7 +75,7 @@ def step_impl(context, url: str):
     assert_that(response.status_code, equal_to(200))
     data = json.loads(response.data)
     genre = data['genre']
-    assert_that(genre['genreId'], equal_to(context.genre_entity['id']))
+    assert_that(genre['id'], equal_to(context.genre_entity['id']))
 
 
 @when('I patch that "{entity_name}" entity with that "{entity_id}" id')
@@ -113,3 +113,31 @@ def step_impl(context):
 @then("I get http status 400")
 def step_impl(context):
     assert_that(context.response.status_code, equal_to(400))
+
+
+@step("I put a book entity with a relationship to that author")
+def step_impl(context):
+    book = generate_example_book()
+    context.created_book = book = {
+        **book,
+        **{'authorId': context.author_entity['id']}
+    }
+    response = make_request(client=context.client, endpoint=f'book/{book["id"]}',
+                            method='put', data=book)
+    assert_that(response.status_code, equal_to(201))
+
+
+@when("I get that book entity")
+def step_impl(context):
+    book = context.created_book
+    url = f'/book/{book["id"]}'
+    response = make_request(client=context.client, endpoint=url, method='get')
+    assert_that(response.status_code, equal_to(200))
+    data = json.loads(response.data)
+    context.retrieved_book = data
+
+
+@step("I can see that author in the response")
+def step_impl(context):
+    author = context.retrieved_book['author']
+    assert_that(author['id'], equal_to(context.author_entity['id']))

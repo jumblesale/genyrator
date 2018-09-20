@@ -10,7 +10,7 @@ review = DomainModel(
             target_name='book',
             target_identifier_column='book_id',
             source_foreign_key_column='book_id',
-            lazy=True,
+            lazy=False,
             nullable=False,
         ),
     },
@@ -25,6 +25,9 @@ review = DomainModel(
     ],
     json_translation_map={
         'review_id': 'id',
-        'book_id': 'book_id',
-    }
+        'book_id': 'book',
+    },
+    eager_relationships=[
+        'book',
+    ],
 )

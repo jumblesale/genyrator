@@ -7,19 +7,19 @@ from bookshop.sqlalchemy.model.Genre import Genre
 
 book = DomainModel(
     external_identifier_map={
-        'author_uuid': Relationship(
+        'author_id': Relationship(
             sqlalchemy_model_class=Author,
             target_name='author',
-            target_identifier_column='author_uuid',
+            target_identifier_column='author_id',
             source_foreign_key_column='author_id',
-            lazy=True,
+            lazy=False,
             nullable=False,
         ),
     },
     identifier_column_name='book_id',
     relationship_keys=[
         'author',
-        'review',
+        'reviews',
         'genre',
     ],
     property_keys=[
@@ -32,8 +32,10 @@ book = DomainModel(
     ],
     json_translation_map={
         'book_id': 'id',
-        'author_uuid': 'author_id',
-        'review_uuid': 'None',
-        'genre_uuid': 'None',
-    }
+        'author_id': 'author',
+    },
+    eager_relationships=[
+        'author',
+        'genre',
+    ],
 )

@@ -17,7 +17,7 @@ def create_joined_entity_map(
         target_identifier_value = data[json_relationship_name]
         filter_kwargs = {relationship.target_identifier_column: target_identifier_value}
         result = relationship.sqlalchemy_model_class.query.filter_by(**filter_kwargs).first()
-        if relationship.nullable is False and result is None:
+        if relationship.nullable is False and result is None and target_identifier_value is not None:
             errors.append(
                 [f'Could not find {relationship.target_name} with {json_relationship_name} equal to {target_identifier_value}']
             )

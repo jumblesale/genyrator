@@ -11,7 +11,7 @@ book_genre = DomainModel(
             target_name='book',
             target_identifier_column='book_id',
             source_foreign_key_column='book_id',
-            lazy=True,
+            lazy=False,
             nullable=False,
         ),
         'genre_id': Relationship(
@@ -19,7 +19,7 @@ book_genre = DomainModel(
             target_name='genre',
             target_identifier_column='genre_id',
             source_foreign_key_column='genre_id',
-            lazy=True,
+            lazy=False,
             nullable=False,
         ),
     },
@@ -35,7 +35,11 @@ book_genre = DomainModel(
     ],
     json_translation_map={
         'book_genre_id': 'id',
-        'book_id': 'book_id',
-        'genre_id': 'genre_id',
-    }
+        'book_id': 'book',
+        'genre_id': 'genre',
+    },
+    eager_relationships=[
+        'book',
+        'genre',
+    ],
 )

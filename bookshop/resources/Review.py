@@ -34,16 +34,15 @@ reviews_many_schema = ReviewSchema(many=True)
 
 @api.route('/review/<reviewId>', endpoint='review_by_id')  # noqa: E501
 class ReviewResource(Resource):  # type: ignore
-    @api.marshal_with(review_model)
     @api.doc(id='get-review-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, reviewId):  # type: ignore
         result: Optional[Review] = Review.query.filter_by(review_id=reviewId).first()  # noqa: E501
         if result is None:
             abort(404)
-        return model_to_dict(
+        response = model_to_dict(
             result,
-            review_domain_model,
         ), 200
+        return response
 
     @api.doc(id='delete-review-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
     def delete(self, reviewId):  # type: ignore
@@ -92,7 +91,6 @@ class ReviewResource(Resource):  # type: ignore
 
         return model_to_dict(
             marshmallow_result.data,
-            review_domain_model,
         ), 201
 
     @api.expect(review_model, validate=False)
