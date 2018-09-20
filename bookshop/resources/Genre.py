@@ -33,15 +33,15 @@ genres_many_schema = GenreSchema(many=True)
 
 @api.route('/genre/<genreId>', endpoint='genre_by_id')  # noqa: E501
 class GenreResource(Resource):  # type: ignore
-    @api.marshal_with(genre_model)
     @api.doc(id='get-genre-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, genreId):  # type: ignore
         result: Optional[Genre] = Genre.query.filter_by(genre_id=genreId).first()  # noqa: E501
         if result is None:
             abort(404)
-        return model_to_dict(
+        response = model_to_dict(
             result,
         ), 200
+        return response
 
     @api.doc(id='delete-genre-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
     def delete(self, genreId):  # type: ignore

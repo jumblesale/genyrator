@@ -33,15 +33,15 @@ authors_many_schema = AuthorSchema(many=True)
 
 @api.route('/author/<authorId>', endpoint='author_by_id')  # noqa: E501
 class AuthorResource(Resource):  # type: ignore
-    @api.marshal_with(author_model)
     @api.doc(id='get-author-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, authorId):  # type: ignore
         result: Optional[Author] = Author.query.filter_by(author_id=authorId).first()  # noqa: E501
         if result is None:
             abort(404)
-        return model_to_dict(
+        response = model_to_dict(
             result,
         ), 200
+        return response
 
     @api.doc(id='delete-author-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
     def delete(self, authorId):  # type: ignore

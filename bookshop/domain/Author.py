@@ -11,7 +11,7 @@ author = DomainModel(
             target_name='book',
             target_identifier_column='book_id',
             source_foreign_key_column='None',
-            lazy=True,
+            lazy=False,
             nullable=False,
         ),
     },
@@ -26,6 +26,7 @@ author = DomainModel(
     ],
     json_translation_map={
         'author_id': 'id',
+        'book_id': 'favourite_book',
     },
     eager_relationships=[
         'books',

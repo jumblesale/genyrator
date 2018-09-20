@@ -1,4 +1,4 @@
-from typing import List, Mapping, Any, Optional, Union
+from typing import List, Mapping, MutableMapping, Any, Optional, Union
 
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.orm.collections import InstrumentedList
@@ -17,16 +17,17 @@ def model_to_dict(
     # always hydrate eager relationships
     for relationship in domain_model.eager_relationships:
         relationship_model = getattr(sqlalchemy_model, relationship)
-        eager_relationships[relationship] = _recurse_on_model_or_list(
+        relationship_dict = _recurse_on_model_or_list(
             model_or_list=relationship_model,
             return_immediately=True,
         )
+        eager_relationships[relationship] = relationship_dict
     return {
-        **eager_relationships,
         **_model_to_dict(
             sqlalchemy_model=sqlalchemy_model,
             paths=paths,
         ),
+        **eager_relationships,
     }
 
 
@@ -60,7 +61,7 @@ def _model_to_dict(
 def _serialize_data(
     domain_model:     DomainModel,
     sqlalchemy_model: DeclarativeMeta,
-) -> Mapping[str, Any]:
+) -> MutableMapping[str, Any]:
     serialized_data = {}
     for domain_property in domain_model.property_keys:
         if domain_property in domain_model.json_translation_map:

@@ -52,15 +52,16 @@ api = Namespace('{{ entity.resource_namespace }}',
 @api.route('/{{ entity.dashed_name }}/<{{ entity.identifier_column.json_property_name }}>', endpoint='{{ entity.python_name }}_by_id')  # noqa: E501
 class {{ entity.class_name }}Resource(Resource):  # type: ignore
     {%- if entity.supports_get_one %}
-    @api.marshal_with({{ entity.python_name }}_model)
+{#-    @api.marshal_with({{ entity.python_name }}_model) #}
     @api.doc(id='get-{{ entity.python_name }}-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, {{ entity.identifier_column.json_property_name }}):  # type: ignore
         {{ find_element_by_id() }}.first()  # noqa: E501
         if result is None:
             abort(404)
-        return model_to_dict(
+        response = model_to_dict(
             result,
         ), 200
+        return response
     {%- endif -%}{# get_one method #}
     {%- if entity.supports_delete_one %}
 
