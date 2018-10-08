@@ -69,7 +69,7 @@ class ConvertDict(Template):
 
 @attr.s
 class SQLAlchemyModel(Template):
-    module_name: str    = attr.ib()
+    module_name: str =    attr.ib()
     db_import_path: str = attr.ib()
     entity: Entity =      attr.ib()
 
