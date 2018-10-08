@@ -19,6 +19,7 @@ Feature: Posting new entities with foreign keys
      When I get that book entity
      Then I can see that author in the response
 
+  @skip
   Scenario: PATCHing a relationship
     Given I put an example "book" entity
       And I put an example "author" entity
