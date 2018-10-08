@@ -34,6 +34,8 @@ class {{ template.entity.class_name }}(db.Model):  # type: ignore
         uselist={{ relationship.join.value == 'to_many' | string }},
     {%- if relationship.source_foreign_key_column_name %}
         foreign_keys=[{{ relationship.source_foreign_key_column_name }}],
+    {%- elif relationship.target_foreign_key_column_name %}
+        foreign_keys='{{ relationship.target_entity_class_name }}.{{ relationship.target_foreign_key_column_name }}',
     {%- endif %}
     {%- if relationship.__class__.__name__ == 'RelationshipWithJoinTable' %}
         secondary='{{ relationship.join_table }}',
