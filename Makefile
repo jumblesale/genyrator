@@ -5,7 +5,7 @@ deps:
 test: pep8 behave
 
 behave:
-	pipenv run behave test/e2e
+	pipenv run behave --tags=-skip test/e2e 
 
 pep8:
 	pipenv run pycodestyle

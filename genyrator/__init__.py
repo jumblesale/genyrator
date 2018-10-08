@@ -1,6 +1,8 @@
 # flake8: noqa
 from genyrator.entities.Column import (
     Column,
+    IdentifierColumn,
+    ForeignKeyRelationship,
     create_column,
     create_identifier_column,
 )
