@@ -25,6 +25,8 @@ api = Namespace('authors',
 author_model = api.model('Author', {
     'id': fields.String(attribute='authorId'),
     'name': fields.String(),
+    'favouriteAuthorId': fields.String(),
+    'hatedAuthorId': fields.String(),
 })
 
 author_schema = AuthorSchema()

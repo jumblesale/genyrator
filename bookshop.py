@@ -28,6 +28,14 @@ book_entity = create_entity(
             ),
         ),
         create_column(
+            name='collaborator_id', type_option=TypeOption.int,
+            nullable=True,
+            foreign_key_relationship=ForeignKeyRelationship(
+                target_entity='author',
+                target_entity_identifier_column_type=TypeOption.UUID,
+            ),
+        ),
+        create_column(
             name='published', type_option=TypeOption.date,
             # alias='date_published',
         ),
@@ -41,7 +49,19 @@ book_entity = create_entity(
             source_identifier_column_name='book_id',
             target_identifier_column_name='author_id',
             target_entity_class_name='Author',
+            property_name='author',
             nullable=False,
+            lazy=False,
+            join=JoinOption.to_one,
+        ),
+        create_relationship(
+            source_foreign_key_column_name='collaborator_id',
+            source_identifier_column_name='book_id',
+            target_identifier_column_name='author_id',
+            target_entity_class_name='Author',
+            key_alias_in_json='collaborator_id',
+            property_name='collaborator',
+            nullable=True,
             lazy=False,
             join=JoinOption.to_one,
         ),
@@ -88,6 +108,22 @@ author_entity = create_entity(
             name='name', type_option=TypeOption.string,
             index=True, nullable=False,
         ),
+        create_column(
+            name='favourite_author_id', type_option=TypeOption.int,
+            # TODO: need to be able to identify target foreign key
+            foreign_key_relationship=ForeignKeyRelationship(
+                target_entity='author',
+                target_entity_identifier_column_type=TypeOption.UUID,
+            ),
+        ),
+        create_column(
+            name='hated_author_id', type_option=TypeOption.int,
+            # TODO: need to be able to identify target foreign key
+            foreign_key_relationship=ForeignKeyRelationship(
+                target_entity='author',
+                target_entity_identifier_column_type=TypeOption.UUID,
+            ),
+        ),
     ],
     relationships=[
         create_relationship(
@@ -95,6 +131,7 @@ author_entity = create_entity(
             source_foreign_key_column_name=None,
             source_identifier_column_name='author_id',
             target_identifier_column_name='book_id',
+            target_foreign_key_column_name='author_id',
             nullable=False,
             lazy=False,
             join=JoinOption.to_many,
@@ -105,10 +142,22 @@ author_entity = create_entity(
             source_foreign_key_column_name=None,
             source_identifier_column_name='author_id',
             target_identifier_column_name='book_id',
+            target_foreign_key_column_name='author_id',
             nullable=False,
             lazy=False,
             join=JoinOption.to_one,
             property_name='favourite_book',
+        ),
+        create_relationship(  # TODO: we need target_foreign_key_column_name
+            target_entity_class_name='Book',
+            source_foreign_key_column_name=None,
+            source_identifier_column_name='author_id',
+            target_identifier_column_name='book_id',
+            target_foreign_key_column_name='collaborator_id',
+            nullable=True,
+            lazy=False,
+            join=JoinOption.to_many,
+            property_name='collaborations',
         ),
     ],
     api_paths=[
