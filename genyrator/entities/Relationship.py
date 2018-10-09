@@ -85,6 +85,12 @@ def create_relationship(
 
         property_name: The property name used on the SQLAlchemy model.
     """
+    if source_foreign_key_column_name is not None:
+        if target_foreign_key_column_name is not None:
+            raise Exception('Cannot provide both source and target foreign key columns')
+        if join != JoinOption.to_one:
+            raise Exception('Can only provide source foreign key column on to-one relationships')
+
     target_entity_python_name = pythonize(target_entity_class_name)
     relationship = Relationship(
         python_name=target_entity_python_name,
