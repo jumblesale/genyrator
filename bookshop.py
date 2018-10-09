@@ -206,12 +206,13 @@ author_entity = create_entity(
     ],
     api_paths=[
         create_api_path(
-            joined_entities=['book', 'review'],
+            joined_entities=['books', 'review'],
             route='books/reviews',
         ),
         create_api_path(
-            joined_entities=['book'],
+            joined_entities=['books'],
             route='books',
+            endpoint='author-books',
         ),
     ],
 )

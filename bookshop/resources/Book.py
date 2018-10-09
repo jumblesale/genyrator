@@ -67,10 +67,8 @@ class BookResource(Resource):  # type: ignore
         if 'id' not in data:
             data['id'] = bookId
 
-        result: Optional[Book] = Book.query.filter_by(book_id=bookId).first()  # noqa: E501
-
         marshmallow_schema_or_errors = convert_dict_to_marshmallow_result(
-            data=json_dict_to_python_dict(model_to_dict(sqlalchemy_model=result)),
+            data=data,
             identifier=bookId,
             identifier_column='book_id',
             domain_model=book_domain_model,

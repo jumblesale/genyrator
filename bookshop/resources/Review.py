@@ -63,10 +63,8 @@ class ReviewResource(Resource):  # type: ignore
         if 'id' not in data:
             data['id'] = reviewId
 
-        result: Optional[Review] = Review.query.filter_by(review_id=reviewId).first()  # noqa: E501
-
         marshmallow_schema_or_errors = convert_dict_to_marshmallow_result(
-            data=json_dict_to_python_dict(model_to_dict(sqlalchemy_model=result)),
+            data=data,
             identifier=reviewId,
             identifier_column='review_id',
             domain_model=review_domain_model,

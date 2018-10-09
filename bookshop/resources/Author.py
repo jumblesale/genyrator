@@ -64,10 +64,8 @@ class AuthorResource(Resource):  # type: ignore
         if 'id' not in data:
             data['id'] = authorId
 
-        result: Optional[Author] = Author.query.filter_by(author_id=authorId).first()  # noqa: E501
-
         marshmallow_schema_or_errors = convert_dict_to_marshmallow_result(
-            data=json_dict_to_python_dict(model_to_dict(sqlalchemy_model=result)),
+            data=data,
             identifier=authorId,
             identifier_column='author_id',
             domain_model=author_domain_model,
@@ -139,14 +137,14 @@ class ManyAuthorResource(Resource):  # type: ignore
         ...
 
 
-@api.route('/author/<authorId>/books/reviews', endpoint='book-review')  # noqa: E501
+@api.route('/author/<authorId>/books/reviews', endpoint='books-review')  # noqa: E501
 class Review(Resource):  # type: ignore
-    @api.doc(id='book-review', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+    @api.doc(id='books-review', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, authorId):  # type: ignore
         result: Optional[Author] = Author \
             .query \
             .options(
-                joinedload('book')
+                joinedload('books')
                 .joinedload('review')
             ) \
             .filter_by(
@@ -157,7 +155,7 @@ class Review(Resource):  # type: ignore
         result_dict = model_to_dict(
             sqlalchemy_model=result,
             paths=[
-                'book',
+                'books',
                 'review',
             ],
         )
@@ -165,14 +163,14 @@ class Review(Resource):  # type: ignore
         return result_dict
 
 
-@api.route('/author/<authorId>/books', endpoint='book')  # noqa: E501
-class Book(Resource):  # type: ignore
-    @api.doc(id='book', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+@api.route('/author/<authorId>/books', endpoint='author-books')  # noqa: E501
+class Books(Resource):  # type: ignore
+    @api.doc(id='author-books', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
     def get(self, authorId):  # type: ignore
         result: Optional[Author] = Author \
             .query \
             .options(
-                joinedload('book')
+                joinedload('books')
             ) \
             .filter_by(
                 author_id=authorId) \
@@ -182,7 +180,7 @@ class Book(Resource):  # type: ignore
         result_dict = model_to_dict(
             sqlalchemy_model=result,
             paths=[
-                'book',
+                'books',
             ],
         )
 
