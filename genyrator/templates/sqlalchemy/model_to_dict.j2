@@ -75,8 +75,8 @@ def _serialize_data(
 
 def _recurse_on_model_or_list(
     model_or_list:      Union[InstrumentedList, DeclarativeMeta],
-    paths:              List[str]=list(),
-    return_immediately: bool=False,
+    paths:              List[str] = list(),
+    return_immediately: bool = False,
 ) -> Optional[Union[List[Mapping[str, Any]], Mapping[str, Any]]]:
     next_paths = paths[1:] if paths else []
     if type(model_or_list) is InstrumentedList:

@@ -16,6 +16,7 @@ from bookshop.sqlalchemy.convert_properties import (
 from bookshop.sqlalchemy.join_entities import create_joined_entity_map
 from bookshop.schema import AuthorSchema
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
+from bookshop.sqlalchemy.convert_dict_to_marshmallow_result import convert_dict_to_marshmallow_result
 from bookshop.domain.Author import author as author_domain_model
 
 api = Namespace('authors',
@@ -96,8 +97,35 @@ class AuthorResource(Resource):  # type: ignore
 
     @api.expect(author_model, validate=False)
     def patch(self, authorId):  # type: ignore
-        ...
+        result: Optional[Author] = Author.query.filter_by(author_id=authorId).first()  # noqa: E501
 
+        if result is None:
+            abort(404)
+
+        data = json.loads(request.data)
+
+        marshmallow_schema_or_errors = convert_dict_to_marshmallow_result(
+            data=json_dict_to_python_dict(model_to_dict(result)),
+            identifier=authorId,
+            identifier_column='author_id',
+            domain_model=author_domain_model,
+            sqlalchemy_model=Author,
+            schema=author_schema,
+            patch_data=data,
+        )
+
+        if isinstance(marshmallow_schema_or_errors, list):
+            abort(400, marshmallow_schema_or_errors)
+        if marshmallow_schema_or_errors.errors:
+            abort(400, python_dict_to_json_dict(marshmallow_schema_or_errors.errors))
+
+        db.session.add(marshmallow_schema_or_errors.data)
+        db.session.commit()
+
+        return model_to_dict(
+            marshmallow_schema_or_errors.data,
+        ), 200
+    
 
 @api.route('/authors', endpoint='authors')  # noqa: E501
 class ManyAuthorResource(Resource):  # type: ignore
