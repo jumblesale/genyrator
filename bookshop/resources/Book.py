@@ -27,6 +27,7 @@ book_model = api.model('Book', {
     'name': fields.String(),
     'rating': fields.Float(),
     'authorId': fields.String(),
+    'collaboratorId': fields.String(),
     'published': fields.Date(),
     'created': fields.DateTime(),
 })

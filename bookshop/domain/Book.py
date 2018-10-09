@@ -2,6 +2,7 @@ from bookshop.domain.types import DomainModel, Relationship
 
 
 from bookshop.sqlalchemy.model.Author import Author
+from bookshop.sqlalchemy.model.Author import Author
 from bookshop.sqlalchemy.model.Review import Review
 from bookshop.sqlalchemy.model.Genre import Genre
 
@@ -15,10 +16,19 @@ book = DomainModel(
             lazy=False,
             nullable=False,
         ),
+        'collaborator_id': Relationship(
+            sqlalchemy_model_class=Author,
+            target_name='author',
+            target_identifier_column='author_id',
+            source_foreign_key_column='collaborator_id',
+            lazy=False,
+            nullable=True,
+        ),
     },
     identifier_column_name='book_id',
     relationship_keys=[
         'author',
+        'collaborator',
         'reviews',
         'genre',
     ],
@@ -27,15 +37,18 @@ book = DomainModel(
         'name',
         'rating',
         'author_id',
+        'collaborator_id',
         'published',
         'created',
     ],
     json_translation_map={
         'book_id': 'id',
         'author_id': 'author',
+        'collaborator_id': 'collaborator',
     },
     eager_relationships=[
         'author',
+        'collaborator',
         'genre',
     ],
 )

@@ -112,6 +112,55 @@ def create_entity(
         model_alias:        Optional[ImportAlias] = None,
         additional_properties: Optional[List[AdditionalProperty]] = None
 ) -> Entity:
+    """Return a fully configured Entity
+
+    The returned Entity is configured with columns and relationships.
+
+    Args:
+        class_name:          The class name (eg BookClub) used for the SQLAlchemy
+                             and RESTPlus models
+
+        identifier_column:   The column used to identify the entity in the URL. Note;
+                             this is not the primary key of the SQLAlchemy model and therefore
+                             is not used for joins.
+
+        columns:             All columns except for the internally generated primary key.
+                             This must includes the identifier column and any columns
+                             required for relationships.
+
+        relationships:       The relationships between entities. This means just SQLAlchemy
+                             relationships unless the relationship is non-lazy in which case
+                             it will also appear in the JSON response.
+
+        uniques:             A list of list of column names that require unique indexes.
+                             The identifier column does not need to appear in here.
+
+        operations:          HTTP actions which should be generated for this entity.
+
+        display_name:        Human readable name (eg Book Club). Has sensible default.
+
+        table_name:          The SQLAlchemy table. Has sensible default.
+
+        plural:              The plural form of the entity name used in method names
+                             (eg book_clubs). Has sensible default.
+
+        dashed_plural:       The plural form of the entity name used in URIs and
+                             RESTPlus resource IDs (eg book-clubs). Has sensible default.
+
+        resource_namespace:  RESTPlus namespace resource name for entity (eg BookClub). Has sensible default.
+
+        resource_path:       RESTPlus namespace path. Has sensible default.
+
+        api_paths:           List of class names for which RESTPlus routes should
+                             be created. A relationship must exist for the path.
+                             This is only needed for lazy relationships.
+
+        model_alias:         Override the SQLAlchemy model used in the RESTPlus routes.
+                             Use this if you want to extend the generated SQLAlchemy model.
+
+        additional_properties: Key value pairs to be added to the SQLAlchemy model.
+                               They will end up in the model as `key = value`.
+    """
     operations = operations if operations is not None else all_operations
     python_name = pythonize(class_name)
     columns = [identifier_column, *columns]

@@ -4,9 +4,11 @@ from typing import Mapping, cast, MutableMapping
 import json
 
 from behave import given, when, then
-from hamcrest import assert_that, equal_to
+from hamcrest import assert_that, equal_to, instance_of, none
 
 from test.e2e.steps.common import make_request
+from bookshop.sqlalchemy.model.Author import Author
+from bookshop.sqlalchemy.model.Book import Book
 
 
 def generate_example_book() -> Mapping[str, str]:
@@ -127,6 +129,15 @@ def step_impl(context):
     assert_that(response.status_code, equal_to(201))
 
 
+@step("I also put a collaborator relationship to that author")
+def step_impl(context):
+    context.created_book['collaboratorId'] = context.author_entity['id']
+    book = context.created_book
+    response = make_request(client=context.client, endpoint=f'book/{book["id"]}',
+                            method='put', data=book)
+    assert_that(response.status_code, equal_to(201))
+
+
 @when("I get that book entity")
 def step_impl(context):
     book = context.created_book
@@ -141,3 +152,51 @@ def step_impl(context):
 def step_impl(context):
     author = context.retrieved_book['author']
     assert_that(author['id'], equal_to(context.author_entity['id']))
+
+
+@when('I get that "{entity_name}" SQLAlchemy model')
+def step_impl(context, entity_name: str):
+    from bookshop import app
+    context.app_context = app.app_context()
+    context.app_context.push()
+    if entity_name == 'author':
+        model = Author
+        filter_ = Author.author_id == context.author_entity['id']
+    elif entity_name == 'book':
+        model = Book
+        filter_ = Book.book_id == context.created_book['id']
+    else:
+        raise Exception('Only supports books and authors')
+
+    setattr(
+        context,
+        f'sql_{entity_name}',
+        getattr(model, 'query').filter(filter_).one()
+    )
+
+
+@then('"{target}" should have "2" items in it')
+def step_impl(context, target):
+    length = len(_extract_target(context, target))
+    assert_that(length, equal_to(2))
+    context.app_context.pop()
+
+
+@then('"{target}" should be that author')
+def step_impl(context, target):
+    author = Author.query.filter(Author.author_id == context.author_entity['id']).one()
+    assert_that(_extract_target(context, target), equal_to(author))
+
+
+@then('"{target}" should be None')
+def step_impl(context, target):
+    assert_that(_extract_target(context, target), none())
+
+
+def _extract_target(context, target):
+    if isinstance(target, str):
+        target = target.split('.')
+    if len(target) == 0:
+        return context
+    else:
+        return _extract_target(getattr(context, target[0]), target[1:])

@@ -51,6 +51,27 @@ def create_column(
         alias:                    Optional[str] = None,
         foreign_key_relationship: Optional[ForeignKeyRelationship] = None,
 ) -> Union[Column, ForeignKey]:
+    """Return a column to be attached to an entity
+
+    Args:
+        name:        The property name on the SQLAlchemy model
+
+        type_option: The type of the column.
+
+        index:       Whether to create a database index for the column.
+
+        nullable:    Whether to allow the column to be nullable in the database.
+
+        identifier:  If set to True all other args will be ignored and this will
+                     created as an identifier column. See: create_identifier_column
+
+        display_name: Human readable name intended for use in UIs.
+
+        alias:        Column name to be used the database.
+
+        foreign_key_relationship: The entity this column relates. If this is not
+                                  None the result will be a `ForeignKey`.
+    """
     if identifier is True:
         constructor = IdentifierColumn
     elif foreign_key_relationship is not None:
@@ -86,6 +107,17 @@ def create_identifier_column(
         name:        str,
         type_option: TypeOption,
 ) -> IdentifierColumn:
+    """Return an identifier column for an entity
+
+    The identifier column is not the database primary key for the table.
+    The primary key is auto-generated and is always called `id`.
+
+    This identifier column is always unique, indexed and non-nullable.
+
+    Args:
+        name:        The property name on the SQLAlchemy model.
+        type_option: The type of the column.
+    """
     column: IdentifierColumn = create_column(
         name=name, type_option=type_option, index=True, nullable=False,
         identifier=True,

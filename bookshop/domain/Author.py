@@ -3,6 +3,7 @@ from bookshop.domain.types import DomainModel, Relationship
 
 from bookshop.sqlalchemy.model.Book import Book
 from bookshop.sqlalchemy.model.Book import Book
+from bookshop.sqlalchemy.model.Book import Book
 
 author = DomainModel(
     external_identifier_map={
@@ -19,10 +20,13 @@ author = DomainModel(
     relationship_keys=[
         'books',
         'favourite_book',
+        'collaborations',
     ],
     property_keys=[
         'author_id',
         'name',
+        'favourite_author_id',
+        'hated_author_id',
     ],
     json_translation_map={
         'author_id': 'id',
@@ -31,5 +35,6 @@ author = DomainModel(
     eager_relationships=[
         'books',
         'favourite_book',
+        'collaborations',
     ],
 )
