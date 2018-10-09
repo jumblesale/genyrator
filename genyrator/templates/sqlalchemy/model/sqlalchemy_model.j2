@@ -12,7 +12,9 @@ from {{ template.module_name }}.sqlalchemy.model.types import BigIntegerVariantT
 class {{ template.entity.class_name }}(db.Model):  # type: ignore
 {%- if template.entity.table_name %}
     __table_name__ = '{{ template.entity.table_name }}'
-{% endif -%}
+
+{% endif %}
+    # Properties
 {%- if template.entity.additional_properties %}
     {%- for property in template.entity.additional_properties %}
     {{ property.python_name }} = {{ property.value }}
@@ -27,18 +29,29 @@ class {{ template.entity.class_name }}(db.Model):  # type: ignore
     {%- if column.index %}, index=True{% endif %}{# -#}
     , nullable={{ column.nullable | string }})  # noqa: E501
 {%- endfor %}
+
+    # Relationships
 {%- for relationship in template.entity.relationships %}
-    {{ relationship.property_name }} ={{ pad(relationship.property_name) }} db.relationship(
+    {{ relationship.property_name }} = db.relationship(
         '{{ relationship.target_entity_class_name }}',
         lazy={{ relationship.lazy | string }},
         uselist={{ relationship.join.value == 'to_many' | string }},
-    {%- if relationship.source_foreign_key_column_name %}
+    {%- if relationship.target_entity_class_name == template.entity.class_name -%}
+      {%- if relationship.source_foreign_key_column_name %}
+        primaryjoin=id=={{ relationship.source_foreign_key_column_name }},
+        remote_side=[id],
+      {%- elif relationship.target_foreign_key_column_name %}
+        foreign_keys=[{{ relationship.target_foreign_key_column_name }}],
+      {%- endif -%}
+    {%- else -%}
+      {%- if relationship.source_foreign_key_column_name %}
         foreign_keys=[{{ relationship.source_foreign_key_column_name }}],
-    {%- elif relationship.target_foreign_key_column_name %}
+      {%- elif relationship.target_foreign_key_column_name %}
         foreign_keys='{{ relationship.target_entity_class_name }}.{{ relationship.target_foreign_key_column_name }}',
-    {%- endif %}
-    {%- if relationship.__class__.__name__ == 'RelationshipWithJoinTable' %}
+      {%- endif %}
+      {%- if relationship.__class__.__name__ == 'RelationshipWithJoinTable' %}
         secondary='{{ relationship.join_table }}',
+      {%- endif %}
     {%- endif %}
     )
 {%- endfor %}
