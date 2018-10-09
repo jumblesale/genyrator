@@ -47,6 +47,11 @@ def create_template_config(
         create_template(Template.ConvertModels, ['sqlalchemy', 'convert_between_models'], module_name=module_name),
         create_template(Template.JoinEntities, ['sqlalchemy', 'join_entities'], module_name=module_name),
         create_template(Template.Template, ['sqlalchemy', 'model', 'types']),
+        create_template(
+            Template.ConvertDictToMarshmallow,
+            ['sqlalchemy', 'convert_dict_to_marshmallow_result'],
+            module_name=module_name, db_import_path=db_import_path,
+        ),
     ]
     domain_models = [
         create_template(Template.Template, ['domain', 'types']),
