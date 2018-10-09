@@ -46,7 +46,4 @@ def convert_dict_to_marshmallow_result(
         instance=result,
     )
 
-    if marshmallow_result.errors:
-        return marshmallow_result.errors
-
     return marshmallow_result

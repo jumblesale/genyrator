@@ -9,9 +9,11 @@ from bookshop.sqlalchemy.convert_between_models import convert_sqlalchemy_model_
 
 
 def model_to_dict(
-    sqlalchemy_model: DeclarativeMeta,
+    sqlalchemy_model: Optional[DeclarativeMeta],
     paths:            List[str] = list(),
 ) -> Mapping[str, Any]:
+    if sqlalchemy_model is None:
+        return {}
     eager_relationships = {}
     domain_model = convert_sqlalchemy_model_to_domain_model(sqlalchemy_model)
     # always hydrate eager relationships

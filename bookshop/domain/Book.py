@@ -1,8 +1,8 @@
 from bookshop.domain.types import DomainModel, Relationship
 
 
-from bookshop.sqlalchemy.model.Review import Review
 from bookshop.sqlalchemy.model.Author import Author
+from bookshop.sqlalchemy.model.Review import Review
 from bookshop.sqlalchemy.model.Genre import Genre
 
 book = DomainModel(

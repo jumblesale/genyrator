@@ -65,33 +65,25 @@ class ReviewResource(Resource):  # type: ignore
 
         result: Optional[Review] = Review.query.filter_by(review_id=reviewId).first()  # noqa: E501
 
-        joined_entities = create_joined_entity_map(
-            review_domain_model,
-            data,
+        marshmallow_schema_or_errors = convert_dict_to_marshmallow_result(
+            data=json_dict_to_python_dict(model_to_dict(sqlalchemy_model=result)),
+            identifier=reviewId,
+            identifier_column='review_id',
+            domain_model=review_domain_model,
+            sqlalchemy_model=Review,
+            schema=review_schema,
         )
 
-        if type(joined_entities) is list:
-            abort(400, joined_entities)
+        if isinstance(marshmallow_schema_or_errors, list):
+            abort(400, marshmallow_schema_or_errors)
+        if marshmallow_schema_or_errors.errors:
+            abort(400, python_dict_to_json_dict(marshmallow_schema_or_errors.errors))
 
-        data = convert_properties_to_sqlalchemy_properties(
-            review_domain_model,
-            joined_entities,
-            json_dict_to_python_dict(data),
-        )
-
-        marshmallow_result = review_schema.load(
-            json_dict_to_python_dict(data),
-            session=db.session,
-            instance=result,
-        )
-        if marshmallow_result.errors:
-            abort(400, python_dict_to_json_dict(marshmallow_result.errors))
-
-        db.session.add(marshmallow_result.data)
+        db.session.add(marshmallow_schema_or_errors.data)
         db.session.commit()
 
         return model_to_dict(
-            marshmallow_result.data,
+            marshmallow_schema_or_errors.data,
         ), 201
 
     @api.expect(review_model, validate=False)
@@ -102,6 +94,9 @@ class ReviewResource(Resource):  # type: ignore
             abort(404)
 
         data = json.loads(request.data)
+
+        if type(data) is not dict:
+            return abort(400)
 
         marshmallow_schema_or_errors = convert_dict_to_marshmallow_result(
             data=json_dict_to_python_dict(model_to_dict(result)),
