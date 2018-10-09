@@ -6,11 +6,14 @@ from bookshop.sqlalchemy.model.types import BigIntegerVariantType
 
 
 class Review(db.Model):  # type: ignore
+    # Properties
     id =        db.Column(BigIntegerVariantType, primary_key=True, autoincrement=True)  # noqa: E501
     review_id = db.Column(UUIDType, index=True, nullable=False)  # noqa: E501
     text =      db.Column(db.String, index=True, nullable=False)  # noqa: E501
     book_id =   db.Column(db.BigInteger, db.ForeignKey('book.id'), nullable=True)  # noqa: E501
-    book =      db.relationship(
+
+    # Relationships
+    book = db.relationship(
         'Book',
         lazy=False,
         uselist=False,

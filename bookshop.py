@@ -110,7 +110,6 @@ author_entity = create_entity(
         ),
         create_column(
             name='favourite_author_id', type_option=TypeOption.int,
-            # TODO: need to be able to identify target foreign key
             foreign_key_relationship=ForeignKeyRelationship(
                 target_entity='author',
                 target_entity_identifier_column_type=TypeOption.UUID,
@@ -118,7 +117,6 @@ author_entity = create_entity(
         ),
         create_column(
             name='hated_author_id', type_option=TypeOption.int,
-            # TODO: need to be able to identify target foreign key
             foreign_key_relationship=ForeignKeyRelationship(
                 target_entity='author',
                 target_entity_identifier_column_type=TypeOption.UUID,
@@ -148,7 +146,7 @@ author_entity = create_entity(
             join=JoinOption.to_one,
             property_name='favourite_book',
         ),
-        create_relationship(  # TODO: we need target_foreign_key_column_name
+        create_relationship(
             target_entity_class_name='Book',
             source_foreign_key_column_name=None,
             source_identifier_column_name='author_id',
@@ -158,6 +156,52 @@ author_entity = create_entity(
             lazy=False,
             join=JoinOption.to_many,
             property_name='collaborations',
+        ),
+        create_relationship(
+            target_entity_class_name='Author',
+            source_foreign_key_column_name=None,
+            source_identifier_column_name='author_id',
+            target_identifier_column_name='author_id',
+            target_foreign_key_column_name='favourite_author_id',
+            nullable=True,
+            lazy=True,
+            join=JoinOption.to_many,
+            property_name='favourite_of',
+        ),
+        create_relationship(
+            target_entity_class_name='Author',
+            source_foreign_key_column_name='favourite_author_id',
+            source_identifier_column_name='author_id',
+            target_identifier_column_name='author_id',
+            target_foreign_key_column_name=None,
+            key_alias_in_json='favourite_author_id',
+            nullable=True,
+            lazy=True,
+            join=JoinOption.to_one,
+            property_name='favourite_author',
+        ),
+        create_relationship(
+            target_entity_class_name='Author',
+            source_foreign_key_column_name=None,
+            source_identifier_column_name='author_id',
+            target_identifier_column_name='author_id',
+            target_foreign_key_column_name='hated_author_id',
+            nullable=True,
+            lazy=True,
+            join=JoinOption.to_many,
+            property_name='hated_by',
+        ),
+        create_relationship(
+            target_entity_class_name='Author',
+            source_foreign_key_column_name='hated_author_id',
+            source_identifier_column_name='author_id',
+            target_identifier_column_name='author_id',
+            target_foreign_key_column_name=None,
+            key_alias_in_json='hated_author_id',
+            nullable=True,
+            lazy=True,
+            join=JoinOption.to_one,
+            property_name='hated_author',
         ),
     ],
     api_paths=[

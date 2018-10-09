@@ -117,6 +117,12 @@ class DomainModel(Template):
     entity:      Entity = attr.ib()
     module_name: str =    attr.ib()
 
+    def sqlalchemy_model_imports(self):
+        return list(set([
+            rel.target_entity_class_name
+            for rel in self.entity.relationships
+        ]))
+
 
 @attr.s
 class ConvertProperties(Template):
