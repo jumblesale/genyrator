@@ -45,14 +45,32 @@ def step_impl(context, app_name: str):
     assert_that(client.get('/').status_code, equal_to(200))
 
 
-@given('I put an example "{entity_name}" entity')
-def step_impl(context, entity_name: str):
-    entity = example_entity_generators[entity_name]()
+@given('I put an example "{entity_type}" entity')
+def step_impl(context, entity_type: str):
+    _put_entity(context, entity_type, f'{entity_type}_entity', {})
+
+
+@given('I put an example "{entity_type}" entity called "{entity_name}" with a "favouriteAuthorId" from "{target_entity}"')
+def step_impl(context, entity_type: str, entity_name: str, target_entity: str):
+    extras = {
+        'favouriteAuthorId': getattr(context, target_entity)['id'],
+    }
+    _put_entity(context, entity_type, entity_name, extras)
+
+
+@given('I put an example "{entity_type}" entity called "{entity_name}"')
+def step_impl(context, entity_type: str, entity_name: str):
+    _put_entity(context, entity_type, entity_name, {})
+
+
+def _put_entity(context, entity_type: str, entity_name: str, extras: Mapping[str, str]):
+    entity = example_entity_generators[entity_type]()
     entity_id = entity['id']
-    setattr(context, f'{entity_name}_entity', entity)
+    entity.update(extras)
+    setattr(context, entity_name, entity)
     response = make_request(
-        client=context.client, endpoint=f"{entity_name}/{entity_id}",
-        method='put', data=entity
+        client=context.client, endpoint=f'{entity_type}/{entity_id}',
+        method='put', data=entity,
     )
     assert_that(response.status_code, equal_to(201))
 
@@ -138,6 +156,23 @@ def step_impl(context):
     assert_that(response.status_code, equal_to(201))
 
 
+@step("I put an author called {author_name} with a relationship to that author on {relationship}")
+def step_impl(context, author_name, relationship):
+    related_author = generate_example_author()
+    setattr(context, author_name, related_author)
+    response = make_request(
+        client=context.client, endpoint=f'author/{related_author["id"]}',
+        method='put', data=related_author)
+    assert_that(response.status_code, equal_to(201))
+
+    context.author_entity[relationship] = related_author['id']
+    author = context.author_entity
+    response = make_request(
+        client=context.client, endpoint=f'author/{author["id"]}',
+        method='put', data=author)
+    assert_that(response.status_code, equal_to(201))
+
+
 @when("I get that book entity")
 def step_impl(context):
     book = context.created_book
@@ -154,23 +189,36 @@ def step_impl(context):
     assert_that(author['id'], equal_to(context.author_entity['id']))
 
 
-@when('I get that "{entity_name}" SQLAlchemy model')
-def step_impl(context, entity_name: str):
+@when('I get that "{entity_type}" SQLAlchemy model')
+def step_impl(context, entity_type: str):
+    entity = context.author_entity if entity_type == 'author' else context.created_book
+
+    _get_sqlalchemy_model(context, entity_type, entity)
+
+
+@when('I get the "{entity_type}" called "{entity_name}" SQLAlchemy model')
+def step_impl(context, entity_type: str, entity_name: str):
+    entity = getattr(context, entity_name)
+
+    _get_sqlalchemy_model(context, entity_type, entity)
+
+
+def _get_sqlalchemy_model(context, entity_type, entity):
     from bookshop import app
     context.app_context = app.app_context()
     context.app_context.push()
-    if entity_name == 'author':
+    if entity_type == 'author':
         model = Author
-        filter_ = Author.author_id == context.author_entity['id']
-    elif entity_name == 'book':
+        filter_ = Author.author_id == entity['id']
+    elif entity_type == 'book':
         model = Book
-        filter_ = Book.book_id == context.created_book['id']
+        filter_ = Book.book_id == entity['id']
     else:
         raise Exception('Only supports books and authors')
 
     setattr(
         context,
-        f'sql_{entity_name}',
+        f'sql_{entity_type}',
         getattr(model, 'query').filter(filter_).one()
     )
 
@@ -186,6 +234,14 @@ def step_impl(context, target):
 def step_impl(context, target):
     author = Author.query.filter(Author.author_id == context.author_entity['id']).one()
     assert_that(_extract_target(context, target), equal_to(author))
+
+
+@then('"{target}" should be "{context_name}"')
+def step_impl(context, target, context_name):
+    assert_that(
+        _extract_target(context, target),
+        getattr(context, context_name),
+    )
 
 
 @then('"{target}" should be None')

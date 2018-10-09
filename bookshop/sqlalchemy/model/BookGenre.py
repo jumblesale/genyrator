@@ -6,17 +6,20 @@ from bookshop.sqlalchemy.model.types import BigIntegerVariantType
 
 
 class BookGenre(db.Model):  # type: ignore
+    # Properties
     id =            db.Column(BigIntegerVariantType, primary_key=True, autoincrement=True)  # noqa: E501
     book_genre_id = db.Column(UUIDType, index=True, nullable=False)  # noqa: E501
     book_id =       db.Column(db.BigInteger, db.ForeignKey('book.id'), nullable=True)  # noqa: E501
     genre_id =      db.Column(db.BigInteger, db.ForeignKey('genre.id'), nullable=True)  # noqa: E501
-    book =          db.relationship(
+
+    # Relationships
+    book = db.relationship(
         'Book',
         lazy=False,
         uselist=False,
         foreign_keys=[book_id],
     )
-    genre =         db.relationship(
+    genre = db.relationship(
         'Genre',
         lazy=False,
         uselist=False,
