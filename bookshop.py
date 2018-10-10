@@ -261,8 +261,8 @@ genre_entity = create_entity(
     relationships=[
         create_relationship(
             target_entity_class_name='Book', nullable=True, lazy=False, join=JoinOption.to_many,
-            join_table='book_genre', source_foreign_key_column_name='',
-            target_identifier_column_name='book_id', source_identifier_column_name='genre_id'
+            join_table='book_genre', target_identifier_column_name='book_id',
+            source_identifier_column_name='genre_id'
         ),
     ],
 )
