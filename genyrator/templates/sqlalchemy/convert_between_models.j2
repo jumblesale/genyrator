@@ -13,3 +13,11 @@ def convert_sqlalchemy_model_to_domain_model(
     domain_module = importlib.import_module(f'{{ template.module_name }}.domain.{class_name}')
     return getattr(domain_module, convert_case.to_python_name(class_name))
 
+
+def convert_sqlalchemy_class_to_domain_model(
+        sqlalchemy_class: Model,
+):
+    class_name = sqlalchemy_class.__name__
+    domain_module = importlib.import_module(f'data_pipeline.generated.domain.{class_name}')
+    return getattr(domain_module, convert_case.to_python_name(class_name))
+
