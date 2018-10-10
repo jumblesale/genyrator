@@ -21,6 +21,8 @@ def create_joined_entity_map(
             errors.append(
                 [f'Could not find {relationship.target_name} with {json_relationship_name} equal to {target_identifier_value}']
             )
+        elif relationship.nullable is True and result is None:
+            continue
         else:
             joined_entities[external_identifier] = result
     return joined_entities if not errors else errors
