@@ -1,5 +1,5 @@
 # flake8: noqa
-{% for import in template.imports -%}
+{% for import in template.imports|sort(attribute='module_name') -%}
 from {{ template.module_name }}.sqlalchemy.model.{{ import.module_name }} import {% for import in import.imports %}{{ import }}{% endfor %}
 {% endfor %}
 
