@@ -117,7 +117,7 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
 
     @api.expect({{ entity.python_name }}_model, validate=False)
     def patch(self, {{ entity.identifier_column.json_property_name }}):  # type: ignore
-        {{ find_element_by_id() }}.options(noload()).first()  # noqa: E501
+        {{ find_element_by_id() }}.options(noload('*')).first()  # noqa: E501
 
         if result is None:
             abort(404)
