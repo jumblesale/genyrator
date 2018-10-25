@@ -29,7 +29,7 @@ def model_to_dict(
             sqlalchemy_model=sqlalchemy_model,
             paths=paths,
         ),
-        **eager_relationships,
+        **python_dict_to_json_dict(eager_relationships),
     }
 
 
