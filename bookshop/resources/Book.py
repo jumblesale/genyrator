@@ -5,6 +5,9 @@ from flask import request, abort, url_for
 from flask_restplus import Resource, fields, Namespace
 from sqlalchemy.orm import joinedload
 
+from sqlalchemy.orm import noload
+
+
 from bookshop.core.convert_dict import (
     python_dict_to_json_dict, json_dict_to_python_dict
 )
@@ -90,7 +93,7 @@ class BookResource(Resource):  # type: ignore
 
     @api.expect(book_model, validate=False)
     def patch(self, bookId):  # type: ignore
-        result: Optional[Book] = Book.query.filter_by(book_id=bookId).first()  # noqa: E501
+        result: Optional[Book] = Book.query.filter_by(book_id=bookId).options(noload('*')).first()  # noqa: E501
 
         if result is None:
             abort(404)

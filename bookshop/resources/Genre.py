@@ -5,6 +5,9 @@ from flask import request, abort, url_for
 from flask_restplus import Resource, fields, Namespace
 
 
+from sqlalchemy.orm import noload
+
+
 from bookshop.core.convert_dict import (
     python_dict_to_json_dict, json_dict_to_python_dict
 )
@@ -85,7 +88,7 @@ class GenreResource(Resource):  # type: ignore
 
     @api.expect(genre_model, validate=False)
     def patch(self, genreId):  # type: ignore
-        result: Optional[Genre] = Genre.query.filter_by(genre_id=genreId).first()  # noqa: E501
+        result: Optional[Genre] = Genre.query.filter_by(genre_id=genreId).options(noload('*')).first()  # noqa: E501
 
         if result is None:
             abort(404)
