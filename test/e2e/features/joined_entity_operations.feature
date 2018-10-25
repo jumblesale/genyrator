@@ -24,3 +24,10 @@ Feature: Posting new entities with foreign keys
       And I put an example "author" entity
      When I patch that "book" entity with that "author" id
      Then I can see that book in the response from "author/{id}/books"
+
+  Scenario: PATCHing a property
+    Given I put an example "book" entity
+      And I put an example "author" entity
+      And I patch that "book" entity with that "author" id
+     When I patch that "book" entity to set "name" to "dave dave dave: the dave story"
+     Then I can see that "book" has "name" set to "dave dave dave: the dave story"
