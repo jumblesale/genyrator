@@ -98,7 +98,7 @@ def step_impl(context, url: str):
     assert_that(genre['id'], equal_to(context.genre_entity['id']))
 
 
-@when('I patch that "{entity_name}" entity with that "{entity_id}" id')
+@step('I patch that "{entity_name}" entity with that "{entity_id}" id')
 def step_impl(context, entity_name: str, entity_id: str):
     patch_id = getattr(context, f'{entity_id}_entity')['id']
     existing_entity_id = getattr(context, f'{entity_name}_entity')['id']
@@ -110,13 +110,17 @@ def step_impl(context, entity_name: str, entity_id: str):
     assert_that(response.status_code, equal_to(200))
 
 
-@then('I can see that book in the response from "{url}"')
+@step('I can see that book in the response from "{url}"')
 def step_impl(context, url: str):
     url = url.replace('{id}', context.author_entity['id'])
     response = make_request(client=context.client, endpoint=url, method='get')
     assert_that(response.status_code, equal_to(200))
-    data = json.loads(response.data)
-    ...
+    data = response.json
+    existing_book = getattr(context, 'book_entity')
+    for book in data['books']:
+        if existing_book['id'] == book['id']:
+            return
+    raise Exception(f'Book with id {existing_book["id"]} not found')
 
 
 @given('I put an incorrect "book_genre" join entity')
@@ -256,3 +260,24 @@ def _extract_target(context, target):
         return context
     else:
         return _extract_target(getattr(context, target[0]), target[1:])
+
+
+@when('I patch that "{entity_name}" entity to set "{prop}" to "{value}"')
+def step_impl(context, entity_name, prop, value):
+    existing_entity_id = getattr(context, f'{entity_name}_entity')['id']
+    data = {
+        prop: value
+    }
+    response = make_request(client=context.client, endpoint=f'{entity_name}/{existing_entity_id}',
+                            method='patch', data=data)
+    assert_that(response.status_code, equal_to(200))
+
+
+@then('I can see that "{entity_name}" has "{prop}" set to "{value}"')
+def step_impl(context, entity_name, prop, value):
+    existing_entity = getattr(context, f'{entity_name}_entity')
+    response = make_request(client=context.client, endpoint=f'{entity_name}/{existing_entity["id"]}',
+                            method='get')
+    assert_that(response.status_code, equal_to(200))
+    data = response.json
+    assert_that(data[prop], equal_to(value))
