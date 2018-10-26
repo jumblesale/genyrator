@@ -1,6 +1,6 @@
 from {{ template.module_name }}.domain.types import DomainModel, Relationship
 
-{% for target_entity_class_name in template.sqlalchemy_model_imports() %}
+{% for target_entity_class_name in template.sqlalchemy_model_imports()|sort %}
 from {{ template.module_name }}.sqlalchemy.model.{{ target_entity_class_name }} import {{ target_entity_class_name }}
 {%- endfor %}
 
