@@ -4,9 +4,7 @@ from typing import Optional
 from flask import request, abort, url_for
 from flask_restplus import Resource, fields, Namespace
 
-
 from sqlalchemy.orm import noload
-
 
 from bookshop.core.convert_dict import (
     python_dict_to_json_dict, json_dict_to_python_dict
@@ -89,7 +87,8 @@ class BookGenreResource(Resource):  # type: ignore
 
     @api.expect(book_genre_model, validate=False)
     def patch(self, bookGenreId):  # type: ignore
-        result: Optional[BookGenre] = BookGenre.query.filter_by(book_genre_id=bookGenreId).options(noload('*')).first()  # noqa: E501
+        result: Optional[BookGenre] = BookGenre.query.filter_by(book_genre_id=bookGenreId)\
+            .options(noload('*')).first()  # noqa: E501
 
         if result is None:
             abort(404)
