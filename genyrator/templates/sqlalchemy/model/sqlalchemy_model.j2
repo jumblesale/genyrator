@@ -40,6 +40,10 @@ class {{ template.entity.class_name }}(db.Model):  # type: ignore
       {%- if relationship.source_foreign_key_column_name %}
         primaryjoin=id=={{ relationship.source_foreign_key_column_name }},
         remote_side=[id],
+      {%- elif relationship.target_foreign_key_column_name and relationship.secondary_join_name %}
+        secondary='{{ relationship.join_table }}',
+        primaryjoin='{{ template.entity.class_name }}.id=={{ relationship.join_table_class_name }}.{{ relationship.target_foreign_key_column_name }}',
+        secondaryjoin='{{ template.entity.class_name }}.id=={{ relationship.join_table_class_name }}.{{ relationship.secondary_join_name }}',
       {%- elif relationship.target_foreign_key_column_name %}
         foreign_keys=[{{ relationship.target_foreign_key_column_name }}],
       {%- endif -%}

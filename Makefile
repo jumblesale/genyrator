@@ -13,4 +13,7 @@ mamba:
 pep8:
 	pipenv run pycodestyle
 
-.PHONY: deps test behave pep8
+bookshop-build:
+	pipenv run python bookshop.py
+
+.PHONY: deps test behave pep8 bookshop-build
