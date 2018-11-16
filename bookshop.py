@@ -86,6 +86,19 @@ book_entity = create_entity(
             join_table='book_genre',
             property_name='genre',
         ),
+        create_relationship(
+            target_entity_class_name='Book',
+            source_identifier_column_name='book_id',
+            source_foreign_key_column_name=None,
+            target_identifier_column_name='book_id',
+            target_foreign_key_column_name='book1_id',
+            nullable=False,
+            lazy=True,
+            join=JoinOption.to_many,
+            join_table='related_book',
+            property_name='related_books',
+            secondary_join_name='book2_id',
+        ),
     ],
     operations=all_operations,
     api_paths=[
@@ -94,6 +107,53 @@ book_entity = create_entity(
                 'genre',
             ],
             route='genres',
+        ),
+    ],
+)
+
+related_book = create_entity(
+    class_name='RelatedBook',
+    identifier_column=create_identifier_column(
+        'related_book_uuid', TypeOption.UUID,
+    ),
+    columns=[
+        create_column(
+            name='book1_id', type_option=TypeOption.int,
+            foreign_key_relationship=ForeignKeyRelationship(
+                target_entity='book',
+                target_entity_identifier_column_type=TypeOption.UUID,
+            ),
+        ),
+        create_column(
+            name='book2_id', type_option=TypeOption.int,
+            foreign_key_relationship=ForeignKeyRelationship(
+                target_entity='book',
+                target_entity_identifier_column_type=TypeOption.UUID,
+            ),
+        ),
+    ],
+    relationships=[
+        create_relationship(
+            source_foreign_key_column_name='book1_id',
+            source_identifier_column_name='related_book_id',
+            target_identifier_column_name='book_id',
+            target_entity_class_name='Book',
+            property_name='book1',
+            key_alias_in_json='book1_id',
+            nullable=False,
+            lazy=False,
+            join=JoinOption.to_one,
+        ),
+        create_relationship(
+            source_foreign_key_column_name='book2_id',
+            source_identifier_column_name='related_book_id',
+            target_identifier_column_name='book_id',
+            target_entity_class_name='Book',
+            property_name='book2',
+            key_alias_in_json='book2_id',
+            nullable=False,
+            lazy=False,
+            join=JoinOption.to_one,
         ),
     ],
 )
@@ -313,6 +373,6 @@ def create_bookshop_schema(entities: List[Entity]) -> Schema:
 
 if __name__ == '__main__':
     schema = create_bookshop_schema([
-        book_entity, author_entity, review_entity, genre_entity, book_genre_entity
+        book_entity, author_entity, review_entity, genre_entity, book_genre_entity, related_book,
     ])
     write_app(schema)

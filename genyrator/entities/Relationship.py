@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 import attr
-from genyrator.inflector import pythonize
+from genyrator.inflector import pythonize, to_class_name
 
 
 class JoinOption(Enum):
@@ -23,6 +23,7 @@ class Relationship(object):
     nullable:                       bool =          attr.ib()
     lazy:                           bool =          attr.ib()
     join:                           JoinOption =    attr.ib()
+    secondary_join_name:            Optional[str] = attr.ib()
 
 
 @attr.s
@@ -32,7 +33,8 @@ class RelationshipWithoutJoinTable(Relationship):
 
 @attr.s
 class RelationshipWithJoinTable(Relationship):
-    join_table: str = attr.ib()
+    join_table:            str = attr.ib()
+    join_table_class_name: str = attr.ib()
 
 
 def create_relationship(
@@ -48,6 +50,7 @@ def create_relationship(
         target_identifier_column_name:  Optional[str] = None,
         target_foreign_key_column_name: Optional[str] = None,
         property_name:                  Optional[str] = None,
+        secondary_join_name:            Optional[str] = None,
 ) -> Relationship:
     """Return a relationship between two entities
 
@@ -84,6 +87,11 @@ def create_relationship(
                                         there are multiple routes to the other entity.
 
         property_name: The property name used on the SQLAlchemy model.
+
+        secondary_join_name: The column name of the secondary foreign key on the
+                             intermediary join table when doing a many-to-many join
+                             on a self-referential many-to-many relationship.
+                             See: https://docs.sqlalchemy.org/en/latest/orm/join_conditions.html#self-referential-many-to-many-relationship
     """
     if source_foreign_key_column_name is not None:
         if target_foreign_key_column_name is not None:
@@ -104,6 +112,7 @@ def create_relationship(
         nullable=nullable,
         lazy=lazy,
         join=join,
+        secondary_join_name=secondary_join_name,
     )
     if join_table is None:
         target_identifier_column_name = pythonize(target_identifier_column_name) \
@@ -113,6 +122,9 @@ def create_relationship(
         )
     join_table = str(join_table) if join_table else None
 
-    return RelationshipWithJoinTable(
-        **{**{'join_table': join_table, **relationship.__dict__}}
-    )
+    properties = relationship.__dict__
+    properties.update({
+        'join_table': join_table,
+        'join_table_class_name': to_class_name(join_table),
+    })
+    return RelationshipWithJoinTable(**properties)

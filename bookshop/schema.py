@@ -5,6 +5,7 @@ from bookshop.sqlalchemy.model import (
     Review,
     Genre,
     BookGenre,
+    RelatedBook,
 )
 
 
@@ -36,3 +37,9 @@ class BookGenreSchema(ModelSchema):
     class Meta:
         include_fk = True
         model = BookGenre
+
+
+class RelatedBookSchema(ModelSchema):
+    class Meta:
+        include_fk = True
+        model = RelatedBook

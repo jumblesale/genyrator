@@ -28,10 +28,15 @@ def generate_example_author() -> Mapping[str, str]:
     return {"id": str(uuid.uuid4()), "name": 'camus'}
 
 
+def generate_example_related_book() -> Mapping[str, str]:
+    return {"id": str(uuid.uuid4())}
+
+
 example_entity_generators = {
     'book':   generate_example_book,
     'genre':  generate_example_genre,
     'author': generate_example_author,
+    'related-book': generate_example_related_book,
 }
 
 
@@ -56,6 +61,15 @@ def step_impl(context, entity_type: str, entity_name: str, target_entity: str):
         'favouriteAuthorId': getattr(context, target_entity)['id'],
     }
     _put_entity(context, entity_type, entity_name, extras)
+
+
+@given('I put an example "related-book" entity called "{entity_name}" joining "{book1}" to "{book2}"')
+def step_impl(context, entity_name: str, book1: str, book2: str):
+    extras = {
+        'book1Id': getattr(context, book1)['id'],
+        'book2Id': getattr(context, book2)['id'],
+    }
+    _put_entity(context, 'related-book', entity_name, extras)
 
 
 @given('I put an example "{entity_type}" entity called "{entity_name}"')
@@ -227,10 +241,10 @@ def _get_sqlalchemy_model(context, entity_type, entity):
     )
 
 
-@then('"{target}" should have "2" items in it')
-def step_impl(context, target):
+@then('"{target}" should have "{n}" items in it')
+def step_impl(context, target: str, n: str):
     length = len(_extract_target(context, target))
-    assert_that(length, equal_to(2))
+    assert_that(length, equal_to(int(n)))
     context.app_context.pop()
 
 

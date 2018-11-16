@@ -40,3 +40,14 @@ Feature: SQLAlchemy relationships
       When I get the "author" called "author1" SQLAlchemy model
       Then "sql_author.favourite_author" should be None
        And "sql_author.favourite_of" should have "2" items in it
+
+  Scenario: Following a self referencing many-to-many relationship
+    Given I put an example "book" entity called "myFirstBook"
+      And I put an example "book" entity called "mySecondBook"
+      And I put an example "book" entity called "myThirdBook"
+      And I put an example "related-book" entity called "join1" joining "myFirstBook" to "mySecondBook"
+      And I put an example "related-book" entity called "join2" joining "myFirstBook" to "myThirdBook"
+      When I get the "book" called "myFirstBook" SQLAlchemy model
+      Then "sql_book.related_books" should have "2" items in it
+      When I get the "book" called "myThirdBook" SQLAlchemy model
+      Then "sql_book.related_books" should have "0" items in it

@@ -40,5 +40,13 @@ class Book(db.Model):  # type: ignore
         uselist=False,
         secondary='book_genre',
     )
+    related_books = db.relationship(
+        'Book',
+        lazy=True,
+        uselist=True,
+        secondary='related_book',
+        primaryjoin='Book.id==RelatedBook.book1_id',
+        secondaryjoin='Book.id==RelatedBook.book2_id',
+    )
 
     __table_args__ = (UniqueConstraint('book_id', ), )
