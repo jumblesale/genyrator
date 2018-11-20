@@ -1,4 +1,5 @@
 import datetime
+import uuid
 from typing import Mapping, Dict, Callable, Any, Iterable, List, Optional
 from bookshop.core.convert_case import to_json_name, to_python_name
 
@@ -9,32 +10,19 @@ def convert_dict_naming(
 ) -> Optional[Mapping[str, Any]]:
     if in_dict is None:
         return None
-    out_dict = {}
-    for k, v in in_dict.items():
-        if type(v) is dict:
-            value = convert_dict_naming(v, fn)
-        elif type(v) is list or type(v) is set:
-            value = convert_iterable_naming(v, fn)
-        else:
-            value = dict_value_to_json_value(v)
-        out_dict[fn(k)] = dict_value_to_json_value(value)
-    return out_dict
+    return {
+        fn(key): dict_value_to_json_value(value, fn)
+        for key, value in in_dict.items()
+    }
 
 
 def convert_iterable_naming(
     in_list: Iterable,
     fn:      Callable[[str], str],
 ) -> List:
-    out_list = []
-    for v in in_list:
-        if type(v) is dict:
-            value = convert_dict_naming(v, fn)
-        elif type(v) is list or type(v) is set:
-            value = convert_iterable_naming(v, fn)
-        else:
-            value = v
-        out_list.append(dict_value_to_json_value(value))
-    return out_list
+    return [
+        dict_value_to_json_value(value, fn) for value in in_list
+    ]
 
 
 def python_dict_to_json_dict(python_dict: Mapping[str, Any]) -> Mapping[str, Any]:
@@ -45,10 +33,13 @@ def json_dict_to_python_dict(json_dict: Mapping[str, Any]) -> Mapping[str, Any]:
     return convert_dict_naming(json_dict, to_python_name)
 
 
-def dict_value_to_json_value(param: Any) -> Any:
-    property_type = type(param)
-    if property_type is datetime.datetime or property_type is datetime.date:
+def dict_value_to_json_value(param: Any, fn: Callable[[str], str]) -> Any:
+    if isinstance(param, dict):
+        return convert_dict_naming(param, fn)
+    elif isinstance(param, (list, set)):
+        return convert_iterable_naming(param, fn)
+    elif isinstance(param, (datetime.datetime, datetime.date)):
         return param.isoformat()
-    if param.__class__.__name__ == 'UUID':
+    elif isinstance(param, uuid.UUID):
         return str(param)
     return param
