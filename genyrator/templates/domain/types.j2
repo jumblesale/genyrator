@@ -5,6 +5,12 @@ from sqlalchemy.ext.declarative import DeclarativeMeta
 import attr
 
 
+class UserJson(dict):
+    """Used to represent JSON provided by the user, which should
+    not have its contents modified during serialization"""
+    ...
+
+
 @attr.s(frozen=True, auto_attribs=True)
 class Relationship:
     sqlalchemy_model_class:    DeclarativeMeta

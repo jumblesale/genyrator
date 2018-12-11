@@ -13,7 +13,7 @@ Feature: performing operations on a simple schema
     And I have json data
     """
     {
-      "bookId": 3,
+      "id": 3,
       "bookName": "the dispossessed",
       "publishDate": "1974-05-21",
       "inStock": 3,

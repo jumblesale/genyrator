@@ -4,9 +4,14 @@
     {%- set column_type = column.restplus_type.value if column.__class__.__name__ != 'ForeignKey'
                                                    else column.target_restplus_type.value %}
     {%- if column.__class__.__name__ == 'IdentifierColumn' %}
-    'id': fields.{{ column_type }}(attribute='{{ column.json_property_name }}'),
+    'id': fields.{{ column_type }}(),
     {%- else %}
     '{{ column.json_property_name }}': fields.{{ column_type }}(),
+    {%- endif %}
+{%- endfor %}
+{%- for relationship in entity.relationships %}
+    {%- if not relationship.lazy %}
+    '{{ relationship.json_property_name }}': fields.Raw(),
     {%- endif %}
 {%- endfor %}
 })

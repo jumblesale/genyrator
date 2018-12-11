@@ -25,8 +25,9 @@ api = Namespace('genres',
                 description='Genre API', )
 
 genre_model = api.model('Genre', {
-    'id': fields.String(attribute='genreId'),
+    'id': fields.String(),
     'title': fields.String(),
+    'book': fields.Raw(),
 })
 
 genre_schema = GenreSchema()
@@ -36,13 +37,14 @@ genres_many_schema = GenreSchema(many=True)
 @api.route('/genre/<genreId>', endpoint='genre_by_id')  # noqa: E501
 class GenreResource(Resource):  # type: ignore
     @api.doc(id='get-genre-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+    @api.marshal_with(genre_model)
     def get(self, genreId):  # type: ignore
         result: Optional[Genre] = Genre.query.filter_by(genre_id=genreId).first()  # noqa: E501
         if result is None:
             abort(404)
-        response = model_to_dict(
+        response = python_dict_to_json_dict(model_to_dict(
             result,
-        ), 200
+        )), 200
         return response
 
     @api.doc(id='delete-genre-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
@@ -80,9 +82,9 @@ class GenreResource(Resource):  # type: ignore
         db.session.add(marshmallow_schema_or_errors.data)
         db.session.commit()
 
-        return model_to_dict(
+        return python_dict_to_json_dict(model_to_dict(
             marshmallow_schema_or_errors.data,
-        ), 201
+        )), 201
 
     @api.expect(genre_model, validate=False)
     def patch(self, genreId):  # type: ignore
@@ -115,9 +117,9 @@ class GenreResource(Resource):  # type: ignore
         db.session.add(marshmallow_schema_or_errors.data)
         db.session.commit()
 
-        return model_to_dict(
+        return python_dict_to_json_dict(model_to_dict(
             marshmallow_schema_or_errors.data,
-        ), 200
+        )), 200
     
 
 @api.route('/genres', endpoint='genres')  # noqa: E501

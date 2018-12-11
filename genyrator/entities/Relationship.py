@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 import attr
-from genyrator.inflector import pythonize, to_class_name
+from genyrator.inflector import pythonize, to_json_case, to_class_name
 
 
 class JoinOption(Enum):
@@ -18,6 +18,7 @@ class Relationship(object):
     source_foreign_key_column_name: Optional[str] = attr.ib()
     source_identifier_column_name:  str =           attr.ib()
     property_name:                  str =           attr.ib()
+    json_property_name:             str =           attr.ib()
     # in the json request, what key will this appear under?
     key_alias_in_json:              str =           attr.ib()
     nullable:                       bool =          attr.ib()
@@ -100,6 +101,7 @@ def create_relationship(
             raise Exception('Can only provide source foreign key column on to-one relationships')
 
     target_entity_python_name = pythonize(target_entity_class_name)
+    property_name = property_name if property_name is not None else target_entity_python_name
     relationship = Relationship(
         python_name=target_entity_python_name,
         target_entity_class_name=target_entity_class_name,
@@ -107,7 +109,8 @@ def create_relationship(
         target_foreign_key_column_name=target_foreign_key_column_name,
         source_identifier_column_name=source_identifier_column_name,
         source_foreign_key_column_name=source_foreign_key_column_name,
-        property_name=property_name if property_name is not None else target_entity_python_name,
+        property_name=property_name,
+        json_property_name=to_json_case(property_name),
         key_alias_in_json=key_alias_in_json if key_alias_in_json is not None else target_identifier_column_name,
         nullable=nullable,
         lazy=lazy,

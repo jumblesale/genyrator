@@ -1,4 +1,4 @@
-from sqlalchemy_utils import UUIDType
+from sqlalchemy_utils import UUIDType, JSONType
 from sqlalchemy import UniqueConstraint
 
 from bookshop.sqlalchemy import db

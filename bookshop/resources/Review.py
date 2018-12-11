@@ -25,9 +25,10 @@ api = Namespace('reviews',
                 description='Review API', )
 
 review_model = api.model('Review', {
-    'id': fields.String(attribute='reviewId'),
+    'id': fields.String(),
     'text': fields.String(),
     'bookId': fields.String(),
+    'book': fields.Raw(),
 })
 
 review_schema = ReviewSchema()
@@ -37,13 +38,14 @@ reviews_many_schema = ReviewSchema(many=True)
 @api.route('/review/<reviewId>', endpoint='review_by_id')  # noqa: E501
 class ReviewResource(Resource):  # type: ignore
     @api.doc(id='get-review-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+    @api.marshal_with(review_model)
     def get(self, reviewId):  # type: ignore
         result: Optional[Review] = Review.query.filter_by(review_id=reviewId).first()  # noqa: E501
         if result is None:
             abort(404)
-        response = model_to_dict(
+        response = python_dict_to_json_dict(model_to_dict(
             result,
-        ), 200
+        )), 200
         return response
 
     @api.doc(id='delete-review-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
@@ -81,9 +83,9 @@ class ReviewResource(Resource):  # type: ignore
         db.session.add(marshmallow_schema_or_errors.data)
         db.session.commit()
 
-        return model_to_dict(
+        return python_dict_to_json_dict(model_to_dict(
             marshmallow_schema_or_errors.data,
-        ), 201
+        )), 201
 
     @api.expect(review_model, validate=False)
     def patch(self, reviewId):  # type: ignore
@@ -116,9 +118,9 @@ class ReviewResource(Resource):  # type: ignore
         db.session.add(marshmallow_schema_or_errors.data)
         db.session.commit()
 
-        return model_to_dict(
+        return python_dict_to_json_dict(model_to_dict(
             marshmallow_schema_or_errors.data,
-        ), 200
+        )), 200
     
 
 @api.route('/reviews', endpoint='reviews')  # noqa: E501

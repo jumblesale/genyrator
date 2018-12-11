@@ -25,13 +25,16 @@ api = Namespace('books',
                 description='Book API', )
 
 book_model = api.model('Book', {
-    'id': fields.String(attribute='bookId'),
+    'id': fields.String(),
     'name': fields.String(),
     'rating': fields.Float(),
     'authorId': fields.String(),
     'collaboratorId': fields.String(),
     'published': fields.Date(),
     'created': fields.DateTime(),
+    'author': fields.Raw(),
+    'collaborator': fields.Raw(),
+    'genre': fields.Raw(),
 })
 
 book_schema = BookSchema()
@@ -41,13 +44,14 @@ books_many_schema = BookSchema(many=True)
 @api.route('/book/<bookId>', endpoint='book_by_id')  # noqa: E501
 class BookResource(Resource):  # type: ignore
     @api.doc(id='get-book-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+    @api.marshal_with(book_model)
     def get(self, bookId):  # type: ignore
         result: Optional[Book] = Book.query.filter_by(book_id=bookId).first()  # noqa: E501
         if result is None:
             abort(404)
-        response = model_to_dict(
+        response = python_dict_to_json_dict(model_to_dict(
             result,
-        ), 200
+        )), 200
         return response
 
     @api.doc(id='delete-book-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
@@ -85,9 +89,9 @@ class BookResource(Resource):  # type: ignore
         db.session.add(marshmallow_schema_or_errors.data)
         db.session.commit()
 
-        return model_to_dict(
+        return python_dict_to_json_dict(model_to_dict(
             marshmallow_schema_or_errors.data,
-        ), 201
+        )), 201
 
     @api.expect(book_model, validate=False)
     def patch(self, bookId):  # type: ignore
@@ -120,9 +124,9 @@ class BookResource(Resource):  # type: ignore
         db.session.add(marshmallow_schema_or_errors.data)
         db.session.commit()
 
-        return model_to_dict(
+        return python_dict_to_json_dict(model_to_dict(
             marshmallow_schema_or_errors.data,
-        ), 200
+        )), 200
     
 
 @api.route('/books', endpoint='books')  # noqa: E501
@@ -156,11 +160,11 @@ class Genre(Resource):  # type: ignore
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        result_dict = model_to_dict(
+        result_dict = python_dict_to_json_dict(model_to_dict(
             sqlalchemy_model=result,
             paths=[
                 'genre',
             ],
-        )
+        ))
 
         return result_dict
