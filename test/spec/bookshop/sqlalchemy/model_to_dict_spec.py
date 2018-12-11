@@ -7,7 +7,6 @@ from sqlalchemy.orm import joinedload
 
 from bookshop import app
 from bookshop.sqlalchemy.model import Book, Author, Genre, BookGenre
-from bookshop.domain.Book import book as book_domain_model
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
 from bookshop import db
 
@@ -16,17 +15,17 @@ AUTHOR_UUID = uuid.uuid4()
 GENRE_UUID =  uuid.uuid4()
 
 datetime_now = datetime.datetime.now()
-date_now =     datetime.datetime.today()
+date_now =     datetime.datetime.today().date()
 
-author_model = Author(id=1, author_id=str(AUTHOR_UUID), name='orwell')
+author_model = Author(id=1, author_id=AUTHOR_UUID, name='orwell')
 author_dict = {
-    "id": str(AUTHOR_UUID),
+    "id":   AUTHOR_UUID,
     "name": 'orwell',
 }
 
 book_model = Book(
     id=1,
-    book_id=str(BOOK_UUID),
+    book_id=BOOK_UUID,
     name='animal farm',
     rating=4.1,
     author_id=1,
@@ -34,11 +33,11 @@ book_model = Book(
     created=datetime_now,
 )
 book_dict = {
-    "id": str(BOOK_UUID),
+    "id": BOOK_UUID,
     "name": 'animal farm',
     "rating": 4.1,
-    "published": date_now.strftime('%Y-%m-%d'),
-    "created": datetime_now.isoformat(),
+    "published": date_now,
+    "created": datetime_now,
 }
 
 genre_model = Genre(
@@ -124,4 +123,4 @@ with description('model_to_dict') as self:
                 sqlalchemy_model=retrieved_genre,
                 paths=['genre'],
             )
-        expect(result['genre']['id']).to(equal(str(GENRE_UUID)))
+        expect(result['genre']['id']).to(equal(GENRE_UUID))
