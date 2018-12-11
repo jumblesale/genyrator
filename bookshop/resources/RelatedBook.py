@@ -25,9 +25,11 @@ api = Namespace('related_books',
                 description='Relatedbook API', )
 
 related_book_model = api.model('RelatedBook', {
-    'id': fields.String(attribute='relatedBookUuid'),
+    'id': fields.String(),
     'book1Id': fields.String(),
     'book2Id': fields.String(),
+    'book1': fields.Raw(),
+    'book2': fields.Raw(),
 })
 
 related_book_schema = RelatedBookSchema()
@@ -37,13 +39,14 @@ related_books_many_schema = RelatedBookSchema(many=True)
 @api.route('/related-book/<relatedBookUuid>', endpoint='related_book_by_id')  # noqa: E501
 class RelatedBookResource(Resource):  # type: ignore
     @api.doc(id='get-related_book-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+    @api.marshal_with(related_book_model)
     def get(self, relatedBookUuid):  # type: ignore
         result: Optional[RelatedBook] = RelatedBook.query.filter_by(related_book_uuid=relatedBookUuid).first()  # noqa: E501
         if result is None:
             abort(404)
-        response = model_to_dict(
+        response = python_dict_to_json_dict(model_to_dict(
             result,
-        ), 200
+        )), 200
         return response
 
     @api.doc(id='delete-related_book-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
@@ -81,9 +84,9 @@ class RelatedBookResource(Resource):  # type: ignore
         db.session.add(marshmallow_schema_or_errors.data)
         db.session.commit()
 
-        return model_to_dict(
+        return python_dict_to_json_dict(model_to_dict(
             marshmallow_schema_or_errors.data,
-        ), 201
+        )), 201
 
     @api.expect(related_book_model, validate=False)
     def patch(self, relatedBookUuid):  # type: ignore
@@ -116,9 +119,9 @@ class RelatedBookResource(Resource):  # type: ignore
         db.session.add(marshmallow_schema_or_errors.data)
         db.session.commit()
 
-        return model_to_dict(
+        return python_dict_to_json_dict(model_to_dict(
             marshmallow_schema_or_errors.data,
-        ), 200
+        )), 200
     
 
 @api.route('/related-books', endpoint='related_books')  # noqa: E501

@@ -175,7 +175,9 @@ def step_impl(context, path: str):
 
 @step("that response matches the original data")
 def step_impl(context):
-    assert_that(json.loads(context.response.data), equal_to(context.data))
+    response_data = context.response.json
+    original_data = context.data
+    assert_that(response_data, equal_to(original_data))
 
 
 @step('the response has "{field}" with value "{value}"')

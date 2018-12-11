@@ -66,6 +66,7 @@ class SqlAlchemyTypeOption(Enum):
     datetime = 'db.DateTime'
     date =     'db.Date'
     UUID =     'UUIDType'
+    dict =     'JSONType'
 
 
 class RestplusTypeOption(Enum):
@@ -76,6 +77,7 @@ class RestplusTypeOption(Enum):
     datetime = 'DateTime'
     date =     'Date'
     UUID =     'String'
+    dict =     'Raw'
 
 
 def type_option_to_sqlalchemy_type(type_option: TypeOption) -> SqlAlchemyTypeOption:

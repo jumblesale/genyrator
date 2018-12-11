@@ -25,9 +25,11 @@ api = Namespace('book_genres',
                 description='Bookgenre API', )
 
 book_genre_model = api.model('BookGenre', {
-    'id': fields.String(attribute='bookGenreId'),
+    'id': fields.String(),
     'bookId': fields.String(),
     'genreId': fields.String(),
+    'book': fields.Raw(),
+    'genre': fields.Raw(),
 })
 
 book_genre_schema = BookGenreSchema()
@@ -37,13 +39,14 @@ book_genres_many_schema = BookGenreSchema(many=True)
 @api.route('/book-genre/<bookGenreId>', endpoint='book_genre_by_id')  # noqa: E501
 class BookGenreResource(Resource):  # type: ignore
     @api.doc(id='get-book_genre-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+    @api.marshal_with(book_genre_model)
     def get(self, bookGenreId):  # type: ignore
         result: Optional[BookGenre] = BookGenre.query.filter_by(book_genre_id=bookGenreId).first()  # noqa: E501
         if result is None:
             abort(404)
-        response = model_to_dict(
+        response = python_dict_to_json_dict(model_to_dict(
             result,
-        ), 200
+        )), 200
         return response
 
     @api.doc(id='delete-book_genre-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
@@ -81,9 +84,9 @@ class BookGenreResource(Resource):  # type: ignore
         db.session.add(marshmallow_schema_or_errors.data)
         db.session.commit()
 
-        return model_to_dict(
+        return python_dict_to_json_dict(model_to_dict(
             marshmallow_schema_or_errors.data,
-        ), 201
+        )), 201
 
     @api.expect(book_genre_model, validate=False)
     def patch(self, bookGenreId):  # type: ignore
@@ -116,9 +119,9 @@ class BookGenreResource(Resource):  # type: ignore
         db.session.add(marshmallow_schema_or_errors.data)
         db.session.commit()
 
-        return model_to_dict(
+        return python_dict_to_json_dict(model_to_dict(
             marshmallow_schema_or_errors.data,
-        ), 200
+        )), 200
     
 
 @api.route('/book-genres', endpoint='book_genres')  # noqa: E501

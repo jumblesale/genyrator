@@ -25,10 +25,13 @@ api = Namespace('authors',
                 description='Author API', )
 
 author_model = api.model('Author', {
-    'id': fields.String(attribute='authorId'),
+    'id': fields.String(),
     'name': fields.String(),
     'favouriteAuthorId': fields.String(),
     'hatedAuthorId': fields.String(),
+    'books': fields.Raw(),
+    'favouriteBook': fields.Raw(),
+    'collaborations': fields.Raw(),
 })
 
 author_schema = AuthorSchema()
@@ -38,13 +41,14 @@ authors_many_schema = AuthorSchema(many=True)
 @api.route('/author/<authorId>', endpoint='author_by_id')  # noqa: E501
 class AuthorResource(Resource):  # type: ignore
     @api.doc(id='get-author-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})  # noqa: E501
+    @api.marshal_with(author_model)
     def get(self, authorId):  # type: ignore
         result: Optional[Author] = Author.query.filter_by(author_id=authorId).first()  # noqa: E501
         if result is None:
             abort(404)
-        response = model_to_dict(
+        response = python_dict_to_json_dict(model_to_dict(
             result,
-        ), 200
+        )), 200
         return response
 
     @api.doc(id='delete-author-by-id', responses={401: 'Unauthorised', 404: 'Not Found'})
@@ -82,9 +86,9 @@ class AuthorResource(Resource):  # type: ignore
         db.session.add(marshmallow_schema_or_errors.data)
         db.session.commit()
 
-        return model_to_dict(
+        return python_dict_to_json_dict(model_to_dict(
             marshmallow_schema_or_errors.data,
-        ), 201
+        )), 201
 
     @api.expect(author_model, validate=False)
     def patch(self, authorId):  # type: ignore
@@ -117,9 +121,9 @@ class AuthorResource(Resource):  # type: ignore
         db.session.add(marshmallow_schema_or_errors.data)
         db.session.commit()
 
-        return model_to_dict(
+        return python_dict_to_json_dict(model_to_dict(
             marshmallow_schema_or_errors.data,
-        ), 200
+        )), 200
     
 
 @api.route('/authors', endpoint='authors')  # noqa: E501
@@ -154,13 +158,13 @@ class Review(Resource):  # type: ignore
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        result_dict = model_to_dict(
+        result_dict = python_dict_to_json_dict(model_to_dict(
             sqlalchemy_model=result,
             paths=[
                 'books',
                 'review',
             ],
-        )
+        ))
 
         return result_dict
 
@@ -179,11 +183,11 @@ class Books(Resource):  # type: ignore
             .first()  # noqa: E501
         if result is None:
             abort(404)
-        result_dict = model_to_dict(
+        result_dict = python_dict_to_json_dict(model_to_dict(
             sqlalchemy_model=result,
             paths=[
                 'books',
             ],
-        )
+        ))
 
         return result_dict
