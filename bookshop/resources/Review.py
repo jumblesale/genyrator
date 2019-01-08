@@ -126,7 +126,17 @@ class ReviewResource(Resource):  # type: ignore
 @api.route('/reviews', endpoint='reviews')  # noqa: E501
 class ManyReviewResource(Resource):  # type: ignore
     def get(self):
-        result = Review.query.all()
+        query = Review.query
+        param_review_id = request.args.get('review_id')
+        if param_review_id:
+            query = query.filter_by(review_id=param_review_id)
+        param_text = request.args.get('text')
+        if param_text:
+            query = query.filter_by(text=param_text)
+        param_book_id = request.args.get('book_id')
+        if param_book_id:
+            query = query.filter_by(book_id=param_book_id)
+        result = query.all()
         urls = [
             url_for(
                 'review_by_id',

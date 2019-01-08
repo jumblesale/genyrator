@@ -55,6 +55,13 @@ def step_impl(context, entity_type: str):
     _put_entity(context, entity_type, f'{entity_type}_entity', {})
 
 
+@given('I put an example set of books')
+def step_impl(context):
+    _put_entity(context, 'book', 'book1', {'name': 'Wind in the Willows', 'rating': 3.2})
+    _put_entity(context, 'book', 'book2', {'name': 'Jungle Book', 'rating': 4.6})
+    _put_entity(context, 'book', 'book3', {'name': 'Peter Rabbit', 'rating': 3.2})
+
+
 @given('I put an example "{entity_type}" entity called "{entity_name}" with a "favouriteAuthorId" from "{target_entity}"')
 def step_impl(context, entity_type: str, entity_name: str, target_entity: str):
     extras = {
@@ -100,6 +107,21 @@ def step_impl(context):
     response = make_request(client=context.client, endpoint=f'book-genre/{book_genre_uuid}',
                             method='put', data=book_genre_entity)
     assert_that(response.status_code, equal_to(201))
+
+
+@when('I list "{entity_type}" filtered by "{parameters}"')
+def step_impl(context, entity_type: str, parameters: str):
+    context.response = make_request(
+        client=context.client,
+        endpoint=entity_type,
+        method='get',
+        parameters=parameters,
+    )
+
+
+@then('I have "{count}" results')
+def step_impl(context, count: str):
+    assert_that(len(context.response.json['links']), int(count))
 
 
 @then('I can see that genre in the response from "{url}"')

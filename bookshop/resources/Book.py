@@ -132,7 +132,29 @@ class BookResource(Resource):  # type: ignore
 @api.route('/books', endpoint='books')  # noqa: E501
 class ManyBookResource(Resource):  # type: ignore
     def get(self):
-        result = Book.query.all()
+        query = Book.query
+        param_book_id = request.args.get('book_id')
+        if param_book_id:
+            query = query.filter_by(book_id=param_book_id)
+        param_name = request.args.get('name')
+        if param_name:
+            query = query.filter_by(name=param_name)
+        param_rating = request.args.get('rating')
+        if param_rating:
+            query = query.filter_by(rating=param_rating)
+        param_author_id = request.args.get('author_id')
+        if param_author_id:
+            query = query.filter_by(author_id=param_author_id)
+        param_collaborator_id = request.args.get('collaborator_id')
+        if param_collaborator_id:
+            query = query.filter_by(collaborator_id=param_collaborator_id)
+        param_published = request.args.get('published')
+        if param_published:
+            query = query.filter_by(published=param_published)
+        param_created = request.args.get('created')
+        if param_created:
+            query = query.filter_by(created=param_created)
+        result = query.all()
         urls = [
             url_for(
                 'book_by_id',
