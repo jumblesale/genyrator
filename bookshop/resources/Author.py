@@ -129,7 +129,20 @@ class AuthorResource(Resource):  # type: ignore
 @api.route('/authors', endpoint='authors')  # noqa: E501
 class ManyAuthorResource(Resource):  # type: ignore
     def get(self):
-        result = Author.query.all()
+        query = Author.query
+        param_author_id = request.args.get('author_id')
+        if param_author_id:
+            query = query.filter_by(author_id=param_author_id)
+        param_name = request.args.get('name')
+        if param_name:
+            query = query.filter_by(name=param_name)
+        param_favourite_author_id = request.args.get('favourite_author_id')
+        if param_favourite_author_id:
+            query = query.filter_by(favourite_author_id=param_favourite_author_id)
+        param_hated_author_id = request.args.get('hated_author_id')
+        if param_hated_author_id:
+            query = query.filter_by(hated_author_id=param_hated_author_id)
+        result = query.all()
         urls = [
             url_for(
                 'author_by_id',

@@ -127,7 +127,17 @@ class BookGenreResource(Resource):  # type: ignore
 @api.route('/book-genres', endpoint='book_genres')  # noqa: E501
 class ManyBookGenreResource(Resource):  # type: ignore
     def get(self):
-        result = BookGenre.query.all()
+        query = BookGenre.query
+        param_book_genre_id = request.args.get('book_genre_id')
+        if param_book_genre_id:
+            query = query.filter_by(book_genre_id=param_book_genre_id)
+        param_book_id = request.args.get('book_id')
+        if param_book_id:
+            query = query.filter_by(book_id=param_book_id)
+        param_genre_id = request.args.get('genre_id')
+        if param_genre_id:
+            query = query.filter_by(genre_id=param_genre_id)
+        result = query.all()
         urls = [
             url_for(
                 'book_genre_by_id',

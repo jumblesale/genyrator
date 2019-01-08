@@ -159,7 +159,13 @@ class Many{{ entity.class_name }}Resource(Resource):  # type: ignore
     {%- if entity.supports_get_all %}
     def get(self):
         {%- if entity.supports_get_one %}
-        result = {{ entity.class_name }}.query.all()
+        query = {{ entity.class_name }}.query
+        {%- for column in entity.columns %}
+        param_{{ column.python_name }} = request.args.get('{{ column.python_name }}')
+        if param_{{ column.python_name }}:
+            query = query.filter_by({{ column.python_name }}=param_{{ column.python_name }})
+        {%- endfor %}
+        result = query.all()
         urls = [
             url_for(
                 '{{ get_one_endpoint }}',

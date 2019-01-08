@@ -127,7 +127,17 @@ class RelatedBookResource(Resource):  # type: ignore
 @api.route('/related-books', endpoint='related_books')  # noqa: E501
 class ManyRelatedBookResource(Resource):  # type: ignore
     def get(self):
-        result = RelatedBook.query.all()
+        query = RelatedBook.query
+        param_related_book_uuid = request.args.get('related_book_uuid')
+        if param_related_book_uuid:
+            query = query.filter_by(related_book_uuid=param_related_book_uuid)
+        param_book1_id = request.args.get('book1_id')
+        if param_book1_id:
+            query = query.filter_by(book1_id=param_book1_id)
+        param_book2_id = request.args.get('book2_id')
+        if param_book2_id:
+            query = query.filter_by(book2_id=param_book2_id)
+        result = query.all()
         urls = [
             url_for(
                 'related_book_by_id',
