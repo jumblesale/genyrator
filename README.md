@@ -79,3 +79,7 @@ schema = create_schema(
 # Write out all files for the app
 schema.write_files()
 ```
+
+## Deploying
+
+Bump the version in `setup.py` then run `make deploy`.
