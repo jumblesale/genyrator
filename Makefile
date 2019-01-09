@@ -16,4 +16,8 @@ pep8:
 bookshop-build:
 	pipenv run python bookshop.py
 
+
+deploy:
+	bash deploy.sh
+
 .PHONY: deps test behave pep8 bookshop-build
