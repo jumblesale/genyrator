@@ -18,6 +18,6 @@ bookshop-build:
 
 
 deploy:
-	bash deploy.sh
+	pipenv run bash deploy.sh
 
 .PHONY: deps test behave pep8 bookshop-build
