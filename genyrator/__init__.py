@@ -1,4 +1,8 @@
 # flake8: noqa
+
+__version__ = '0.0.139'
+
+
 from genyrator.entities.Column import (
     Column,
     IdentifierColumn,
