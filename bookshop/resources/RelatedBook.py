@@ -124,7 +124,7 @@ class RelatedBookResource(Resource):  # type: ignore
         )), 200
     
 
-@api.route('/related_book', endpoint='related_books')  # noqa: E501
+@api.route('/related-book', endpoint='related_books')  # noqa: E501
 class ManyRelatedBookResource(Resource):  # type: ignore
     def get(self):
         query = RelatedBook.query

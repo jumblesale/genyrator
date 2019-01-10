@@ -154,7 +154,7 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
 {%- endif -%}{# single class -#}
 {%- if entity.supports_get_all or entity.supports_delete_all or entity.supports_post %}
 
-@api.route('/{{ entity.python_name }}', endpoint='{{ entity.resource_namespace }}')  # noqa: E501
+@api.route('/{{ entity.dashed_name }}', endpoint='{{ entity.resource_namespace }}')  # noqa: E501
 class Many{{ entity.class_name }}Resource(Resource):  # type: ignore
     {%- if entity.supports_get_all %}
     def get(self):

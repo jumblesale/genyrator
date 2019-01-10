@@ -124,7 +124,7 @@ class BookGenreResource(Resource):  # type: ignore
         )), 200
     
 
-@api.route('/book_genre', endpoint='book_genres')  # noqa: E501
+@api.route('/book-genre', endpoint='book_genres')  # noqa: E501
 class ManyBookGenreResource(Resource):  # type: ignore
     def get(self):
         query = BookGenre.query
