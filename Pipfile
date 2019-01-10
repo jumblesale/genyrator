@@ -4,13 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-attrs = "*"
+attrs = ">=18.1"
+inflection = ">=0.3"
+
+[dev-packages]
 behave = "*"
 flask = "*"
 flask-marshmallow = "*"
 flask-restplus = "*"
 flask-sqlalchemy = "*"
-inflection = "*"
 marshmallow-sqlalchemy = "*"
 pycodestyle = "*"
 pyhamcrest = "*"
@@ -20,8 +22,7 @@ twine = "*"
 mamba = "*"
 expects = "*"
 sqlalchemy-utils = "*"
-
-[dev-packages]
+pipenv = "*"
 
 [requires]
 python_version = "3.6"

@@ -4,3 +4,5 @@ output/
 __pycache__/
 build/
 *.db
+/dist/
+/genyrator.egg-info/
