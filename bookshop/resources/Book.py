@@ -129,7 +129,7 @@ class BookResource(Resource):  # type: ignore
         )), 200
     
 
-@api.route('/books', endpoint='books')  # noqa: E501
+@api.route('/book', endpoint='books')  # noqa: E501
 class ManyBookResource(Resource):  # type: ignore
     def get(self):
         query = Book.query
@@ -155,14 +155,7 @@ class ManyBookResource(Resource):  # type: ignore
         if param_created:
             query = query.filter_by(created=param_created)
         result = query.all()
-        urls = [
-            url_for(
-                'book_by_id',
-                bookId=x.book_id
-            )
-            for x in result
-        ]
-        return {"links": urls}
+        return python_dict_to_json_dict({"data": [model_to_dict(r) for r in result]})
 
     def post(self):  # type: ignore
         ...

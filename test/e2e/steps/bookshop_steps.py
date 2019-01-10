@@ -121,7 +121,7 @@ def step_impl(context, entity_type: str, parameters: str):
 
 @then('I have "{count}" results')
 def step_impl(context, count: str):
-    assert_that(len(context.response.json['links']), int(count))
+    assert_that(len(context.response.json['data']), int(count))
 
 
 @then('I can see that genre in the response from "{url}"')

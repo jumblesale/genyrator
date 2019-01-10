@@ -126,7 +126,7 @@ class AuthorResource(Resource):  # type: ignore
         )), 200
     
 
-@api.route('/authors', endpoint='authors')  # noqa: E501
+@api.route('/author', endpoint='authors')  # noqa: E501
 class ManyAuthorResource(Resource):  # type: ignore
     def get(self):
         query = Author.query
@@ -143,14 +143,7 @@ class ManyAuthorResource(Resource):  # type: ignore
         if param_hated_author_id:
             query = query.filter_by(hated_author_id=param_hated_author_id)
         result = query.all()
-        urls = [
-            url_for(
-                'author_by_id',
-                authorId=x.author_id
-            )
-            for x in result
-        ]
-        return {"links": urls}
+        return python_dict_to_json_dict({"data": [model_to_dict(r) for r in result]})
 
     def post(self):  # type: ignore
         ...

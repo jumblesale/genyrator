@@ -123,7 +123,7 @@ class ReviewResource(Resource):  # type: ignore
         )), 200
     
 
-@api.route('/reviews', endpoint='reviews')  # noqa: E501
+@api.route('/review', endpoint='reviews')  # noqa: E501
 class ManyReviewResource(Resource):  # type: ignore
     def get(self):
         query = Review.query
@@ -137,14 +137,7 @@ class ManyReviewResource(Resource):  # type: ignore
         if param_book_id:
             query = query.filter_by(book_id=param_book_id)
         result = query.all()
-        urls = [
-            url_for(
-                'review_by_id',
-                reviewId=x.review_id
-            )
-            for x in result
-        ]
-        return {"links": urls}
+        return python_dict_to_json_dict({"data": [model_to_dict(r) for r in result]})
 
     def post(self):  # type: ignore
         ...

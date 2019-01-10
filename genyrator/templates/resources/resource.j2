@@ -154,7 +154,7 @@ class {{ entity.class_name }}Resource(Resource):  # type: ignore
 {%- endif -%}{# single class -#}
 {%- if entity.supports_get_all or entity.supports_delete_all or entity.supports_post %}
 
-@api.route('/{{ entity.dashed_plural }}', endpoint='{{ entity.resource_namespace }}')  # noqa: E501
+@api.route('/{{ entity.python_name }}', endpoint='{{ entity.resource_namespace }}')  # noqa: E501
 class Many{{ entity.class_name }}Resource(Resource):  # type: ignore
     {%- if entity.supports_get_all %}
     def get(self):
@@ -166,14 +166,7 @@ class Many{{ entity.class_name }}Resource(Resource):  # type: ignore
             query = query.filter_by({{ column.python_name }}=param_{{ column.python_name }})
         {%- endfor %}
         result = query.all()
-        urls = [
-            url_for(
-                '{{ get_one_endpoint }}',
-                {{ identifier_column.json_property_name }}=x.{{ identifier_column.python_name }}
-            )
-            for x in result
-        ]
-        return {"links": urls}
+        return python_dict_to_json_dict({"data": [model_to_dict(r) for r in result]})
         {%- else %}
         ...
         {%- endif %}
