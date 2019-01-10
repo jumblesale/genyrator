@@ -122,7 +122,7 @@ class GenreResource(Resource):  # type: ignore
         )), 200
     
 
-@api.route('/genres', endpoint='genres')  # noqa: E501
+@api.route('/genre', endpoint='genres')  # noqa: E501
 class ManyGenreResource(Resource):  # type: ignore
     def get(self):
         query = Genre.query
@@ -133,14 +133,7 @@ class ManyGenreResource(Resource):  # type: ignore
         if param_title:
             query = query.filter_by(title=param_title)
         result = query.all()
-        urls = [
-            url_for(
-                'genre_by_id',
-                genreId=x.genre_id
-            )
-            for x in result
-        ]
-        return {"links": urls}
+        return python_dict_to_json_dict({"data": [model_to_dict(r) for r in result]})
 
     def post(self):  # type: ignore
         ...

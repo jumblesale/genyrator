@@ -22,7 +22,7 @@ Feature: performing operations on a simple schema
     """
 
   Scenario: requesting a non-existing entity
-     When I make a "GET" request to "/book-store" with parameters "id=1"
+     When I make a "GET" request to "/book-store/1"
      Then I get http status "404"
 
   Scenario: creating a new entity with correct data
