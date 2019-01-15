@@ -25,3 +25,4 @@ class {{ entity.class_name }}Factory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session = db.session
 
     {{ entity.identifier_column.python_name }} = factory.Faker('{{ entity.identifier_column.faker_method }}')
+

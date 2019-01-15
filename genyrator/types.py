@@ -116,3 +116,17 @@ def type_option_to_default_value(type_option: TypeOption) -> str:
         TypeOption.date:     '"1970-01-01T00:00"',
         TypeOption.UUID:     '"00000000-0000-0000-0000-000000000000"',
     }[type_option]
+
+
+def type_option_to_faker_method(type_option: TypeOption) -> str:
+    return {
+        TypeOption.string:   'pystring',
+        TypeOption.float:    'pyfloat',
+        TypeOption.int:      'pyint',
+        TypeOption.bool:     'pybool',
+        TypeOption.dict:     'pydict',
+        TypeOption.list:     'pylist',
+        TypeOption.datetime: 'date_time_this_decade',
+        TypeOption.date:     'date_this_year',
+        TypeOption.UUID:     'uuid4',
+    }[type_option]
