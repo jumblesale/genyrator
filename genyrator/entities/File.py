@@ -9,6 +9,7 @@ FileList = NamedTuple('FileList', [
     ('root_files',       List['File']),
     ('core',             List['File']),
     ('db_models',        List['File']),
+    ('fixtures',         List['File']),
     ('db_init',          List['File']),
     ('domain_models',    List['File']),
     ('resources',        List['File']), ])

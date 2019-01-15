@@ -8,6 +8,7 @@ TemplateConfig = NamedTuple('TemplateConfig', [
     ('core',          List[Template.Template]),
     ('db_init',       List[Template.Template]),
     ('db_models',     List[Template.Template]),
+    ('fixtures',      List[Template.Template]),
     ('domain_models', List[Template.Template]),
     ('resources',     List[Template.Template]), ])
 
@@ -53,6 +54,14 @@ def create_template_config(
             module_name=module_name, db_import_path=db_import_path,
         ),
     ]
+    fixtures = [
+        create_template(Template.Template, ['sqlalchemy', 'fixture', '__init__']),
+        *[create_template(
+            Template.Fixture, ['sqlalchemy', 'fixture', 'fixture'], module_name=module_name,
+            db_import_path=db_import_path, out_path=Template.OutPath((['sqlalchemy', 'fixture'], entity.class_name)),
+            entity=entity,
+        ) for entity in entities]
+    ]
     domain_models = [
         create_template(Template.Template, ['domain', 'types']),
         *[create_template(
@@ -82,6 +91,7 @@ def create_template_config(
         core=core_files,
         db_init=db_init,
         db_models=db_models,
+        fixtures=fixtures,
         domain_models=domain_models,
         resources=resources,
     )

@@ -37,3 +37,4 @@ tqdm==4.24.0
 twine==1.11.0
 urllib3==1.23
 werkzeug==0.14.1
+factory_boy==2.11.1

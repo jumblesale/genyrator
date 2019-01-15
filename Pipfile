@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 attrs = ">=18.1"
 inflection = ">=0.3"
+factory-boy = "*"
 
 [dev-packages]
 behave = "*"
