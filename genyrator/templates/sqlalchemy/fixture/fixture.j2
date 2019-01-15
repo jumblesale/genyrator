@@ -1,17 +1,3 @@
-{%- set entity = template.entity -%}
-{%- if   entity.identifier_column.type_option.value == 'UUID' -%}
-{%- set id_column_constructor = "factory.Faker('uuid4')" -%}
-{%- elif entity.identifier_column.type_option.value == 'string' -%}
-{%- set id_column_constructor = "factory.Faker('uuid4')" -%}
-{%- elif entity.identifier_column.type_option.value == 'int' -%}
-{%- set id_column_constructor = "factory.Faker('pyint')" -%}
-{%- elif entity.identifier_column.type_option.value == 'float' %}
-{%- set id_column_constructor = "factory.Faker('pyfloat')" -%}
-{%- elif entity.identifier_column.type_option.value == 'date' -%}
-{%- set id_column_constructor = "factory.Faker('date_this_year')" -%}
-{%- elif entity.identifier_column.type_option.value == 'datetime' -%}
-{%- set id_column_constructor = "factory.Faker('date_time_this_decade')" -%}
-{%- endif -%}
 import factory
 import uuid
 
