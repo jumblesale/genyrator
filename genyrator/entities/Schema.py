@@ -32,6 +32,10 @@ class Schema(object):
         for model in self.files.db_models:
             model.write()
 
+    def write_fixtures(self):
+        for model in self.files.fixtures:
+            model.write()
+
     def write_core_files(self):
         for core_file in self.files.core:
             core_file.write()

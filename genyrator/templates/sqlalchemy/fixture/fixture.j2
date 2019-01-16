@@ -1,6 +1,5 @@
 {%- set entity = template.entity -%}
 import factory
-import uuid
 
 from {{ template.db_import_path }} import db
 from {{ template.module_name }}.sqlalchemy.model.{{ entity.class_name }} import {{ entity.class_name }}
@@ -12,4 +11,10 @@ class {{ entity.class_name }}Factory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session = db.session
 
     {{ entity.identifier_column.python_name }} = factory.Faker('{{ entity.identifier_column.faker_method }}')
+    {%- for column in entity.columns %}
+        {%- if column.python_name != entity.identifier_column.python_name and
+               column.faker_method is not none %}
+    {{ column.python_name }} = factory.Faker('{{ column.faker_method }}')
+        {%- endif %}
+    {%- endfor %}
 
