@@ -229,14 +229,13 @@ def step_impl(context):
     """)
 
 
-@when('I create a fixture for the "{entity_name}" entity with values')
+@when('I create a fixture for the "{entity_name}" entity')
 def step_impl(context, entity_name: str):
     fixture_module_name = f'{context.module_name}.sqlalchemy.fixture.{entity_name}'
     fixture_module = importlib.import_module(fixture_module_name)
     fixture = getattr(fixture_module, f'{entity_name}Factory')
-    args = json.loads(context.text)
     with context.app.app_context():
-        fixture.create(**args)
+        instance = fixture.create()
         context.generated_module.db.session.commit()
 
 

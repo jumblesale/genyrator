@@ -120,7 +120,7 @@ def type_option_to_default_value(type_option: TypeOption) -> str:
 
 def type_option_to_faker_method(type_option: TypeOption) -> str:
     return {
-        TypeOption.string:   'pystring',
+        TypeOption.string:   'pystr',
         TypeOption.float:    'pyfloat',
         TypeOption.int:      'pyint',
         TypeOption.bool:     'pybool',

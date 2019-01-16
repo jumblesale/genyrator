@@ -75,7 +75,8 @@ def create_column(
                                   None the result will be a `ForeignKey`.
 
         faker_method: The method to pass to Faker to provide fixture data for this column.
-                      Defaults to the constructor for the type of this column
+                      If this column is not nullable, defaults to the constructor for the type
+                      of this column.
     """
     if identifier is True:
         constructor = IdentifierColumn
@@ -83,6 +84,10 @@ def create_column(
         constructor = ForeignKey
     else:
         constructor = Column
+
+    if faker_method is None and nullable is False:
+        faker_method = type_option_to_faker_method(type_option)
+
     args = {
         "python_name":        pythonize(name),
         "class_name":         to_class_name(name),
@@ -96,7 +101,7 @@ def create_column(
         "index":              index,
         "nullable":           nullable,
         "alias":              alias,
-        "faker_method":       type_option_to_faker_method(type_option),
+        "faker_method":       faker_method,
     }
     if foreign_key_relationship is not None:
         args['relationship'] = '{}.{}'.format(
@@ -110,8 +115,9 @@ def create_column(
 
 
 def create_identifier_column(
-        name:        str,
-        type_option: TypeOption,
+        name:         str,
+        type_option:  TypeOption,
+        faker_method: Optional[str] = None,
 ) -> IdentifierColumn:
     """Return an identifier column for an entity
 
@@ -121,11 +127,15 @@ def create_identifier_column(
     This identifier column is always unique, indexed and non-nullable.
 
     Args:
-        name:        The property name on the SQLAlchemy model.
-        type_option: The type of the column.
+        name:         The property name on the SQLAlchemy model.
+        type_option:  The type of the column.
+        faker_method: The faker method to use when creating this column in fixtures.
+                      Cannot be None so if not supplied, translates the type to a sensible
+                      default.
     """
+    faker_method = faker_method if faker_method is not None else type_option_to_faker_method(type_option)
     column: IdentifierColumn = create_column(
         name=name, type_option=type_option, index=True, nullable=False,
-        identifier=True,
+        identifier=True, faker_method=faker_method,
     )
     return column
