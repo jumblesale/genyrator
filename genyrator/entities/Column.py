@@ -4,8 +4,8 @@ from genyrator.inflector import pythonize, to_class_name, to_json_case, humanize
 from genyrator.types import (
     SqlAlchemyTypeOption, PythonTypeOption, TypeOption, type_option_to_sqlalchemy_type,
     type_option_to_python_type, type_option_to_default_value, RestplusTypeOption,
-    type_option_to_restplus_type
-)
+    type_option_to_restplus_type,
+    type_option_to_faker_method)
 
 ForeignKeyRelationship = NamedTuple(
     'ForeignKeyRelationship', [
@@ -22,6 +22,7 @@ class Column(object):
     alias:              str =                  attr.ib()
     json_property_name: str =                  attr.ib()
     type_option:        TypeOption =           attr.ib()
+    faker_method:       str =                  attr.ib()
     sqlalchemy_type:    SqlAlchemyTypeOption = attr.ib()
     python_type:        PythonTypeOption =     attr.ib()
     restplus_type:      RestplusTypeOption =   attr.ib()
@@ -50,6 +51,7 @@ def create_column(
         display_name:             Optional[str] = None,
         alias:                    Optional[str] = None,
         foreign_key_relationship: Optional[ForeignKeyRelationship] = None,
+        faker_method:             Optional[str] = None,
 ) -> Union[Column, ForeignKey]:
     """Return a column to be attached to an entity
 
@@ -71,6 +73,9 @@ def create_column(
 
         foreign_key_relationship: The entity this column relates. If this is not
                                   None the result will be a `ForeignKey`.
+
+        faker_method: The method to pass to Faker to provide fixture data for this column.
+                      Defaults to the constructor for the type of this column
     """
     if identifier is True:
         constructor = IdentifierColumn
@@ -91,6 +96,7 @@ def create_column(
         "index":              index,
         "nullable":           nullable,
         "alias":              alias,
+        "faker_method":       type_option_to_faker_method(type_option),
     }
     if foreign_key_relationship is not None:
         args['relationship'] = '{}.{}'.format(

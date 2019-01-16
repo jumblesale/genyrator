@@ -1,0 +1,15 @@
+{%- set entity = template.entity -%}
+import factory
+import uuid
+
+from {{ template.db_import_path }} import db
+from {{ template.module_name }}.sqlalchemy.model.{{ entity.class_name }} import {{ entity.class_name }}
+
+
+class {{ entity.class_name }}Factory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = {{ entity.class_name }}
+        sqlalchemy_session = db.session
+
+    {{ entity.identifier_column.python_name }} = factory.Faker('{{ entity.identifier_column.faker_method }}')
+

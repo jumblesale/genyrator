@@ -227,3 +227,24 @@ def step_impl(context):
           | test_name | test  |
           | test_id   | 3     |
     """)
+
+
+@when('I create a fixture for the "{entity_name}" entity with values')
+def step_impl(context, entity_name: str):
+    fixture_module_name = f'{context.module_name}.sqlalchemy.fixture.{entity_name}'
+    fixture_module = importlib.import_module(fixture_module_name)
+    fixture = getattr(fixture_module, f'{entity_name}Factory')
+    args = json.loads(context.text)
+    with context.app.app_context():
+        fixture.create(**args)
+        context.generated_module.db.session.commit()
+
+
+@then('the db contains "{count}" "{model_name}" entity')
+def step_impl(context, count: str, model_name: str):
+    model_module_name = f'{context.module_name}.sqlalchemy.model.{model_name}'
+    model_module = importlib.import_module(model_module_name)
+    model = getattr(model_module, model_name)
+    with context.app.app_context():
+        result = model.query.all()
+        assert_that(len(result), equal_to(int(count)))
