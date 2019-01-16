@@ -1,5 +1,4 @@
 import factory
-import uuid
 
 from bookshop.sqlalchemy import db
 from bookshop.sqlalchemy.model.RelatedBook import RelatedBook
