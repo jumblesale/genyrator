@@ -28,7 +28,6 @@ from {{ template.db_import_path }} import db
 from {{ template.module_name }}.sqlalchemy.convert_properties import (
     convert_properties_to_sqlalchemy_properties, convert_sqlalchemy_properties_to_dict_properties
 )
-from {{ template.module_name }}.sqlalchemy.join_entities import create_joined_entity_map
 from {{ template.module_name }}.schema import {{ entity.class_name }}Schema
 from {{ template.module_name }}.sqlalchemy.model_to_dict import model_to_dict
 from {{ template.module_name }}.sqlalchemy.convert_dict_to_marshmallow_result import convert_dict_to_marshmallow_result
