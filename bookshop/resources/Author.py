@@ -14,7 +14,6 @@ from bookshop.sqlalchemy.model import Author
 from bookshop.sqlalchemy.convert_properties import (
     convert_properties_to_sqlalchemy_properties, convert_sqlalchemy_properties_to_dict_properties
 )
-from bookshop.sqlalchemy.join_entities import create_joined_entity_map
 from bookshop.schema import AuthorSchema
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
 from bookshop.sqlalchemy.convert_dict_to_marshmallow_result import convert_dict_to_marshmallow_result
