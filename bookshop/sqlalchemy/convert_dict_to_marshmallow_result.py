@@ -8,7 +8,7 @@ from bookshop.sqlalchemy import db
 from bookshop.core.convert_dict import json_dict_to_python_dict
 from bookshop.domain.types import DomainModel
 from bookshop.sqlalchemy.convert_properties import convert_properties_to_sqlalchemy_properties
-from bookshop.sqlalchemy.join_entities import create_joined_entity_map
+from bookshop.sqlalchemy.join_entities import create_joined_entity_id_map
 
 
 def convert_dict_to_marshmallow_result(
@@ -27,17 +27,17 @@ def convert_dict_to_marshmallow_result(
     if patch_data is not None:
         data = {**data, **patch_data}
 
-    joined_entities_or_errors = create_joined_entity_map(
+    joined_entity_ids_or_errors = create_joined_entity_id_map(
         domain_model,
         data,
     )
 
-    if isinstance(joined_entities_or_errors, list):
-        return joined_entities_or_errors
+    if isinstance(joined_entity_ids_or_errors, list):
+        return joined_entity_ids_or_errors
 
     data = convert_properties_to_sqlalchemy_properties(
         domain_model,
-        joined_entities_or_errors,
+        joined_entity_ids_or_errors,
         json_dict_to_python_dict(data),
     )
 

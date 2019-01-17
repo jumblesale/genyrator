@@ -7,7 +7,7 @@ from {{ template.module_name }}.domain.types import DomainModel
 
 def convert_properties_to_sqlalchemy_properties(
         model:           DomainModel,
-        joined_entities: Mapping[str, DeclarativeMeta],
+        joined_entities: Mapping[str, int],
         data:            Mapping[str, Any],
 ) -> Mapping[str, Any]:
     result = {}
@@ -17,7 +17,7 @@ def convert_properties_to_sqlalchemy_properties(
             result[model.identifier_column_name] = data[k]
         elif k in joined_entities:
             entity = joined_entities[k]
-            result[model.external_identifier_map[k].source_foreign_key_column] = getattr(entity, 'id')
+            result[model.external_identifier_map[k].source_foreign_key_column] = entity
         else:
             result[k] = v
     return result
