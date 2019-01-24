@@ -1,4 +1,4 @@
-from typing import List, Optional, NewType, Tuple, NamedTuple
+from typing import List, Optional, NewType, Tuple, NamedTuple, Type
 import attr
 from jinja2 import Template as JinjaTemplate, StrictUndefined
 
@@ -102,6 +102,7 @@ class Resource(Template):
     db_import_path:    str =    attr.ib()
     entity:            Entity = attr.ib()
     restplus_template: str =    attr.ib()
+    TypeOption:        Type =   attr.ib()
 
 
 @attr.s

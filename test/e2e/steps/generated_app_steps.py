@@ -164,6 +164,16 @@ def step_impl(context: Any, method: str, path: str):
 
 @step('I can get entity "{path}"')
 def step_impl(context, path: str):
+    _i_can_get_entity(context, path)
+
+
+@step('I can get entity "{path_template}" using that response data')
+def stemp_impl(context, path_template: str):
+    path = path_template.format(**context.response.json)
+    _i_can_get_entity(context, path)
+
+
+def _i_can_get_entity(context, path: str):
     context.response = response = make_request(context.client, path, 'get')
     assert_that(response.status_code, equal_to(200))
 
@@ -177,6 +187,15 @@ def step_impl(context, path: str):
 def step_impl(context):
     response_data = context.response.json
     original_data = context.data
+    assert_that(response_data, equal_to(original_data))
+
+
+@step('that response matches the original data plus "{id_field}"')
+def step_impl(context, id_field: str):
+    response_data = context.response.json
+    original_data = context.data
+    original_data[id_field] = response_data[id_field]
+
     assert_that(response_data, equal_to(original_data))
 
 
