@@ -1,4 +1,5 @@
 import json
+import uuid
 from typing import Optional
 
 from flask import request, abort, url_for
@@ -145,7 +146,22 @@ class ManyAuthorResource(Resource):  # type: ignore
         return python_dict_to_json_dict({"data": [model_to_dict(r) for r in result]})
 
     def post(self):  # type: ignore
-        ...
+        data = request.get_json(force=True)
+        if not isinstance(data, dict):
+            return abort(400)
+
+        data['authorId'] = uuid.uuid4()
+
+        marshmallow_result = author_schema.load(json_dict_to_python_dict(data), session=db.session)
+        if marshmallow_result.errors:
+            abort(400, marshmallow_result.errors)
+
+        db.session.add(marshmallow_result.data)
+        db.session.commit()
+
+        return python_dict_to_json_dict(model_to_dict(
+            marshmallow_result.data,
+        )), 201
 
 
 @api.route('/author/<authorId>/books/reviews', endpoint='books-review')  # noqa: E501
