@@ -2,6 +2,7 @@ from typing import List, NamedTuple
 from genyrator import Entity
 import genyrator.entities.Template as Template
 from genyrator.entities.Template import create_template
+from genyrator.types import TypeOption
 
 TemplateConfig = NamedTuple('TemplateConfig', [
     ('root_files',    List[Template.Template]),
@@ -79,7 +80,8 @@ def create_template_config(
             db_import_path=db_import_path, module_name=module_name,
             restplus_template=create_template(
                 Template.RestplusModel, ['resources', 'restplus_model'], entity=entity
-            ).render()
+            ).render(),
+            TypeOption=TypeOption,
         ) for entity in entities],
         create_template(
             Template.ResourcesInit, ['resources', '__init__'], entities=entities,
