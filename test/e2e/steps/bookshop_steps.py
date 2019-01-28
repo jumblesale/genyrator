@@ -96,16 +96,20 @@ def _put_entity(context, entity_type: str, entity_name: str, extras: Mapping[str
     assert_that(response.status_code, equal_to(201))
 
 
-@when('I put a "book_genre" join entity')
-def step_impl(context):
+@when('I "{verb}" a "book_genre" join entity')
+def step_impl(context, verb):
     book_uuid =  context.book_entity['id']
     genre_uuid = context.genre_entity['id']
     book_genre_entity = generate_example_book_genre(
         book_uuid=book_uuid, genre_uuid=genre_uuid,
     )
     context.book_genre_uuid = book_genre_uuid = book_genre_entity['id']
-    response = make_request(client=context.client, endpoint=f'book-genre/{book_genre_uuid}',
-                            method='put', data=book_genre_entity)
+    if verb.lower() == 'put':
+        response = make_request(client=context.client, endpoint=f'book-genre/{book_genre_uuid}',
+                                method=verb, data=book_genre_entity)
+    elif verb.lower() == 'post':
+        response = make_request(client=context.client, endpoint=f'book-genre',
+                                method=verb, data=book_genre_entity)
     assert_that(response.status_code, equal_to(201))
 
 

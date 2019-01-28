@@ -6,7 +6,7 @@ Feature: Posting new entities with foreign keys
   Scenario: Putting a join entity
     Given I put an example "book" entity
       And I put an example "genre" entity
-     When I put a "book_genre" join entity
+     When I "put" a "book_genre" join entity
      Then I can see that genre in the response from "book/{id}/genres"
 
   Scenario: Putting a join entity where the join does not exist
@@ -31,3 +31,10 @@ Feature: Posting new entities with foreign keys
       And I patch that "book" entity with that "author" id
      When I patch that "book" entity to set "name" to "dave dave dave: the dave story"
      Then I can see that "book" has "name" set to "dave dave dave: the dave story"
+
+  Scenario: POSTing a join entity
+    Given I put an example "book" entity
+      And I put an example "genre" entity
+     When I "post" a "book_genre" join entity
+     Then I can see that genre in the response from "book/{id}/genres"
+
