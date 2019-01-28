@@ -192,7 +192,7 @@ class Many{{ entity.class_name }}Resource(Resource):  # type: ignore
             domain_model={{ template.entity.python_name }}_domain_model,
             sqlalchemy_model={{ entity.class_name }},
             schema={{ entity.python_name }}_schema,
-            )
+        )
 
         if isinstance(marshmallow_schema_or_errors, list):
             abort(400, marshmallow_schema_or_errors)
