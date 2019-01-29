@@ -11,7 +11,7 @@ mamba:
 	pipenv run mamba test
 
 pep8:
-	pipenv run pycodestyle
+	pipenv run pycodestyle genyrator
 
 bookshop-build:
 	pipenv run python bookshop.py

@@ -147,13 +147,23 @@ class ManyBookGenreResource(Resource):  # type: ignore
 
         data['bookGenreId'] = uuid.uuid4()
 
-        marshmallow_result = book_genre_schema.load(json_dict_to_python_dict(data), session=db.session)
-        if marshmallow_result.errors:
-            abort(400, marshmallow_result.errors)
+        marshmallow_schema_or_errors = convert_dict_to_marshmallow_result(
+            data=data,
+            identifier=data['bookGenreId'],
+            identifier_column='book_genre_id',
+            domain_model=book_genre_domain_model,
+            sqlalchemy_model=BookGenre,
+            schema=book_genre_schema,
+        )
 
-        db.session.add(marshmallow_result.data)
+        if isinstance(marshmallow_schema_or_errors, list):
+            abort(400, marshmallow_schema_or_errors)
+        if marshmallow_schema_or_errors.errors:
+            abort(400, marshmallow_schema_or_errors)
+
+        db.session.add(marshmallow_schema_or_errors.data)
         db.session.commit()
 
         return python_dict_to_json_dict(model_to_dict(
-            marshmallow_result.data,
+            marshmallow_schema_or_errors.data,
         )), 201
