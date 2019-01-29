@@ -186,7 +186,7 @@ class Many{{ entity.class_name }}Resource(Resource):  # type: ignore
         {% endif %}
 
         marshmallow_schema_or_errors = convert_dict_to_marshmallow_result(
-            data=json_dict_to_python_dict(data),
+            data=data,
             identifier=data['{{ entity.identifier_column.json_property_name }}'],
             identifier_column='{{ entity.identifier_column.python_name }}',
             domain_model={{ template.entity.python_name }}_domain_model,

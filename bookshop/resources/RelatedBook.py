@@ -148,13 +148,13 @@ class ManyRelatedBookResource(Resource):  # type: ignore
         data['relatedBookUuid'] = uuid.uuid4()
 
         marshmallow_schema_or_errors = convert_dict_to_marshmallow_result(
-            data=json_dict_to_python_dict(data),
+            data=data,
             identifier=data['relatedBookUuid'],
             identifier_column='related_book_uuid',
             domain_model=related_book_domain_model,
             sqlalchemy_model=RelatedBook,
             schema=related_book_schema,
-            )
+        )
 
         if isinstance(marshmallow_schema_or_errors, list):
             abort(400, marshmallow_schema_or_errors)

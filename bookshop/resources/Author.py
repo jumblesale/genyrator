@@ -153,13 +153,13 @@ class ManyAuthorResource(Resource):  # type: ignore
         data['authorId'] = uuid.uuid4()
 
         marshmallow_schema_or_errors = convert_dict_to_marshmallow_result(
-            data=json_dict_to_python_dict(data),
+            data=data,
             identifier=data['authorId'],
             identifier_column='author_id',
             domain_model=author_domain_model,
             sqlalchemy_model=Author,
             schema=author_schema,
-            )
+        )
 
         if isinstance(marshmallow_schema_or_errors, list):
             abort(400, marshmallow_schema_or_errors)

@@ -143,13 +143,13 @@ class ManyGenreResource(Resource):  # type: ignore
         data['genreId'] = uuid.uuid4()
 
         marshmallow_schema_or_errors = convert_dict_to_marshmallow_result(
-            data=json_dict_to_python_dict(data),
+            data=data,
             identifier=data['genreId'],
             identifier_column='genre_id',
             domain_model=genre_domain_model,
             sqlalchemy_model=Genre,
             schema=genre_schema,
-            )
+        )
 
         if isinstance(marshmallow_schema_or_errors, list):
             abort(400, marshmallow_schema_or_errors)

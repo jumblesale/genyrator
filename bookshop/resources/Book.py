@@ -165,13 +165,13 @@ class ManyBookResource(Resource):  # type: ignore
         data['bookId'] = uuid.uuid4()
 
         marshmallow_schema_or_errors = convert_dict_to_marshmallow_result(
-            data=json_dict_to_python_dict(data),
+            data=data,
             identifier=data['bookId'],
             identifier_column='book_id',
             domain_model=book_domain_model,
             sqlalchemy_model=Book,
             schema=book_schema,
-            )
+        )
 
         if isinstance(marshmallow_schema_or_errors, list):
             abort(400, marshmallow_schema_or_errors)

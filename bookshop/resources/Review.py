@@ -147,13 +147,13 @@ class ManyReviewResource(Resource):  # type: ignore
         data['reviewId'] = uuid.uuid4()
 
         marshmallow_schema_or_errors = convert_dict_to_marshmallow_result(
-            data=json_dict_to_python_dict(data),
+            data=data,
             identifier=data['reviewId'],
             identifier_column='review_id',
             domain_model=review_domain_model,
             sqlalchemy_model=Review,
             schema=review_schema,
-            )
+        )
 
         if isinstance(marshmallow_schema_or_errors, list):
             abort(400, marshmallow_schema_or_errors)

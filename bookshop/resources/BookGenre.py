@@ -154,7 +154,7 @@ class ManyBookGenreResource(Resource):  # type: ignore
             domain_model=book_genre_domain_model,
             sqlalchemy_model=BookGenre,
             schema=book_genre_schema,
-            )
+        )
 
         if isinstance(marshmallow_schema_or_errors, list):
             abort(400, marshmallow_schema_or_errors)
