@@ -85,7 +85,7 @@ Feature: performing operations on a simple schema
         "chapters": [
           {"title": "chapter 1", "summary": "not very much happens"},
           {"title": "chapter 2", "summary": "our hero enters the forest", "my_notes": "trite"},
-          {"title": "chapter 3", "summary": "our hero returns with the boon to humanity", "rating": 3.1}
+          {"title": "chapter 3", "summary": "our hero returns with the boon to humanity", "myRating": 3.1}
         ]
       }
     }
