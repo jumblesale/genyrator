@@ -44,7 +44,9 @@ def json_dict_to_python_dict(json_dict: Mapping[str, Any]) -> Mapping[str, Any]:
 
 
 def dict_value_to_json_value(param: Any, fn: Callable[[str], str]) -> Any:
-    if isinstance(param, dict):
+    if isinstance(param, UserJson):
+        return param
+    elif isinstance(param, dict):
         return convert_dict_naming(param, fn)
     elif isinstance(param, (list, set)):
         return convert_iterable_naming(param, fn)
