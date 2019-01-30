@@ -40,5 +40,6 @@ setup(
     install_requires=[
         'attrs>=18.1',
         'inflection>=0.3',
+        'sqlalchemy==1.3.0b2',
     ],
 )

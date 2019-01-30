@@ -1,5 +1,6 @@
 import os
 import glob
+import shutil
 
 from genyrator.path import get_root_path_list
 
@@ -15,5 +16,4 @@ def before_feature(context, feature):
     # make very sure this is the directory which the command is being run in
     files = glob.glob(os.path.join(*root_path, 'output', '*'))
     for f in files:
-        # shutil.rmtree(f)
-        ...
+        shutil.rmtree(f)

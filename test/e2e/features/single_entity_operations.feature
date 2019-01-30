@@ -7,6 +7,7 @@ Feature: performing operations on a simple schema
     | publish_date | date     | False    |
     | in_stock     | int      | False    |
     | rating       | float    | True     |
+    | document     | dict     | True     |
     And identifier column "book_id" with type "int"
     And I create a schema "books" from those entities
     And the app is running
@@ -17,7 +18,8 @@ Feature: performing operations on a simple schema
       "bookName": "the dispossessed",
       "publishDate": "1974-05-21",
       "inStock": 3,
-      "rating": 11.6
+      "rating": 11.6,
+      "document": {}
     }
     """
 
@@ -46,7 +48,8 @@ Feature: performing operations on a simple schema
       "bookName": 3,
       "publishDate": "hello",
       "inStock": null,
-      "rating": "5"
+      "rating": "5",
+      "document": {}
     }
     """
     When I make a "PUT" request to "/book-store/3" with that json data
@@ -60,7 +63,31 @@ Feature: performing operations on a simple schema
       "bookName": "the dispossessed",
       "publishDate": "1974-05-21",
       "inStock": 3,
-      "rating": null
+      "rating": null,
+      "document": null
+    }
+    """
+    When I make a "PUT" request to "/book-store/3" with that json data
+    Then I get http status "201"
+     And I can get entity "/book-store/3"
+     And that response matches the original data
+
+  Scenario: creating an entity with json properties
+    Given I have json data
+    """
+    {
+      "id": 3,
+      "bookName": "the dispossessed",
+      "publishDate": "1974-05-21",
+      "inStock": 3,
+      "rating": null,
+      "document": {
+        "chapters": [
+          {"title": "chapter 1", "summary": "not very much happens"},
+          {"title": "chapter 2", "summary": "our hero enters the forest", "my_notes": "trite"},
+          {"title": "chapter 3", "summary": "our hero returns with the boon to humanity", "myRating": 3.1}
+        ]
+      }
     }
     """
     When I make a "PUT" request to "/book-store/3" with that json data
@@ -77,7 +104,8 @@ Feature: performing operations on a simple schema
         "bookName": "the disposssesssed",
         "publishDate": "1974-05-22",
         "inStock": 2,
-        "rating": 12.4
+        "rating": 12.4,
+        "document": {}
       }
       """
      When I make a "PUT" request to "/book-store/3" with that json data

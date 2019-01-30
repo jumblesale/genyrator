@@ -6,7 +6,7 @@ from sqlalchemy.orm import noload
 
 from bookshop.sqlalchemy import db
 from bookshop.core.convert_dict import json_dict_to_python_dict
-from bookshop.domain.types import DomainModel
+from bookshop.domain.types import DomainModel, UserJson
 from bookshop.sqlalchemy.convert_properties import convert_properties_to_sqlalchemy_properties
 from bookshop.sqlalchemy.join_entities import create_joined_entity_id_map
 
@@ -38,7 +38,7 @@ def convert_dict_to_marshmallow_result(
     data = convert_properties_to_sqlalchemy_properties(
         domain_model,
         joined_entity_ids_or_errors,
-        json_dict_to_python_dict(data),
+        json_dict_to_python_dict(preserve_user_json(data)),
     )
 
     if result is not None:
@@ -52,3 +52,19 @@ def convert_dict_to_marshmallow_result(
     )
 
     return marshmallow_result
+
+
+def preserve_user_json(
+        data:         Mapping[str, Any],
+) -> Mapping[str, Any]:
+    """Convert any dicts provided to UserJSON so that
+    they do not get their case changed when the rest
+    of the data is converted to jsonCase
+    """
+    out_dict = {}
+    for k, v in data.items():
+        if isinstance(v, dict):
+            out_dict[k] = UserJson(v)
+        else:
+            out_dict[k] = v
+    return out_dict

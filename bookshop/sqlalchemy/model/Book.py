@@ -1,5 +1,6 @@
-from sqlalchemy_utils import UUIDType, JSONType
+from sqlalchemy_utils import UUIDType
 from sqlalchemy import UniqueConstraint
+from sqlalchemy.types import JSON as JSONType
 
 from bookshop.sqlalchemy import db
 from bookshop.sqlalchemy.model.types import BigIntegerVariantType

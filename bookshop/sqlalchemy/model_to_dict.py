@@ -3,7 +3,7 @@ from typing import List, Mapping, MutableMapping, Any, Optional, Union
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.orm.collections import InstrumentedList
 
-from bookshop.domain.types import DomainModel
+from bookshop.domain.types import DomainModel, UserJson
 from bookshop.sqlalchemy.convert_between_models import convert_sqlalchemy_model_to_domain_model
 
 
@@ -74,7 +74,6 @@ def _serialize_data(
             serialized_data[dict_key] = UserJson(value)
         else:
             serialized_data[dict_key] = value
-        serialized_data[dict_key] = value
     return serialized_data
 
 
