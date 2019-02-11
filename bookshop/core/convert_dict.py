@@ -13,16 +13,7 @@ def convert_dict_naming(
         return None
     out_dict = {}
     for k, v in in_dict.items():
-        # don't change the casing of JSON which the user has supplied
-        if type(v) is UserJson:
-            value = v
-        elif type(v) is dict:
-            value = convert_dict_naming(v, fn)
-        elif type(v) is list or type(v) is set:
-            value = convert_iterable_naming(v, fn)
-        else:
-            value = dict_value_to_json_value(v, fn)
-        out_dict[fn(k)] = dict_value_to_json_value(value, fn)
+        out_dict[fn(k)] = dict_value_to_json_value(v, fn)
     return out_dict
 
 

@@ -1,4 +1,3 @@
-import json
 import uuid
 from typing import Optional
 
@@ -58,9 +57,9 @@ class GenreResource(Resource):  # type: ignore
     @api.expect(genre_model, validate=False)
     @api.marshal_with(genre_model)
     def put(self, genreId):  # type: ignore
-        data = json.loads(request.data)
-        if type(data) is not dict:
-            return abort(400)
+        data = request.get_json(force=True)
+        if not isinstance(data, dict):
+            abort(400)
 
         if 'id' not in data:
             data['id'] = genreId
@@ -94,10 +93,9 @@ class GenreResource(Resource):  # type: ignore
         if result is None:
             abort(404)
 
-        data = json.loads(request.data)
-
-        if type(data) is not dict:
-            return abort(400)
+        data = request.get_json(force=True)
+        if not isinstance(data, dict):
+            abort(400)
 
         marshmallow_schema_or_errors = convert_dict_to_marshmallow_result(
             data=json_dict_to_python_dict(model_to_dict(result)),
