@@ -1,11 +1,11 @@
-FROM python:3.7
+FROM python:3.6
 
 RUN mkdir /genyrator
 WORKDIR /genyrator
 
-COPY ./requirements.txt /genyrator/requirements.txt
-RUN pip install -r requirements.txt
-
 COPY . ./
+
+RUN pip install pipenv && \
+    pipenv sync --dev
 
 CMD ["make", "test"]
