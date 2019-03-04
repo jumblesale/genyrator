@@ -53,6 +53,20 @@ def create_schema(
         api_description: Optional[str] = None,
         file_path:       Optional[List[str]] = None,
 ) -> Schema:
+    """Create a Genyrator Schema.
+
+    A Schema represents a collection of entities, as well as details on how to
+    write the generated code.
+
+    Args:
+        module_name:      The name used for the generated module. Gets used in import statements
+        entities:         A list of Entities to include in the Schema
+        db_import_path:
+        api_name:         Used in the generation of the RESTPLUS API. Shows up in the generated Swagger
+        api_description:  Used in the generated RESTPLUS API
+        file_path:        The path to where to write the files to. Defaults to the module name - if
+                          the module_name is "bookshop", the app will be written to "bookshop/"
+    """
     db_import_path = db_import_path if db_import_path else '{}.sqlalchemy'.format(module_name)
     file_path =  file_path if file_path else [module_name]
     api_name = api_name if api_name else module_name
