@@ -2,7 +2,7 @@
 deps:
 	pipenv install --dev
 
-test: pep8 mamba behave
+test: bookshop-build mamba behave
 
 behave:
 	pipenv run behave --tags=-skip test/e2e 
