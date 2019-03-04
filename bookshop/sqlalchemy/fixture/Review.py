@@ -1,6 +1,6 @@
 import factory
 
-from bookshop.sqlalchemy import db
+from bookshop.sqlalchemy import db as db
 from bookshop.sqlalchemy.model.Review import Review
 
 
