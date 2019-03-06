@@ -41,6 +41,7 @@ book = DomainModel(
         'collaborator_id',
         'published',
         'created',
+        'updated',
     ],
     json_translation_map={
         'book_id': 'id',

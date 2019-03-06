@@ -41,6 +41,16 @@ book_entity = create_entity(
         ),
         create_column(
             name='created', type_option=TypeOption.datetime,
+            sqlalchemy_options={
+                'server_default': 'text(\'CURRENT_TIMESTAMP\')',
+            },
+        ),
+        create_column(
+            name='updated', type_option=TypeOption.datetime,
+            sqlalchemy_options={
+                'default': 'datetime.datetime.utcnow',
+                'onupdate': 'datetime.datetime.utcnow',
+            },
         ),
     ],
     relationships=[

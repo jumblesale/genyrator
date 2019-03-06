@@ -2,6 +2,10 @@ from sqlalchemy_utils import UUIDType
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.types import JSON as JSONType
 
+# Available for custom sqlalchemy_options
+import datetime
+from sqlalchemy import text
+
 from {{ template.db_import_path }} import db
 from {{ template.module_name }}.sqlalchemy.model.types import BigIntegerVariantType
 
@@ -28,6 +32,11 @@ class {{ template.entity.class_name }}(db.Model):  # type: ignore
     {{ column.sqlalchemy_type.value }}{# -#}
     {%- if column.relationship is defined %}, db.ForeignKey('{{ column.relationship }}'){% endif %}
     {%- if column.index %}, index=True{% endif %}{# -#}
+    {%- if column.sqlalchemy_options -%}
+      {%- for option, value in column.sqlalchemy_options -%}
+      , {{ option }}={{ value }}
+      {%- endfor -%}
+    {%- endif -%}
     , nullable={{ column.nullable | string }})  # noqa: E501
 {%- endfor %}
 

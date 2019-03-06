@@ -2,6 +2,10 @@ from sqlalchemy_utils import UUIDType
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.types import JSON as JSONType
 
+# Available for custom sqlalchemy_options
+import datetime
+from sqlalchemy import text
+
 from bookshop.sqlalchemy import db
 from bookshop.sqlalchemy.model.types import BigIntegerVariantType
 
@@ -15,7 +19,8 @@ class Book(db.Model):  # type: ignore
     author_id =       db.Column(db.BigInteger, db.ForeignKey('author.id'), nullable=True)  # noqa: E501
     collaborator_id = db.Column(db.BigInteger, db.ForeignKey('author.id'), nullable=True)  # noqa: E501
     published =       db.Column(db.Date, nullable=True)  # noqa: E501
-    created =         db.Column(db.DateTime, nullable=True)  # noqa: E501
+    created =         db.Column(db.DateTime, server_default=text('CURRENT_TIMESTAMP'), nullable=True)  # noqa: E501
+    updated =         db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow, nullable=True)  # noqa: E501
 
     # Relationships
     author = db.relationship(
