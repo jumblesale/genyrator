@@ -1,20 +1,19 @@
-from typing import List, Optional
+from typing import List, Optional, NamedTuple, Tuple
 import attr
 
 from genyrator.entities.Entity import Entity
 from genyrator.entities.File import create_files_from_template_config, FileList
-from genyrator.entities.Template import Template
-from genyrator.template_config import create_template_config
+from genyrator.template_config import create_template_config, TemplateConfig
 
 
 @attr.s
 class Schema(object):
-    module_name:     str =            attr.ib()
-    entities:        List[Entity] =   attr.ib()
-    templates:       List[Template] = attr.ib()
-    files:           FileList =       attr.ib()
-    api_name:        str =            attr.ib()
-    api_description: str =            attr.ib()
+    module_name:         str =            attr.ib()
+    entities:            List[Entity] =   attr.ib()
+    templates:           TemplateConfig = attr.ib()
+    files:               FileList =       attr.ib()
+    api_name:            str =            attr.ib()
+    api_description:     str =            attr.ib()
 
     def write_files(self) -> None:
         for file_list in self.files:
@@ -48,18 +47,35 @@ class Schema(object):
 def create_schema(
         module_name:     str,
         entities:        List[Entity],
-        db_import_path:  Optional[str] = None,
+        db_import:       Optional[str] = None,
         api_name:        Optional[str] = None,
         api_description: Optional[str] = None,
         file_path:       Optional[List[str]] = None,
 ) -> Schema:
-    db_import_path = db_import_path if db_import_path else '{}.sqlalchemy'.format(module_name)
+    """Create a Genyrator Schema.
+
+    A Schema represents a collection of entities, as well as details on how to
+    write the generated code.
+
+    Args:
+        module_name:      The name used for the generated module. Gets used in import statements
+        entities:         A list of Entities to include in the Schema
+        db_import:        A string containing a statement which, when evaluated, will import an SQLAlchemy
+                          db object. Defaults to "from {module_name}.sqlalchemy import db". You should
+                          make this point to your db object if you wish to use a non-generated db
+                          initialization.
+        api_name:         Used in the generation of the RESTPLUS API. Shows up in the generated Swagger
+        api_description:  Used in the generated RESTPLUS API
+        file_path:        The path to where to write the files to. Defaults to the module name - if
+                          the module_name is "bookshop", the app will be written to "bookshop/"
+    """
+    db_import = db_import if db_import else f'from {module_name}.sqlalchemy import db'
     file_path =  file_path if file_path else [module_name]
     api_name = api_name if api_name else module_name
     api_description = api_description if api_description else ''
     template_config = create_template_config(
         module_name=module_name,
-        db_import_path=db_import_path,
+        db_import_statement=db_import,
         entities=entities,
         api_name=api_name,
         api_description=api_description,

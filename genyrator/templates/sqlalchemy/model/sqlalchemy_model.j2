@@ -2,7 +2,7 @@ from sqlalchemy_utils import UUIDType
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.types import JSON as JSONType
 
-from {{ template.db_import_path }} import db
+{{ template.db_import_statement }}
 from {{ template.module_name }}.sqlalchemy.model.types import BigIntegerVariantType
 
 {%- macro pad(name) -%}

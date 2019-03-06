@@ -4,7 +4,7 @@ from flask_marshmallow.sqla import ModelSchema
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.orm import noload
 
-from {{ template.db_import_path }} import db
+{{ template.db_import_statement }}
 from {{ template.module_name }}.core.convert_dict import json_dict_to_python_dict
 from {{ template.module_name }}.domain.types import DomainModel, UserJson
 from {{ template.module_name }}.sqlalchemy.convert_properties import convert_properties_to_sqlalchemy_properties

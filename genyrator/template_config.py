@@ -15,15 +15,15 @@ TemplateConfig = NamedTuple('TemplateConfig', [
 
 
 def create_template_config(
-        module_name:     str,
-        db_import_path:  str,
-        entities:        List[Entity],
-        api_name:        str,
-        api_description: str,
+        module_name:         str,
+        db_import_statement: str,
+        entities:            List[Entity],
+        api_name:            str,
+        api_description:     str,
 ) -> TemplateConfig:
     root_files = [
         create_template(
-            Template.RootInit, ['__init__'], module_name=module_name, db_import_path=db_import_path,
+            Template.RootInit, ['__init__'], module_name=module_name, db_import_statement=db_import_statement,
         ),
         create_template(Template.Config, ['config'], module_name=module_name),
     ]
@@ -37,11 +37,11 @@ def create_template_config(
     db_models = [
         *[create_template(
             Template.SQLAlchemyModel, ['sqlalchemy', 'model', 'sqlalchemy_model'],
-            db_import_path=db_import_path, entity=e, module_name=module_name,
+            db_import_statement=db_import_statement, entity=e, module_name=module_name,
             out_path=Template.OutPath((['sqlalchemy', 'model'], e.class_name))
         ) for e in entities],
         create_template(
-            Template.SQLAlchemyModelInit, ['sqlalchemy', 'model', '__init__'], db_import_path=db_import_path,
+            Template.SQLAlchemyModelInit, ['sqlalchemy', 'model', '__init__'], db_import_statement=db_import_statement,
             imports=[Template.Import(e.class_name, [e.class_name]) for e in entities], module_name=module_name,
         ),
         create_template(Template.ModelToDict, ['sqlalchemy', 'model_to_dict'], module_name=module_name),
@@ -52,14 +52,14 @@ def create_template_config(
         create_template(
             Template.ConvertDictToMarshmallow,
             ['sqlalchemy', 'convert_dict_to_marshmallow_result'],
-            module_name=module_name, db_import_path=db_import_path,
+            module_name=module_name, db_import_statement=db_import_statement,
         ),
     ]
     fixtures = [
         create_template(Template.Template, ['sqlalchemy', 'fixture', '__init__']),
         *[create_template(
             Template.Fixture, ['sqlalchemy', 'fixture', 'fixture'], module_name=module_name,
-            db_import_path=db_import_path, out_path=Template.OutPath((['sqlalchemy', 'fixture'], entity.class_name)),
+            db_import_statement=db_import_statement, out_path=Template.OutPath((['sqlalchemy', 'fixture'], entity.class_name)),
             entity=entity,
         ) for entity in entities]
     ]
@@ -77,7 +77,7 @@ def create_template_config(
         *[create_template(
             Template.Resource, ['resources', 'resource'],
             entity=entity, out_path=Template.OutPath((['resources'], entity.class_name)),
-            db_import_path=db_import_path, module_name=module_name,
+            db_import_statement=db_import_statement, module_name=module_name,
             restplus_template=create_template(
                 Template.RestplusModel, ['resources', 'restplus_model'], entity=entity
             ).render(),
