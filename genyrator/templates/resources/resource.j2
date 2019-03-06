@@ -24,7 +24,7 @@ from sqlalchemy.orm import noload
 from {{ template.module_name }}.core.convert_dict import (
     python_dict_to_json_dict, json_dict_to_python_dict
 )
-from {{ template.db_import_path }} import db
+{{ template.db_import_statement }}
 {{ model_import }}
 from {{ template.module_name }}.sqlalchemy.convert_properties import (
     convert_properties_to_sqlalchemy_properties, convert_sqlalchemy_properties_to_dict_properties

@@ -9,7 +9,7 @@ from sqlalchemy.orm import noload
 from bookshop.core.convert_dict import (
     python_dict_to_json_dict, json_dict_to_python_dict
 )
-from bookshop.sqlalchemy import db
+from bookshop.sqlalchemy import db as db
 from bookshop.sqlalchemy.model import BookGenre
 from bookshop.sqlalchemy.convert_properties import (
     convert_properties_to_sqlalchemy_properties, convert_sqlalchemy_properties_to_dict_properties

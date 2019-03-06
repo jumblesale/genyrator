@@ -1,7 +1,7 @@
 from flask_marshmallow import Marshmallow
 from bookshop.resources import api
 from bookshop.config import config
-from bookshop.sqlalchemy import db
+from bookshop.sqlalchemy import db as db
 
 app = config()
 db.init_app(app)

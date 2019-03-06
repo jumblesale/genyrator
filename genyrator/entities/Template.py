@@ -52,8 +52,8 @@ def create_template(
 
 @attr.s
 class RootInit(Template):
-    db_import_path: str = attr.ib()
-    module_name:    str = attr.ib()
+    db_import_statement: str = attr.ib()
+    module_name:         str = attr.ib()
 
 
 @attr.s
@@ -69,9 +69,9 @@ class ConvertDict(Template):
 
 @attr.s
 class SQLAlchemyModel(Template):
-    module_name: str =    attr.ib()
-    db_import_path: str = attr.ib()
-    entity: Entity =      attr.ib()
+    module_name:         str =    attr.ib()
+    db_import_statement: str =    attr.ib()
+    entity:              Entity = attr.ib()
 
 
 @attr.s
@@ -86,8 +86,8 @@ class Config(Template):
 
 @attr.s
 class SQLAlchemyModelInit(Template):
-    module_name:    str =          attr.ib()
-    db_import_path: str =          attr.ib()
+    module_name:         str =     attr.ib()
+    db_import_statement: str =     attr.ib()
     imports:        List[Import] = attr.ib()
 
 
@@ -98,11 +98,11 @@ class RestplusModel(Template):
 
 @attr.s
 class Resource(Template):
-    module_name:       str =    attr.ib()
-    db_import_path:    str =    attr.ib()
-    entity:            Entity = attr.ib()
-    restplus_template: str =    attr.ib()
-    TypeOption:        Type =   attr.ib()
+    module_name:         str =    attr.ib()
+    db_import_statement: str =    attr.ib()
+    entity:              Entity = attr.ib()
+    restplus_template:   str =    attr.ib()
+    TypeOption:          Type =   attr.ib()
 
 
 @attr.s
@@ -142,12 +142,12 @@ class JoinEntities(Template):
 
 @attr.s
 class ConvertDictToMarshmallow(Template):
-    module_name:    str = attr.ib()
-    db_import_path: str = attr.ib()
+    module_name:         str = attr.ib()
+    db_import_statement: str = attr.ib()
 
 
 @attr.s
 class Fixture(Template):
-    db_import_path: str = attr.ib()
-    module_name: str =    attr.ib()
-    entity: Entity =      attr.ib()
+    db_import_statement: str =    attr.ib()
+    module_name:         str =    attr.ib()
+    entity:              Entity = attr.ib()

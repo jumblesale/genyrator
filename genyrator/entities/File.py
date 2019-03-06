@@ -45,10 +45,10 @@ def create_files_from_template_config(
 def create_file_from_template(file_path: List[str], template: Template) -> File:
     if template.out_path:
         file_path = file_path + template.out_path[0]
-        file_name = '{}.py'.format(template.out_path[1])
+        file_name = f'{template.out_path[1]}.py'
     else:
         file_path = file_path + template.relative_path
-        file_name = '{}.py'.format(template.template_name)
+        file_name = f'{template.template_name}.py'
     return File(
         file_name=file_name,
         file_path=file_path,
