@@ -31,6 +31,7 @@ book_model = api.model('Book', {
     'collaboratorId': fields.String(),
     'published': fields.Date(),
     'created': fields.DateTime(),
+    'updated': fields.DateTime(),
     'author': fields.Raw(),
     'collaborator': fields.Raw(),
     'genre': fields.Raw(),
@@ -152,6 +153,9 @@ class ManyBookResource(Resource):  # type: ignore
         param_created = request.args.get('created')
         if param_created:
             query = query.filter_by(created=param_created)
+        param_updated = request.args.get('updated')
+        if param_updated:
+            query = query.filter_by(updated=param_updated)
         result = query.all()
         return python_dict_to_json_dict({"data": [model_to_dict(r) for r in result]})
 

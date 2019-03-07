@@ -4,7 +4,7 @@ from typing import Mapping, cast, MutableMapping
 import json
 
 from behave import given, when, then
-from hamcrest import assert_that, equal_to, instance_of, none
+from hamcrest import assert_that, equal_to, instance_of, none, less_than, is_not
 
 from test.e2e.steps.common import make_request
 from bookshop.sqlalchemy.model.Author import Author
@@ -12,8 +12,7 @@ from bookshop.sqlalchemy.model.Book import Book
 
 
 def generate_example_book() -> Mapping[str, str]:
-    return {"id": str(uuid.uuid4()), "name": "the outsider", "rating": 4.96, "published": "1967-04-24",
-            "created": str(datetime.datetime.now())}
+    return {"id": str(uuid.uuid4()), "name": "the outsider", "rating": 4.96, "published": "1967-04-24"}
 
 
 def generate_example_genre() -> Mapping[str, str]:
@@ -182,7 +181,7 @@ def step_impl(context):
 @step("I put a book entity with a relationship to that author")
 def step_impl(context):
     book = generate_example_book()
-    context.created_book = book = {
+    context.book_entity = book = {
         **book,
         **{'authorId': context.author_entity['id']}
     }
@@ -193,8 +192,8 @@ def step_impl(context):
 
 @step("I also put a collaborator relationship to that author")
 def step_impl(context):
-    context.created_book['collaboratorId'] = context.author_entity['id']
-    book = context.created_book
+    context.book_entity['collaboratorId'] = context.author_entity['id']
+    book = context.book_entity
     response = make_request(client=context.client, endpoint=f'book/{book["id"]}',
                             method='put', data=book)
     assert_that(response.status_code, equal_to(201))
@@ -219,7 +218,7 @@ def step_impl(context, author_name, relationship):
 
 @when("I get that book entity")
 def step_impl(context):
-    book = context.created_book
+    book = context.book_entity
     url = f'/book/{book["id"]}'
     response = make_request(client=context.client, endpoint=url, method='get')
     assert_that(response.status_code, equal_to(200))
@@ -235,7 +234,7 @@ def step_impl(context):
 
 @when('I get that "{entity_type}" SQLAlchemy model')
 def step_impl(context, entity_type: str):
-    entity = context.author_entity if entity_type == 'author' else context.created_book
+    entity = context.author_entity if entity_type == 'author' else context.book_entity
 
     _get_sqlalchemy_model(context, entity_type, entity)
 
@@ -292,6 +291,26 @@ def step_impl(context, target, context_name):
 def step_impl(context, target):
     assert_that(_extract_target(context, target), none())
 
+
+@then('"{target}" should be a recent timestamp')
+def step_impl(context, target):
+    expected = datetime.datetime.utcnow()
+    delta = datetime.timedelta(seconds=2)
+    found = _extract_target(context, target)
+
+    assert_that(abs(found - expected).seconds, less_than(delta.seconds))
+
+
+@when('I save the value of "{target}" as "{save_name}"')
+def step_impl(context, target, save_name):
+    found = _extract_target(context, target)
+    context.saved_values = getattr(context, 'saved_values', {})
+    context.saved_values[save_name] = found
+
+
+@then('"{target}" should not equal saved value "{save_name}"')
+def step_impl(context, target, save_name):
+    assert_that(_extract_target(context, target), is_not(equal_to(context.saved_values[save_name])))
 
 def _extract_target(context, target):
     if isinstance(target, str):

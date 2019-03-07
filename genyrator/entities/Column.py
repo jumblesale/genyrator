@@ -1,4 +1,4 @@
-from typing import Optional, Union, NamedTuple
+from typing import Optional, Union, NamedTuple, List, Tuple, Dict
 import attr
 from genyrator.inflector import pythonize, to_class_name, to_json_case, humanize
 from genyrator.types import (
@@ -16,19 +16,20 @@ ForeignKeyRelationship = NamedTuple(
 
 @attr.s
 class Column(object):
-    python_name:        str =                  attr.ib()
-    class_name:         str =                  attr.ib()
-    display_name:       str =                  attr.ib()
-    alias:              str =                  attr.ib()
-    json_property_name: str =                  attr.ib()
-    type_option:        TypeOption =           attr.ib()
-    faker_method:       str =                  attr.ib()
-    sqlalchemy_type:    SqlAlchemyTypeOption = attr.ib()
-    python_type:        PythonTypeOption =     attr.ib()
-    restplus_type:      RestplusTypeOption =   attr.ib()
-    default:            str =                  attr.ib()
-    index:              bool =                 attr.ib()
-    nullable:           bool =                 attr.ib()
+    python_name:        str =                   attr.ib()
+    class_name:         str =                   attr.ib()
+    display_name:       str =                   attr.ib()
+    alias:              str =                   attr.ib()
+    json_property_name: str =                   attr.ib()
+    type_option:        TypeOption =            attr.ib()
+    faker_method:       str =                   attr.ib()
+    sqlalchemy_type:    SqlAlchemyTypeOption =  attr.ib()
+    python_type:        PythonTypeOption =      attr.ib()
+    restplus_type:      RestplusTypeOption =    attr.ib()
+    default:            str =                   attr.ib()
+    index:              bool =                  attr.ib()
+    nullable:           bool =                  attr.ib()
+    sqlalchemy_options: List[Tuple[str, str]] = attr.ib()
 
 
 @attr.s
@@ -52,6 +53,7 @@ def create_column(
         alias:                    Optional[str] = None,
         foreign_key_relationship: Optional[ForeignKeyRelationship] = None,
         faker_method:             Optional[str] = None,
+        sqlalchemy_options:       Optional[Dict[str, str]] = None,
 ) -> Union[Column, ForeignKey]:
     """Return a column to be attached to an entity
 
@@ -77,6 +79,8 @@ def create_column(
         faker_method: The method to pass to Faker to provide fixture data for this column.
                       If this column is not nullable, defaults to the constructor for the type
                       of this column.
+
+        sqlalchemy_options: Pass additional keyword arguments to the SQLAlchemy column object.
     """
     if identifier is True:
         constructor = IdentifierColumn
@@ -87,6 +91,9 @@ def create_column(
 
     if faker_method is None and nullable is False:
         faker_method = type_option_to_faker_method(type_option)
+
+    if sqlalchemy_options is None:
+        sqlalchemy_options = {}
 
     args = {
         "python_name":        pythonize(name),
@@ -102,6 +109,7 @@ def create_column(
         "nullable":           nullable,
         "alias":              alias,
         "faker_method":       faker_method,
+        "sqlalchemy_options": [(key, value) for key, value in sqlalchemy_options.items()],
     }
     if foreign_key_relationship is not None:
         args['relationship'] = '{}.{}'.format(
