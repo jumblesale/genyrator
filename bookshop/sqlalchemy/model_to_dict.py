@@ -23,13 +23,10 @@ def model_to_dict(
             return_immediately=True,
         )
         eager_relationships[relationship] = relationship_dict
-    return {
-        **_model_to_dict(
-            sqlalchemy_model=sqlalchemy_model,
-            paths=paths,
-        ),
-        **eager_relationships,
-    }
+    return dict(deep_merge(
+        _model_to_dict(sqlalchemy_model=sqlalchemy_model,paths=paths),
+        eager_relationships,
+    ))
 
 
 def _model_to_dict(
@@ -98,3 +95,20 @@ def _recurse_on_model_or_list(
             paths=next_paths,
             return_immediately=return_immediately,
         )
+
+
+def deep_merge(dict1, dict2):
+    for k in set(dict1.keys()).union(dict2.keys()):
+        if k in dict1 and k in dict2:
+            if isinstance(dict1[k], dict) and isinstance(dict2[k], dict):
+                yield (k, dict(deep_merge(dict1[k], dict2[k])))
+            elif isinstance(dict1[k], list) and isinstance(dict2[k], list):
+                yield (k, list(dict1[k] + dict2[k]))
+            elif isinstance(dict1[k], list) and not isinstance(dict2[k], list):
+                yield (k, dict1[k])
+            else:
+                yield (k, dict2[k])
+        elif k in dict1:
+            yield (k, dict1[k])
+        else:
+            yield (k, dict2[k])
