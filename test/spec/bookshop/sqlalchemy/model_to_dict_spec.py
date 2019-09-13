@@ -6,13 +6,14 @@ from mamba import description, it
 from sqlalchemy.orm import joinedload
 
 from bookshop import app
-from bookshop.sqlalchemy.model import Book, Author, Genre, BookGenre
+from bookshop.sqlalchemy.model import Book, Author, Genre, BookGenre, Review
 from bookshop.sqlalchemy.model_to_dict import model_to_dict
 from bookshop import db
 
 BOOK_UUID =   uuid.uuid4()
 AUTHOR_UUID = uuid.uuid4()
 GENRE_UUID =  uuid.uuid4()
+REVIEW_UUID = uuid.uuid4()
 
 datetime_now = datetime.datetime.now()
 date_now =     datetime.datetime.today().date()
@@ -50,11 +51,19 @@ book_genre_model = BookGenre(
     book_id=1, genre_id=1,
 )
 
+review_model = Review(id=1, review_id=REVIEW_UUID, text='scathing review - pigs cant talk', book_id=1)
+
+review_dict = {
+    'id': REVIEW_UUID,
+    'text': 'scathing review - pigs cant talk'
+}
+
 with app.app_context():
     db.drop_all()
     db.create_all()
     db.session.add(author_model)
     db.session.add(book_model)
+    db.session.add(review_model)
     db.session.commit()
 
 with description('model_to_dict') as self:
@@ -90,6 +99,20 @@ with description('model_to_dict') as self:
             )
         expect(result).to(have_keys(**book_dict))
         expect(result['author']).to(have_keys(**author_dict))
+
+    with it('always converts eager relationships and retains hydrated paths within that relationship'):
+        with app.app_context():
+            retrieved_author = Author.query.\
+                filter_by(author_id=AUTHOR_UUID).\
+                options(joinedload('favourite_book')).\
+                first()
+            result = model_to_dict(
+                sqlalchemy_model=retrieved_author,
+                paths=['favourite_book', 'reviews']
+            )
+        expect(result).to(have_keys(**author_dict))
+        expect(result['favourite_book']).to(have_keys(**book_dict))
+        expect(result['favourite_book']['reviews'][0]).to(have_keys(**review_dict))
 
     with it('gives an empty response when relationship does not exist'):
         book_without_author = Book(
