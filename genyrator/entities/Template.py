@@ -33,7 +33,7 @@ class Template(object):
 
 def create_template(
         constructor,
-        template_path: Optional[List[str]] = None,
+        template_path: List[str],
         out_path:      Optional[OutPath] = None,
         **kwargs,
 ) -> Template:

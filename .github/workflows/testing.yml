@@ -8,5 +8,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+    - name: build
+      run: docker-compose build dev
+    - name: run lint
+      run: docker-compose run --rm dev make lint
     - name: run tests
-      run: docker-compose run --rm dev make deps test
+      run: docker-compose run --rm dev make test

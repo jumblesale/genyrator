@@ -1,3 +1,4 @@
+# flake8: noqa
 import importlib
 import json
 import random
@@ -234,7 +235,7 @@ def step_impl(context, operations_list: str, endpoint: str, status: int):
 
 @step("I create an example app")
 def step_impl(context):
-        context.execute_steps("""
+    context.execute_steps("""
         Given I have an entity "ExampleEntity" with properties
           | name      | type |
           | test_name | str  |

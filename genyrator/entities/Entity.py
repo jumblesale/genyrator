@@ -1,7 +1,7 @@
 from enum import Enum
 
 import attr
-from typing import List, Optional, NewType, Union, NamedTuple, Set
+from typing import List, Optional, Union, NamedTuple, Set
 
 from genyrator.entities.Relationship import Relationship
 from genyrator.entities.Column import Column, IdentifierColumn
@@ -16,8 +16,7 @@ APIPath = NamedTuple(
      ('python_name',     str),
      ('property_name',   str), ]
 )
-Property = NewType('Property', Union[Column, Relationship, IdentifierColumn])
-APIPaths = NewType('APIPaths', List[APIPath])
+Property = Union[Column, Relationship, IdentifierColumn]
 
 ImportAlias = NamedTuple(
     'ImportAlias',
@@ -68,7 +67,7 @@ class Entity(object):
     columns:               List[Column] =             attr.ib()
     relationships:         List[Relationship] =       attr.ib()
     table_name:            Optional[str] =            attr.ib()
-    uniques:               List[str] =                attr.ib()
+    uniques:               List[List[str]] =          attr.ib()
     max_property_length:   int =                      attr.ib()
     plural:                str =                      attr.ib()
     dashed_plural:         str =                      attr.ib()
@@ -77,7 +76,7 @@ class Entity(object):
     resource_path:         str =                      attr.ib()
     table_args:            str =                      attr.ib()
     operations:            Set[OperationOption] =     attr.ib()
-    api_paths:             Optional[APIPaths] =       attr.ib()
+    api_paths:             Optional[List[APIPath]] =  attr.ib()
     supports_put:          bool =                     attr.ib()
     supports_get_one:      bool =                     attr.ib()
     supports_get_all:      bool =                     attr.ib()
@@ -237,7 +236,7 @@ def _calculate_max_property_length(
 
 def add_api_paths_to_entity(
         entity:    Entity,
-        api_paths: APIPaths,
+        api_paths: List[APIPath],
 ) -> Entity:
     args = entity.__dict__
     args['api_paths'] = api_paths

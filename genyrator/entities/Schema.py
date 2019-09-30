@@ -3,15 +3,14 @@ import attr
 
 from genyrator.entities.Entity import Entity
 from genyrator.entities.File import create_files_from_template_config, FileList
-from genyrator.entities.Template import Template
-from genyrator.template_config import create_template_config
+from genyrator.template_config import create_template_config, TemplateConfig
 
 
 @attr.s
 class Schema(object):
     module_name:     str =            attr.ib()
     entities:        List[Entity] =   attr.ib()
-    templates:       List[Template] = attr.ib()
+    templates:       TemplateConfig = attr.ib()
     files:           FileList =       attr.ib()
     api_name:        str =            attr.ib()
     api_description: str =            attr.ib()

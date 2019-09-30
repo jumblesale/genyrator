@@ -1,0 +1,4 @@
+
+
+class GenyratorError(Exception):
+    pass
