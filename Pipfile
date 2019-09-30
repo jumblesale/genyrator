@@ -27,6 +27,8 @@ expects = "~=0.9"
 sqlalchemy-utils = "~=0.33"
 pipenv = "*"
 ipdb = "~=0.11"
+mypy = "~=0.730"
+flake8 = "~=3.7"
 
 [requires]
 python_version = "3.6"

@@ -6,3 +6,4 @@ build/
 *.db
 /dist/
 /genyrator.egg-info/
+/.mypy_cache/
