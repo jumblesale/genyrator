@@ -1,7 +1,7 @@
 from enum import Enum
 
 import attr
-from typing import List, Optional, NewType, Union, NamedTuple, Set
+from typing import List, Optional, Union, NamedTuple, Set
 
 from genyrator.entities.Relationship import Relationship
 from genyrator.entities.Column import Column, IdentifierColumn

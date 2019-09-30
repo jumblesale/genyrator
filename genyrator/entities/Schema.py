@@ -3,7 +3,6 @@ import attr
 
 from genyrator.entities.Entity import Entity
 from genyrator.entities.File import create_files_from_template_config, FileList
-from genyrator.entities.Template import Template
 from genyrator.template_config import create_template_config, TemplateConfig
 
 

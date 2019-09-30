@@ -1,6 +1,7 @@
 from typing import Set, Dict, Tuple, List, Optional
 
 from genyrator import Relationship, string_to_type_option
+from genyrator.errors import GenyratorError
 from genyrator.entities.Column import ForeignKeyRelationship, create_column, create_identifier_column
 from genyrator.entities.Entity import APIPath, OperationOption, ImportAlias, AdditionalProperty, Entity, create_entity, \
     all_operations
@@ -48,7 +49,7 @@ def create_entity_from_type_dict(
             columns.append(column)
 
     if identifier_column is None:
-        raise Exception('Entity must have an identifier column')
+        raise GenyratorError('Entity must have an identifier column')
 
     return create_entity(
         class_name=class_name,

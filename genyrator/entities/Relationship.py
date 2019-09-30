@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Optional
 import attr
+
+from genyrator.errors import GenyratorError
 from genyrator.inflector import pythonize, to_json_case, to_class_name
 
 
@@ -96,16 +98,16 @@ def create_relationship(
     """
     if source_foreign_key_column_name is not None:
         if target_foreign_key_column_name is not None:
-            raise Exception('Cannot provide both source and target foreign key columns')
+            raise GenyratorError('Cannot provide both source and target foreign key columns')
         if join != JoinOption.to_one:
-            raise Exception('Can only provide source foreign key column on to-one relationships')
+            raise GenyratorError('Can only provide source foreign key column on to-one relationships')
 
     target_entity_python_name = pythonize(target_entity_class_name)
     property_name = property_name if property_name is not None else target_entity_python_name
 
     if key_alias_in_json is None:
         if target_identifier_column_name is None:
-            raise Exception('Must have a key_alias_in_json or target_idenfitier_column_name')
+            raise GenyratorError('Must have a key_alias_in_json or target_idenfitier_column_name')
         key_alias_in_json = target_identifier_column_name
 
     relationship = Relationship(
