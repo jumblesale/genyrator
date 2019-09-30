@@ -11,7 +11,7 @@ flake8:
 	pipenv run flake8
 
 mypy:
-	pipenv run mypy
+	pipenv run mypy genyrator
 
 test: bookshop-build mamba behave
 

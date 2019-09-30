@@ -2,7 +2,7 @@ import os
 from typing import List, NamedTuple
 import attr
 
-from genyrator.entities import Template
+from genyrator.entities.Template import Template
 from genyrator.template_config import TemplateConfig
 
 FileList = NamedTuple('FileList', [

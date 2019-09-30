@@ -102,6 +102,12 @@ def create_relationship(
 
     target_entity_python_name = pythonize(target_entity_class_name)
     property_name = property_name if property_name is not None else target_entity_python_name
+
+    if key_alias_in_json is None:
+        if target_identifier_column_name is None:
+            raise Exception('Must have a key_alias_in_json or target_idenfitier_column_name')
+        key_alias_in_json = target_identifier_column_name
+
     relationship = Relationship(
         python_name=target_entity_python_name,
         target_entity_class_name=target_entity_class_name,
@@ -111,23 +117,22 @@ def create_relationship(
         source_foreign_key_column_name=source_foreign_key_column_name,
         property_name=property_name,
         json_property_name=to_json_case(property_name),
-        key_alias_in_json=key_alias_in_json if key_alias_in_json is not None else target_identifier_column_name,
+        key_alias_in_json=key_alias_in_json,
         nullable=nullable,
         lazy=lazy,
         join=join,
         secondary_join_name=secondary_join_name,
     )
     if join_table is None:
-        target_identifier_column_name = pythonize(target_identifier_column_name) \
-            if target_identifier_column_name else None
-        return RelationshipWithoutJoinTable(
-            **{**{'target_identifier_column_name': target_identifier_column_name, **relationship.__dict__}}
-        )
-    join_table = str(join_table) if join_table else None
-
-    properties = relationship.__dict__
-    properties.update({
-        'join_table': join_table,
-        'join_table_class_name': to_class_name(join_table),
-    })
-    return RelationshipWithJoinTable(**properties)
+        properties = relationship.__dict__
+        properties.update({
+            'target_identifier_column_name': pythonize(target_identifier_column_name) if target_identifier_column_name else None,
+        })
+        return RelationshipWithoutJoinTable(**properties)
+    else:
+        properties = relationship.__dict__
+        properties.update({
+            'join_table': join_table,
+            'join_table_class_name': to_class_name(join_table),
+        })
+        return RelationshipWithJoinTable(**properties)

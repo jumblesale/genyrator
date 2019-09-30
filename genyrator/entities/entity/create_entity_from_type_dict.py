@@ -2,7 +2,7 @@ from typing import Set, Dict, Tuple, List, Optional
 
 from genyrator import Relationship, string_to_type_option
 from genyrator.entities.Column import ForeignKeyRelationship, create_column, create_identifier_column
-from genyrator.entities.Entity import OperationOption, APIPaths, ImportAlias, AdditionalProperty, Entity, create_entity, \
+from genyrator.entities.Entity import APIPath, OperationOption, ImportAlias, AdditionalProperty, Entity, create_entity, \
     all_operations
 from genyrator.inflector import pythonize
 
@@ -17,7 +17,7 @@ def create_entity_from_type_dict(
         relationships:          Optional[List[Relationship]] = None,
         table_name:             Optional[str] = None,
         uniques:                Optional[List[List[str]]] = None,
-        api_paths:              Optional[APIPaths] = None,
+        api_paths:              Optional[List[APIPath]] = None,
         model_alias:            Optional[ImportAlias] = None,
         additional_properties:  Optional[List[AdditionalProperty]] = None,
 ) -> Entity:
@@ -46,6 +46,10 @@ def create_entity_from_type_dict(
                 identifier=False
             )
             columns.append(column)
+
+    if identifier_column is None:
+        raise Exception('Entity must have an identifier column')
+
     return create_entity(
         class_name=class_name,
         identifier_column=identifier_column,

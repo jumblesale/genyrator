@@ -1,4 +1,4 @@
-from typing import Optional, Union, NamedTuple, List, Tuple, Dict
+from typing import Optional, Union, NamedTuple, List, Tuple, Dict, Type
 import attr
 from genyrator.inflector import pythonize, to_class_name, to_json_case, humanize
 from genyrator.types import (
@@ -54,7 +54,7 @@ def create_column(
         foreign_key_relationship: Optional[ForeignKeyRelationship] = None,
         faker_method:             Optional[str] = None,
         sqlalchemy_options:       Optional[Dict[str, str]] = None,
-) -> Union[Column, ForeignKey]:
+) -> Union[Column, IdentifierColumn, ForeignKey]:
     """Return a column to be attached to an entity
 
     Args:
@@ -83,7 +83,7 @@ def create_column(
         sqlalchemy_options: Pass additional keyword arguments to the SQLAlchemy column object.
     """
     if identifier is True:
-        constructor = IdentifierColumn
+        constructor: Type[Column] = IdentifierColumn
     elif foreign_key_relationship is not None:
         constructor = ForeignKey
     else:
@@ -119,7 +119,7 @@ def create_column(
         args['target_restplus_type'] = type_option_to_restplus_type(
             foreign_key_relationship.target_entity_identifier_column_type
         )
-    return constructor(**args)
+    return constructor(**args)  # type: ignore
 
 
 def create_identifier_column(
@@ -142,8 +142,9 @@ def create_identifier_column(
                       default.
     """
     faker_method = faker_method if faker_method is not None else type_option_to_faker_method(type_option)
-    column: IdentifierColumn = create_column(
+    column = create_column(
         name=name, type_option=type_option, index=True, nullable=False,
         identifier=True, faker_method=faker_method,
     )
+    assert isinstance(column, IdentifierColumn)
     return column
