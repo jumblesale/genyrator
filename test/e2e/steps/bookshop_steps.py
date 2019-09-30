@@ -312,6 +312,7 @@ def step_impl(context, target, save_name):
 def step_impl(context, target, save_name):
     assert_that(_extract_target(context, target), is_not(equal_to(context.saved_values[save_name])))
 
+
 def _extract_target(context, target):
     if isinstance(target, str):
         target = target.split('.')
