@@ -4,7 +4,7 @@ from sqlalchemy.types import JSON as JSONType
 
 # Available for custom sqlalchemy_options
 import datetime
-from sqlalchemy import text
+from sqlalchemy import text, func
 
 from {{ template.db_import_path }} import db
 from {{ template.module_name }}.sqlalchemy.model.types import BigIntegerVariantType
