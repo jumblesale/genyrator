@@ -4,7 +4,7 @@ from sqlalchemy.types import JSON as JSONType
 
 # Available for custom sqlalchemy_options
 import datetime
-from sqlalchemy import text
+from sqlalchemy import text, func
 
 from bookshop.sqlalchemy import db
 from bookshop.sqlalchemy.model.types import BigIntegerVariantType
