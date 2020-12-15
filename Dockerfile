@@ -6,7 +6,6 @@ WORKDIR /genyrator
 COPY . ./
 
 RUN pip install pipenv && \
-    pipenv install --system && \
-    pipenv sync --dev
+    pipenv install --dev --system
 
 CMD ["make", "test"]
